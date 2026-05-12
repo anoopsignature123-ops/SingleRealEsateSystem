@@ -1,0 +1,50 @@
+body {
+    margin: 0;
+    overflow: hidden;
+}
+
+input.form-control {
+    border-radius: 0;
+    border: none;
+    border-bottom: 1px solid #ccc;
+}
+
+button.btn-primary {
+    border-radius: 4px;
+}
+.form-control {
+    border-radius: 8px;
+}
+
+.form-control:focus {
+    box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25);
+    border-color: #198754;
+}
+
+.btn-success {
+    border-radius: 8px;
+}
+
+ 
+/* DataTable polish */
+.dataTables_wrapper .dataTables_filter input {
+    border-radius: 6px;
+    border: 1px solid #198754;
+    padding: 5px 10px;
+}
+
+.dataTables_wrapper .dataTables_length select {
+    border-radius: 6px;
+    border: 1px solid #198754;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.current {
+    background: #198754 !important;
+    color: #fff !important;
+    border-radius: 6px;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #f5fdf7;
+}
+ 
