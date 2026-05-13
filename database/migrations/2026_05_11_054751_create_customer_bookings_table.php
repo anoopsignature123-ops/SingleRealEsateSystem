@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('associate_code')->nullable();
             $table->string('associate_name')->nullable();
             $table->integer('current_step')->default(1);
-            $table->enum('status', ['pending', 'completed', 'draft'])->default('draft');
+            $table->enum('status', ['pending', 'completed', 'draft', 'cancelled'])->default('draft');
             $table->softDeletes();
             $table->timestamps();
         });
