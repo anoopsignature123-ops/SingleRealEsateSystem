@@ -19,7 +19,7 @@ class CustomerBookingStepFiveRequest extends FormRequest
 
             'payment_mode' => 'required|in:cash,cheque,dd,neft_rtgs,card',
 
-            'booking_amount' => 'required|numeric|min:1',
+            'booking_amount' => 'required|numeric|min:0',
 
             'due_amount' => 'required|numeric|min:0',
 
@@ -27,17 +27,16 @@ class CustomerBookingStepFiveRequest extends FormRequest
             'net_payable_amount' => 'nullable|required_if:plan_type,full_payment|numeric|min:0',
 
             // EMI
+            'emi_months' => 'nullable|required_if:plan_type,emi_plan|integer|min:1',
             'after_booking_payable_amount' => 'nullable|required_if:plan_type,emi_plan|numeric|min:0',
 
-            // Bank Fields
+            // Bank / transaction fields
             'account_number' => 'nullable|required_if:payment_mode,cheque,dd,neft_rtgs,card',
-
-            'bank_name' => 'nullable|required_if:payment_mode,cheque,dd,neft_rtgs',
-
-            'branch_name' => 'nullable|required_if:payment_mode,cheque,dd,neft_rtgs',
-
-            'transaction_number' => 'nullable|required_if:payment_mode,cheque,dd,neft_rtgs',
-
+            'bank_name' => 'nullable|required_if:payment_mode,cheque,dd,neft_rtgs,card',
+            'branch_name' => 'nullable|required_if:payment_mode,cheque,dd,neft_rtgs,card',
+            'transaction_number' => 'nullable|string',
+            'cheque_number' => 'nullable|required_if:payment_mode,cheque|string',
+            'dd_number' => 'nullable|required_if:payment_mode,dd|string',
             'cheque_date' => 'nullable|required_if:payment_mode,cheque,dd,neft_rtgs|date',
 
         ];
@@ -63,8 +62,9 @@ class CustomerBookingStepFiveRequest extends FormRequest
 
             'branch_name.required_if' => 'Branch name is required.',
 
-            'transaction_number.required_if' => 'Transaction number is required.',
-
+            'cheque_number.required_if' => 'Cheque number is required for cheque payments.',
+            'dd_number.required_if' => 'DD number is required for DD payments.',
+            'emi_months.required_if' => 'EMI months are required for EMI plan.',
             'cheque_date.required_if' => 'Instrument date is required.',
 
         ];

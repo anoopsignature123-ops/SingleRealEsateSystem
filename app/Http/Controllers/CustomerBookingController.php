@@ -8,14 +8,14 @@ use App\Http\Requests\CustomerBookingStepFourRequest;
 use App\Http\Requests\CustomerBookingStepThreeRequest;
 use App\Http\Requests\CustomerBookingStepTwoRequest;
 use App\Models\CustomerBooking;
-use App\Services\CustomerBookingSevice;
+use App\Services\CustomerBookingService;
 use Illuminate\Http\Request;
 
 class CustomerBookingController extends Controller
 {
     protected $customerBookingService;
 
-    public function __construct(CustomerBookingSevice $customerBookingService)
+    public function __construct(CustomerBookingService $customerBookingService)
     {
         $this->customerBookingService = $customerBookingService;
     }
@@ -110,9 +110,9 @@ class CustomerBookingController extends Controller
         return $this->customerBookingService->getBlocksByProject($projectId);
     }
 
-    public function getPlots($blockId)
+    public function getPlots($blockId, $customerId = null)
     {
-        return $this->customerBookingService->getPlotsByBlock($blockId);
+        return $this->customerBookingService->getPlotsByBlock($blockId, $customerId);
     }
 
     public function destroy($id)

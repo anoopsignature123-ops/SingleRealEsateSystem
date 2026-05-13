@@ -13,8 +13,9 @@ use App\Models\PlotSaleDetail;
 use App\Models\PrimaryDetail;
 use App\Models\Project;
 use App\Models\SecondaryDetail;
+use Illuminate\Support\Str;
 
-class CustomerBookingSevice
+class CustomerBookingService
 {
     public function getAll()
     {
@@ -199,9 +200,16 @@ class CustomerBookingSevice
         return Block::where('project_id', $projectId)->get();
     }
 
-    public function getPlotsByBlock($blockId)
+    public function getPlotsByBlock($blockId, $customerId = null)
     {
-        return PlotDetail::with('plotType')->where('block_id', $blockId)->get();
+        $bookedPlotIds = PlotSaleDetail::when($customerId, function ($query, $customerId) {
+            return $query->where('customer_booking_id', '!=', $customerId);
+        })->pluck('plot_detail_id')->toArray();
+
+        return PlotDetail::with('plotType')
+            ->where('block_id', $blockId)
+            ->whereNotIn('id', $bookedPlotIds)
+            ->get();
     }
 
     public function storeStepFour($customerId, array $data)
@@ -230,26 +238,47 @@ class CustomerBookingSevice
 
     public function storeStepFive($customerId, array $data)
     {
+        $paymentMode = $data['payment_mode'] ?? null;
+        $planType = $data['plan_type'] ?? null;
+
+        $transactionNumber = $data['transaction_number'] ?? null;
+        if (! $transactionNumber) {
+            $transactionNumber = strtoupper($paymentMode ? $paymentMode : 'PAY').'-'.time();
+        }
+
+        $receiptNumber = $data['receipt_number'] ?? 'REC-'.Str::upper(Str::random(8));
+
+        $paymentStatus = 'hold';
+        if ($planType == 'emi_plan') {
+            $paymentStatus = 'emi';
+        } elseif (in_array($paymentMode, ['cash', 'neft_rtgs', 'card'], true)) {
+            $paymentStatus = 'booked';
+        }
+
         CustomerPayment::updateOrCreate(['customer_booking_id' => $customerId],
             [
-                'plan_type' => $data['plan_type'] ?? null,
+                'plan_type' => $planType,
                 'booking_amount' => $data['booking_amount'] ?? 0,
                 'due_amount' => $data['due_amount'] ?? 0,
                 'net_payable_amount' => $data['net_payable_amount'] ?? 0,
                 'emi_months' => $data['emi_months'] ?? null,
                 'after_booking_payable_amount' => $data['after_booking_payable_amount'] ?? null,
                 'remark' => $data['remark'] ?? null,
-                'payment_mode' => $data['payment_mode'] ?? null,
+                'payment_mode' => $paymentMode,
                 'account_number' => $data['account_number'] ?? null,
                 'bank_name' => $data['bank_name'] ?? null,
                 'branch_name' => $data['branch_name'] ?? null,
                 'cheque_number' => $data['cheque_number'] ?? null,
                 'cheque_date' => $data['cheque_date'] ?? null,
                 'dd_number' => $data['dd_number'] ?? null,
-                'transaction_number' => $data['transaction_number'] ?? null,
+                'transaction_number' => $transactionNumber,
+                'payment_status' => $paymentStatus,
+                'receipt_number' => $receiptNumber,
             ]
         );
-        CustomerBooking::where('id', $customerId)->update(['current_step' => 6, 'status' => 'completed']);
+
+        $bookingStatus = $paymentStatus === 'booked' ? 'completed' : 'pending';
+        CustomerBooking::where('id', $customerId)->update(['current_step' => 6, 'status' => $bookingStatus]);
     }
 
     public function deleteBooking($id)

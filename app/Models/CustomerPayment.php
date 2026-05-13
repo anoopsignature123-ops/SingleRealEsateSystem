@@ -16,6 +16,8 @@ class CustomerPayment extends Model
         'after_booking_payable_amount',
         'remark',
         'payment_mode',
+        'payment_status',
+        'receipt_number',
         'account_number',
         'bank_name',
         'branch_name',

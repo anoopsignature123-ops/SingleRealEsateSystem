@@ -132,6 +132,9 @@
 
             </div>
 
+            <input type="hidden" id="transactionNumber" name="transaction_number"
+                value="{{ old('transaction_number', $payment?->transaction_number) }}">
+
 
             {{-- Net Payable --}}
             <div class="col-md-6 mb-3 full-field d-none">
@@ -147,6 +150,21 @@
 
 
             {{-- EMI --}}
+            <div class="col-md-6 mb-3 emi-field d-none">
+
+                <label class="form-label fw-semibold">
+                    EMI Months
+                </label>
+
+                <input type="number" id="emiMonths" name="emi_months" class="form-control"
+                    value="{{ old('emi_months', $payment?->emi_months) }}" placeholder="Enter EMI months">
+                @error('emi_months')
+                    <div class="invalid-feedback d-block">
+                        {{ $message }}
+                    </div>
+                @enderror
+            </div>
+
             <div class="col-md-6 mb-3 emi-field d-none">
 
                 <label class="form-label fw-semibold">
@@ -182,19 +200,6 @@
 
                 <input type="text" name="account_number" class="form-control"
                     value="{{ old('account_number', $payment?->account_number) }}" placeholder="Enter account number">
-
-            </div>
-
-
-            {{-- Instrument Number --}}
-            <div class="col-md-6 mb-3 instrument-field d-none">
-
-                <label class="form-label fw-semibold">
-                    Cheque / DD / NEFT Number
-                </label>
-
-                <input type="text" name="transaction_number" class="form-control"
-                    value="{{ old('transaction_number', $payment?->transaction_number) }}" placeholder="Enter number">
 
             </div>
 
@@ -237,6 +242,34 @@
 
             </div>
 
+            {{-- Cheque Number --}}
+            <div class="col-md-6 mb-3 instrument-field cheque-number-field d-none">
+
+                <label class="form-label fw-semibold">
+                    Cheque Number
+                </label>
+
+                <input type="text" name="cheque_number" class="form-control"
+                    value="{{ old('cheque_number', $payment?->cheque_number) }}" placeholder="Enter cheque number">
+
+            </div>
+
+            {{-- DD Number --}}
+            <div class="col-md-6 mb-3 instrument-field dd-number-field d-none">
+
+                <label class="form-label fw-semibold">
+                    DD Number
+                </label>
+
+                <input type="text" name="dd_number" class="form-control"
+                    value="{{ old('dd_number', $payment?->dd_number) }}" placeholder="Enter DD number">
+
+            </div>
+
+        </div>
+
+        <div id="paymentSummary" class="card border-info mt-3 d-none">
+            <div class="card-body p-3" id="paymentSummaryBody"></div>
         </div>
 
     </div>

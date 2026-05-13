@@ -157,13 +157,9 @@
                 <label class="form-label fw-semibold">
                     Plot Rate
                 </label>
-
                 <input type="text" name="plot_rate" id="plotRate" class="form-control" readonly
                     value="{{ old('plot_rate', $plotSale?->plot_rate) }}" placeholder="Auto filled plot rate">
-
             </div>
-
-
             {{-- Plot Area --}}
             <div class="col-md-6 mb-3">
 

@@ -16,6 +16,7 @@
             $(document).ready(function() {
                 let selectedProjectId = "{{ old('project_id', $plotSale?->project_id) }}";
                 let selectedBlockId = "{{ old('block_id', $plotSale?->block_id) }}";
+                let customerId = "{{ $customer->id ?? '' }}";
 
                 function calculateFinalAmount() {
                     let plotCost = parseFloat($('#plotCost').val()) || 0;
@@ -83,7 +84,22 @@
                         });
                         return;
                     }
-                    $.get('/admin/get-plots/' + blockId, function(plots) {
+                    let plotsUrl = '/admin/get-plots/' + blockId;
+                    if (customerId) {
+                        plotsUrl += '/' + customerId;
+                    }
+                    $.get(plotsUrl, function(plots) {
+                        if (plots.length === 0) {
+                            let html = `
+                                <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                                    <strong>⚠️ No Plots Available!</strong>
+                                    <p>All plots in this block have been booked. Please select a different block or project.</p>
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            `;
+                            $('#plotListSection').html(html);
+                            return;
+                        }
                         let html = '<div class="row">';
                         $.each(plots, function(i, plot) {
                             let plotType = 'N/A';

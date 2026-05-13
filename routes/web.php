@@ -78,5 +78,5 @@ Route::prefix('admin')->middleware('auth')->name('admin.')->group(function () {
     Route::get('associate-tree', [AssociateTreeController::class, 'index'])->name('associate-tree');
     Route::resource('customer-booking', CustomerBookingController::class);
     Route::get('/get-blocks/{projectId}', [CustomerBookingController::class, 'getBlocks']);
-    Route::get('/get-plots/{blockId}', [CustomerBookingController::class, 'getPlots']);
+    Route::get('/get-plots/{blockId}/{customerId?}', [CustomerBookingController::class, 'getPlots']);
 });
