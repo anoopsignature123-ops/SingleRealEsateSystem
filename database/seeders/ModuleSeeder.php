@@ -325,6 +325,185 @@ class ModuleSeeder extends Seeder
                 'icon' => 'bi bi-gear',
             ],
 
+            // Parent Module
+            [
+                'name' => 'Report',
+                'slug' => 'report',
+                'icon' => 'bi bi-clipboard-data',
+            ],
+
+            // Child Modules
+            [
+                'name' => 'Agent Details',
+                'slug' => 'agent-details-report',
+                'parent_slug' => 'report',
+                'route_name' => 'admin.agent-details-report.index',
+                'active_routes' => 'admin.agent-details-report*',
+                'icon' => 'bi bi-person-badge',
+            ],
+
+            [
+                'name' => 'Customer Details',
+                'slug' => 'customer-details-report',
+                'parent_slug' => 'report',
+                'route_name' => 'admin.customer-details-report.index',
+                'active_routes' => 'admin.customer-details-report*',
+                'icon' => 'bi bi-people',
+            ],
+
+            [
+                'name' => 'Plots Details',
+                'slug' => 'plots-details-report',
+                'parent_slug' => 'report',
+                'route_name' => 'admin.plots-details-report.index',
+                'active_routes' => 'admin.plots-details-report*',
+                'icon' => 'bi bi-grid',
+            ],
+
+            [
+                'name' => 'EMI Dues Status',
+                'slug' => 'emi-dues-status-report',
+                'parent_slug' => 'report',
+                'route_name' => 'admin.emi-dues-status-report.index',
+                'active_routes' => 'admin.emi-dues-status-report*',
+                'icon' => 'bi bi-calendar-x',
+            ],
+
+            [
+                'name' => 'EMI Payment Dues',
+                'slug' => 'emi-payment-dues-report',
+                'parent_slug' => 'report',
+                'route_name' => 'admin.emi-payment-dues-report.index',
+                'active_routes' => 'admin.emi-payment-dues-report*',
+                'icon' => 'bi bi-cash-stack',
+            ],
+
+            [
+                'name' => 'One Time Payment Dues',
+                'slug' => 'one-time-payment-dues-report',
+                'parent_slug' => 'report',
+                'route_name' => 'admin.one-time-payment-dues-report.index',
+                'active_routes' => 'admin.one-time-payment-dues-report*',
+                'icon' => 'bi bi-wallet2',
+            ],
+
+            [
+                'name' => 'Plot Booking Details',
+                'slug' => 'plot-booking-details-report',
+                'parent_slug' => 'report',
+                'route_name' => 'admin.plot-booking-details-report.index',
+                'active_routes' => 'admin.plot-booking-details-report*',
+                'icon' => 'bi bi-house-check',
+            ],
+
+            [
+                'name' => 'EMI Payment Details',
+                'slug' => 'emi-payment-details-report',
+                'parent_slug' => 'report',
+                'route_name' => 'admin.emi-payment-details-report.index',
+                'active_routes' => 'admin.emi-payment-details-report*',
+                'icon' => 'bi bi-calendar-check',
+            ],
+
+            [
+                'name' => 'Full Payment Details',
+                'slug' => 'full-payment-details-report',
+                'parent_slug' => 'report',
+                'route_name' => 'admin.full-payment-details-report.index',
+                'active_routes' => 'admin.full-payment-details-report*',
+                'icon' => 'bi bi-credit-card',
+            ],
+
+            [
+                'name' => 'Registerd Plot Details',
+                'slug' => 'registered-plot-details-report',
+                'parent_slug' => 'report',
+                'route_name' => 'admin.registered-plot-details-report.index',
+                'active_routes' => 'admin.registered-plot-details-report*',
+                'icon' => 'bi bi-file-earmark-check',
+            ],
+
+            [
+                'name' => 'Without Registerd Plot Report',
+                'slug' => 'without-registered-plot-report',
+                'parent_slug' => 'report',
+                'route_name' => 'admin.without-registered-plot-report.index',
+                'active_routes' => 'admin.without-registered-plot-report*',
+                'icon' => 'bi bi-file-earmark-x',
+            ],
+
+            [
+                'name' => 'Associate Direct Report',
+                'slug' => 'associate-direct-report',
+                'parent_slug' => 'report',
+                'route_name' => 'admin.associate-direct-report.index',
+                'active_routes' => 'admin.associate-direct-report*',
+                'icon' => 'bi bi-diagram-2',
+            ],
+
+            [
+                'name' => 'Associate Chain Report',
+                'slug' => 'associate-chain-report',
+                'parent_slug' => 'report',
+                'route_name' => 'admin.associate-chain-report.index',
+                'active_routes' => 'admin.associate-chain-report*',
+                'icon' => 'bi bi-diagram-3',
+            ],
+
+            [
+                'name' => 'Associate Business Report',
+                'slug' => 'associate-business-report',
+                'parent_slug' => 'report',
+                'route_name' => 'admin.associate-business-report.index',
+                'active_routes' => 'admin.associate-business-report*',
+                'icon' => 'bi bi-graph-up',
+            ],
+
+            [
+                'name' => 'Customer Ledger',
+                'slug' => 'customer-ledger-report',
+                'parent_slug' => 'report',
+                'route_name' => 'admin.customer-ledger-report.index',
+                'active_routes' => 'admin.customer-ledger-report*',
+                'icon' => 'bi bi-journal-text',
+            ],
+
+            [
+                'name' => 'Cheque Details',
+                'slug' => 'cheque-details-report',
+                'parent_slug' => 'report',
+                'route_name' => 'admin.cheque-details-report.index',
+                'active_routes' => 'admin.cheque-details-report*',
+                'icon' => 'bi bi-bank',
+            ],
+
+            [
+                'name' => 'EMI Dues Summary',
+                'slug' => 'emi-dues-summary-report',
+                'parent_slug' => 'report',
+                'route_name' => 'admin.emi-dues-summary-report.index',
+                'active_routes' => 'admin.emi-dues-summary-report*',
+                'icon' => 'bi bi-bar-chart',
+            ],
+
+            [
+                'name' => 'Associate Advance',
+                'slug' => 'associate-advance-report',
+                'parent_slug' => 'report',
+                'route_name' => 'admin.associate-advance-report.index',
+                'active_routes' => 'admin.associate-advance-report*',
+                'icon' => 'bi bi-cash-coin',
+            ],
+
+            [
+                'name' => 'Monthly EMI Report',
+                'slug' => 'monthly-emi-report',
+                'parent_slug' => 'report',
+                'route_name' => 'admin.monthly-emi-report.index',
+                'active_routes' => 'admin.monthly-emi-report*',
+                'icon' => 'bi bi-calendar-month',
+            ],
+
         ];
         foreach ($modules as $module) {
             $parentId = null;
