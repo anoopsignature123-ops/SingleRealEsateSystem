@@ -102,7 +102,7 @@
 
                     <table class="table table-hover align-middle">
 
-                        <thead class="table-success">
+                        <thead>
 
                             <tr>
 

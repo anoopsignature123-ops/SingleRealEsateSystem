@@ -335,10 +335,10 @@ class ModuleSeeder extends Seeder
             // Child Modules
             [
                 'name' => 'Agent Details',
-                'slug' => 'agent-details-report',
+                'slug' => 'agent-detail-report',
                 'parent_slug' => 'report',
-                'route_name' => 'admin.agent-details-report.index',
-                'active_routes' => 'admin.agent-details-report*',
+                'route_name' => 'admin.agent-detail-report.index',
+                'active_routes' => 'admin.agent-detail-report*',
                 'icon' => 'bi bi-person-badge',
             ],
 
@@ -350,16 +350,6 @@ class ModuleSeeder extends Seeder
                 'active_routes' => 'admin.customer-details-report*',
                 'icon' => 'bi bi-people',
             ],
-
-            [
-                'name' => 'Plots Details',
-                'slug' => 'plots-details-report',
-                'parent_slug' => 'report',
-                'route_name' => 'admin.plots-details-report.index',
-                'active_routes' => 'admin.plots-details-report*',
-                'icon' => 'bi bi-grid',
-            ],
-
             [
                 'name' => 'EMI Dues Status',
                 'slug' => 'emi-dues-status-report',

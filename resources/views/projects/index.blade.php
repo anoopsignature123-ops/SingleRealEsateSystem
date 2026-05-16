@@ -36,31 +36,32 @@
 
                 <div class="table-responsive">
 
-                    <table class="table table-hover align-middle" id="projectTable">
+                    <table class="table table-hover align-middle" id="associateReportTable">
 
-                        <thead class="table-success">
+                        <thead>
 
                             <tr>
 
                                 <th>#</th>
 
-                                <th>Site Name</th>
+                                <th>Sponsor ID</th>
 
-                                <th>Site Location</th>
+                                <th>Agent ID</th>
+
+                                <th>Name</th>
+
+                                <th>Mobile</th>
 
                                 <th>Date</th>
-
-                                <th width="150">
-                                    Action
-                                </th>
 
                             </tr>
 
                         </thead>
 
+
                         <tbody>
 
-                            @forelse($projects as $key => $project)
+                            @forelse($agents as $key => $agent)
                                 <tr>
 
                                     <td>
@@ -68,43 +69,23 @@
                                     </td>
 
                                     <td class="fw-semibold">
-                                        {{ $project->name }}
+                                        {{ $agent->sponsor_id }}
                                     </td>
 
                                     <td>
-                                        {{ $project->location }}
+                                        {{ $agent->associate_id }}
                                     </td>
 
                                     <td>
-                                        {{ $project->date }}
+                                        {{ $agent->associate_name }}
                                     </td>
 
                                     <td>
+                                        {{ $agent->mobile_number }}
+                                    </td>
 
-                                        <!-- Edit -->
-                                        <a href="{{ route('admin.projects.edit', $project->id) }}"
-                                            class="btn btn-sm btn-outline-primary">
-
-                                            <i class="bi bi-pencil"></i>
-
-                                        </a>
-
-
-                                        <!-- Delete -->
-                                        <form method="POST" action="{{ route('admin.projects.destroy', $project->id) }}"
-                                            class="d-inline delete-form">
-
-                                            @csrf
-                                            @method('DELETE')
-
-                                            <button type="button" class="btn btn-sm btn-outline-danger delete-btn">
-
-                                                <i class="bi bi-trash"></i>
-
-                                            </button>
-
-                                        </form>
-
+                                    <td>
+                                        {{ $agent->created_at->format('d-M-Y') }}
                                     </td>
 
                                 </tr>
@@ -113,9 +94,9 @@
 
                                 <tr>
 
-                                    <td colspan="5" class="text-center text-muted py-4">
+                                    <td colspan="6" class="text-center text-muted py-4">
 
-                                        No project found
+                                        No Record Found
 
                                     </td>
 

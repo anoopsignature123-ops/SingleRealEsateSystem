@@ -1,0 +1,99 @@
+:root {
+    --theme-color: #198754;
+    --theme-light: #f2fff8;
+    --theme-border: #d8e7df;
+    --theme-shadow: rgba(25, 135, 84, .08);
+}
+
+
+/* Header */
+.report-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--theme-color);
+    margin-bottom: 0;
+}
+
+
+/* Cards */
+.report-card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 0 15px var(--theme-shadow);
+    overflow: hidden;
+}
+
+.report-header {
+    background: #f8fffb;
+    border-bottom: 2px solid rgba(25, 135, 84, .12);
+    padding: 18px 22px;
+}
+
+
+/* Table */
+#associateReportTable thead th {
+    background: var(--theme-color) !important;
+    color: white !important;
+    border: none;
+}
+
+#associateReportTable tbody tr:hover {
+    background: var(--theme-light) !important;
+    transition: .2s;
+}
+
+
+/* Inputs */
+.report-card .form-control,
+.report-card .form-select {
+    border-radius: 8px;
+    min-height: 42px;
+    border: 1px solid var(--theme-border);
+}
+
+.report-card .form-control:focus,
+.report-card .form-select:focus {
+    box-shadow: none;
+    border-color: var(--theme-color);
+}
+
+
+/* DataTable */
+.dataTables_filter input,
+.dataTables_length select {
+    border-radius: 8px !important;
+    border: 1px solid var(--theme-border) !important;
+}
+
+.dataTables_paginate .paginate_button.current {
+    background: var(--theme-color) !important;
+    border-color: var(--theme-color) !important;
+    color: white !important;
+}
+
+
+/* Badge */
+.badge-report {
+    background: var(--theme-color) !important;
+    color: white;
+    border-radius: 8px;
+    font-size: 14px;
+    padding: 8px 14px;
+}
+
+
+/* Icons */
+.report-icon {
+    color: var(--theme-color);
+}
+
+
+/* Links */
+a {
+    color: var(--theme-color);
+}
+
+a:hover {
+    color: #146c43;
+}
+

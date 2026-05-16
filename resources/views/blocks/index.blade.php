@@ -38,7 +38,7 @@
 
                     <table class="table table-hover align-middle" id="blocksTable">
 
-                        <thead class="table-success">
+                        <thead>
 
                             <tr>
 

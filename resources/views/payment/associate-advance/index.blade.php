@@ -18,7 +18,7 @@
             <div class="card-body">
                 <div class="table-responsive">
                     <table class="table align-middle table-hover" id="advanceTable">
-                        <thead class="table-success">
+                        <thead>
                             <tr>
                                 <th>#</th>
                                 <th>Associate ID</th>
@@ -35,7 +35,8 @@
                                     <td>{{ $key + 1 }}</td>
                                     <td>{{ $advance->associate?->associate_id ?? '-' }}</td>
                                     <td>{{ $advance->associate?->associate_name ?? '-' }}</td>
-                                    <td class="fw-semibold text-success">₹{{ number_format($advance->advance_amount, 2) }}</td>
+                                    <td class="fw-semibold text-success">₹{{ number_format($advance->advance_amount, 2) }}
+                                    </td>
                                     <td>{{ $advance->advance_date?->format('d-m-Y') }}</td>
                                     <td>{{ $advance->remarks ?? '-' }}</td>
                                     <td>

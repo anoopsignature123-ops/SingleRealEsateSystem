@@ -60,7 +60,7 @@
 
                     <table class="table table-bordered table-hover" id="letterTable">
 
-                        <thead class="table-success">
+                        <thead>
 
                             <tr>
 

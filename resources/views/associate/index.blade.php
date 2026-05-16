@@ -52,7 +52,7 @@
                 <div class="table-responsive">
 
                     <table class="table table-hover align-middle" id="associateTable">
-                        <thead class="table-success">
+                        <thead>
                             <tr>
                                 <th>#</th>
                                 <th>Sponsor Id</th>

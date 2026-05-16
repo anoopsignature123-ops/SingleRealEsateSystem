@@ -23,7 +23,7 @@
 
                     <table class="table table-hover align-middle" id="customerListTable">
 
-                        <thead class="table-success">
+                        <thead>
 
                             <tr>
                                 <th>#</th>

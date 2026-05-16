@@ -101,7 +101,7 @@
 
                     <table class="table table-hover align-middle" id="editPlotBookingTable">
 
-                        <thead class="table-success">
+                        <thead>
 
                             <tr>
 

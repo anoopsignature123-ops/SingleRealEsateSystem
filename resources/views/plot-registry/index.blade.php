@@ -118,7 +118,7 @@
                         <h5 class="fw-bold mb-3">Payment Details</h5>
                         <div class="table-responsive">
                             <table class="table table-bordered">
-                                <thead class="table-success">
+                                <thead>
                                     <tr>
                                         <th>Paid Amount</th>
                                         <th>Pay Date</th>

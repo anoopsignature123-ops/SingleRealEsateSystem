@@ -15,7 +15,7 @@
             <div class="card-body">
                 <div class="table-responsive">
                     <table class="table table-hover align-middle" id="designationTable">
-                        <thead class="table-success">
+                        <thead>
                             <tr>
                                 <th>#</th>
                                 <th>Designation Name</th>

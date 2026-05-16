@@ -90,7 +90,7 @@
 
                     <table class="table table-hover align-middle" id="directAssociateTable">
 
-                        <thead class="table-success">
+                        <thead>
 
                             <tr>
 

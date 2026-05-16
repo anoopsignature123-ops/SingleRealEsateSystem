@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AgentDetailReportController;
 use App\Http\Controllers\AssociateAdvanceController;
 use App\Http\Controllers\AssociateController;
 use App\Http\Controllers\AssociateTreeController;
@@ -10,6 +11,7 @@ use App\Http\Controllers\CancelBookingController;
 use App\Http\Controllers\ChequeClearanceController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\CustomerBookingController;
+use App\Http\Controllers\CustomerDetailReportController;
 use App\Http\Controllers\CustomerListController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DesignationRankController;
@@ -159,4 +161,13 @@ Route::prefix('admin')->middleware('auth')->name('admin.')->group(function () {
         Route::get('booking-letter/agreement/{id}', 'agreementLetter')
             ->name('booking-letter.agreement');
     });
+    Route::controller(AgentDetailReportController::class)->group(function () {
+        Route::get('agent-details-report', 'index')->name('agent-detail-report.index');
+        Route::get('agent-details-report/export', 'export')->name('agent-detail-report.export');
+    });
+    Route::controller(CustomerDetailReportController::class)->group(function () {
+        Route::get('customer-details-report', 'index')->name('customer-details-report.index');
+        Route::get('customer-details-report/export', 'export')->name('customer-details-report.export');
+    });
+
 });

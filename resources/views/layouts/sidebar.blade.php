@@ -1,5 +1,5 @@
 
-<aside class="app-sidebar bg-success shadow" data-bs-theme="dark">
+<aside class="app-sidebar   shadow" data-bs-theme="dark">
     <div class="sidebar-brand">
 
         <a href="#" class="brand-link">
