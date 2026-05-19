@@ -82,4 +82,19 @@ class CustomerBooking extends Model
             'id'
         );
     }
+
+    public function plotRegistry()
+    {
+        return $this->hasOne(
+            PlotRegistry::class,
+            'customer_booking_id'
+        );
+    }
+
+    public function cancelBooking()
+    {
+        return $this->hasOne(
+            CancelBooking::class
+        );
+    }
 }

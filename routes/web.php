@@ -2,16 +2,20 @@
 
 use App\Http\Controllers\AgentDetailReportController;
 use App\Http\Controllers\AssociateAdvanceController;
+use App\Http\Controllers\AssociateChainReportController;
 use App\Http\Controllers\AssociateController;
+use App\Http\Controllers\AssociateDirectReportController;
 use App\Http\Controllers\AssociateTreeController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BlockController;
 use App\Http\Controllers\BookingLetterController;
 use App\Http\Controllers\CancelBookingController;
+use App\Http\Controllers\CancelPlotBookingReportController;
 use App\Http\Controllers\ChequeClearanceController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\CustomerBookingController;
 use App\Http\Controllers\CustomerDetailReportController;
+use App\Http\Controllers\CustomerLedgerReportController;
 use App\Http\Controllers\CustomerListController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DesignationRankController;
@@ -20,11 +24,14 @@ use App\Http\Controllers\DirectAssociateController;
 use App\Http\Controllers\EmiDueDateReportController;
 use App\Http\Controllers\EmiDueStatusReportController;
 use App\Http\Controllers\EmiPaymentController;
+use App\Http\Controllers\EmiPaymentDetailsController;
 use App\Http\Controllers\ForgotPasswordController;
+use App\Http\Controllers\FullPaymentDetailsController;
 use App\Http\Controllers\GenerateEmiController;
 use App\Http\Controllers\OneTimePaymentController;
 use App\Http\Controllers\OneTimePaymentDueController;
 use App\Http\Controllers\PlcRateController;
+use App\Http\Controllers\PlotBookingDetailsController;
 use App\Http\Controllers\PlotDetailController;
 use App\Http\Controllers\PlotPaymentController;
 use App\Http\Controllers\PlotRateController;
@@ -33,9 +40,11 @@ use App\Http\Controllers\PlotTypeController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectManipulationController;
 use App\Http\Controllers\ReceiptReprintController;
+use App\Http\Controllers\RegisteredPlotDetailsController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UpdateEmiDateController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\WithoutRegisteredPlotController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -184,8 +193,63 @@ Route::prefix('admin')->middleware('auth')->name('admin.')->group(function () {
     });
 
     Route::controller(OneTimePaymentDueController::class)->group(function () {
-        Route::get('one-time-payment-due', 'index')->name('one-time-payment-due.index');
-        Route::get('one-time-payment-due/export', 'export')->name('one-time-payment-due.export');
+        Route::get('one-time-payment-dues-report', 'index')->name('one-time-payment-dues-report.index');
+        Route::get('one-time-payment-dues-report/export', 'export')->name('one-time-payment-dues-report.export');
+    });
+
+    Route::controller(PlotBookingDetailsController::class)->group(function () {
+        Route::get('plot-booking-details-report', 'index')->name('plot-booking-details-report.index');
+        Route::get('plot-booking-details-report/export', 'export')->name('plot-booking-details-report.export');
+        Route::get('plot-booking-details-report/customer-details/{id}', 'getCustomerDetails')
+            ->name('plot-booking-details-report.customer');
+        Route::get('plot-booking-details-report/project-blocks/{id}', 'getProjectBlocks')
+            ->name('plot-booking-details-report.blocks');
+        Route::get('plot-booking-details-report/block-plc/{id}', 'getBlockPlcTypes')->name('plot-booking-details-report.plc');
+    });
+    Route::controller(EmiPaymentDetailsController::class)->group(function () {
+        Route::get('emi-payment-details-report', 'index')->name('emi-payment-details-report.index');
+        Route::get('emi-payment-details-report/export', 'export')->name('emi-payment-details-report.export');
+        Route::get('get-customer-details/{id}', 'getCustomerDetails')->name('get-customer-details');
+    });
+
+    Route::controller(FullPaymentDetailsController::class)->group(function () {
+        Route::get('full-payment-details-report', 'index')->name('full-payment-details-report.index');
+        Route::get('full-payment-details-report/export', 'export')->name('full-payment-details-report.export');
+        Route::get('get-customer-details/{id}', 'getCustomerDetails');
+    });
+    Route::controller(RegisteredPlotDetailsController::class)->group(function () {
+        Route::get('registered-plot-details-report', 'index')->name('registered-plot-details-report.index');
+        Route::get('registered-plot-details-report/export', 'export')->name('registered-plot-details-report.export');
+        Route::get('registered-project-blocks/{id}', 'getProjectBlocks');
+    });
+
+    Route::controller(WithoutRegisteredPlotController::class)->group(function () {
+        Route::get('without-registered-plot-report', 'index')->name('without-registered-plot-report.index');
+        Route::get('without-registered-plot-report/export', 'export')->name('without-registered-plot-report.export');
+    });
+
+    Route::controller(AssociateDirectReportController::class)->group(function () {
+        Route::get('/associate-direct-report', 'index')->name('associate-direct-report.index');
+        Route::get('/associate-direct-report/export', 'export')->name('associate-direct-report.export');
+    });
+
+    Route::controller(AssociateChainReportController::class)->group(function () {
+        Route::get('/associate-chain-report', 'index')->name('associate-chain-report.index');
+        Route::get('/associate-chain-report/export', 'export')->name('associate-chain-report.export');
+    });
+
+    Route::controller(CancelPlotBookingReportController::class)->group(function () {
+        Route::get('/cancel-plot-booking-report', 'index')->name('cancel-plot-booking-report.index');
+        Route::get('/cancel-plot-booking-report/export', 'export')->name('cancel-plot-booking-report.export');
+    });
+
+    Route::controller(CustomerLedgerReportController::class)->group(function () {
+        Route::get('/customer-ledger-report', 'index')->name('customer-ledger-report.index');
+        Route::get('/ledger-project-blocks/{projectId}', 'getBlocks');
+        Route::get('/ledger-block-customers/{projectId}/{blockId}', 'getCustomers');
+        Route::get('/ledger-customer-plots/{customerId}', 'getPlots');
+        Route::get('/ledger-plot-booking/{plotId}/{customerId}', 'getBooking');
+        Route::get('/customer-ledger-report/export', 'export')->name('customer-ledger-report.export');
     });
 
 });

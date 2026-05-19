@@ -450,6 +450,15 @@ class ModuleSeeder extends Seeder
             ],
 
             [
+                'name' => 'Cancel Plot Booking Report',
+                'slug' => 'cancel-plot-booking-report',
+                'parent_slug' => 'report',
+                'route_name' => 'admin.cancel-plot-booking-report.index',
+                'active_routes' => 'admin.cancel-plot-booking-report*',
+                'icon' => 'bi bi-x-circle',
+            ],
+
+            [
                 'name' => 'Customer Ledger',
                 'slug' => 'customer-ledger-report',
                 'parent_slug' => 'report',

@@ -37,7 +37,8 @@
         </div>
 
 
-        {{-- Filter --}}
+
+        {{-- Filter Card --}}
         <div class="card report-card mb-4">
 
             <div class="report-header">
@@ -86,8 +87,10 @@
                                 placeholder="Enter mobile">
 
                         </div>
+
+
                         {{-- Due Date --}}
-                        <div class="col-md-3">
+                        <div class="col-md-2">
 
                             <label class="fw-semibold mb-1">
 
@@ -101,7 +104,7 @@
 
 
                         {{-- Buttons --}}
-                        <div class="col-md-3 d-flex align-items-end gap-2">
+                        <div class="col-md-4 d-flex gap-2 align-items-end">
 
                             <button type="submit" class="btn btn-primary">
 
@@ -142,7 +145,7 @@
 
 
 
-        {{-- Table --}}
+        {{-- Table Card --}}
         <div class="card report-card">
 
             <div class="report-header">
@@ -156,6 +159,7 @@
                 </h5>
 
             </div>
+
 
             <div class="card-body">
 
@@ -195,61 +199,35 @@
                             @forelse($emis as $key => $emi)
                                 <tr>
 
-                                    <td>
-
-                                        {{ $key + 1 }}
-
-                                    </td>
-
+                                    <td>{{ $key + 1 }}</td>
 
                                     <td>
-
                                         {{ $emi->customerBooking?->booking_code ?? 'N/A' }}
-
                                     </td>
 
-
                                     <td>
-
                                         {{ $emi->customerBooking?->primaryDetail?->name ?? 'N/A' }}
-
                                     </td>
 
-
                                     <td>
-
                                         {{ $emi->plotSaleDetail?->project?->name ?? 'N/A' }}
-
                                     </td>
-
 
                                     <td>
-
                                         {{ $emi->plotSaleDetail?->plotDetail?->plot_number ?? 'N/A' }}
-
                                     </td>
-
 
                                     <td class="fw-semibold text-success">
-
                                         ₹{{ number_format($emi->net_payable_amount ?? 0, 2) }}
-
                                     </td>
-
 
                                     <td class="fw-semibold text-danger">
-
                                         ₹{{ number_format($emi->due_amount ?? 0, 2) }}
-
                                     </td>
-
 
                                     <td>
-
                                         {{ $emi->paid_installment ?? 0 }}/{{ $emi->emi_months }}
-
                                     </td>
-
 
                                     <td>
 
@@ -275,7 +253,7 @@
 
                                 <tr>
 
-                                    <td colspan="9" class="text-center py-4 text-muted">
+                                    <td colspan="9" class="text-center py-4">
 
                                         No Record Found
 
@@ -305,11 +283,8 @@
             $('#emiStatusTable').DataTable({
 
                 pageLength: 10,
-
                 ordering: true,
-
                 responsive: false,
-
                 scrollX: true
 
             });
