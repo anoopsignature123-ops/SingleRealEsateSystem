@@ -565,23 +565,23 @@ class ModuleSeeder extends Seeder
                 'icon' => 'bi bi-currency-rupee',
             ],
 
-            [
-                'name' => 'Cancel Plot Report',
-                'slug' => 'cancel-plot-report',
-                'parent_slug' => 'report',
-                'route_name' => 'admin.cancel-plot-report.index',
-                'active_routes' => 'admin.cancel-plot-report*',
-                'icon' => 'bi bi-file-earmark-x',
-            ],
+            // [
+            //     'name' => 'Cancel Plot Report',
+            //     'slug' => 'cancel-plot-report',
+            //     'parent_slug' => 'report',
+            //     'route_name' => 'admin.cancel-plot-report.index',
+            //     'active_routes' => 'admin.cancel-plot-report*',
+            //     'icon' => 'bi bi-file-earmark-x',
+            // ],
 
-            [
-                'name' => 'Monthly EMI Report',
-                'slug' => 'monthly-emi-report',
-                'parent_slug' => 'report',
-                'route_name' => 'admin.monthly-emi-report.index',
-                'active_routes' => 'admin.monthly-emi-report*',
-                'icon' => 'bi bi-calendar3',
-            ],
+            // [
+            //     'name' => 'Monthly EMI Report',
+            //     'slug' => 'monthly-emi-report',
+            //     'parent_slug' => 'report',
+            //     'route_name' => 'admin.monthly-emi-report.index',
+            //     'active_routes' => 'admin.monthly-emi-report*',
+            //     'icon' => 'bi bi-calendar3',
+            // ],
 
         ];
         foreach ($modules as $module) {
