@@ -466,6 +466,23 @@ class ModuleSeeder extends Seeder
                 'active_routes' => 'admin.customer-ledger-report*',
                 'icon' => 'bi bi-journal-text',
             ],
+            [
+                'name' => 'Payment Collection & Dues Summary',
+                'slug' => 'payment-collection-dues-summary-report',
+                'parent_slug' => 'report',
+                'route_name' => 'admin.payment-collection-dues-summary-report.index',
+                'active_routes' => 'admin.payment-collection-dues-summary-report*',
+                'icon' => 'bi bi-cash-stack',
+            ],
+
+            [
+                'name' => 'Dues Installment Report',
+                'slug' => 'dues-installment-report',
+                'parent_slug' => 'report',
+                'route_name' => 'admin.dues-installment-report.index',
+                'active_routes' => 'admin.dues-installment-report*',
+                'icon' => 'bi bi-calendar2-check',
+            ],
 
             [
                 'name' => 'Cheque Details',
@@ -482,16 +499,79 @@ class ModuleSeeder extends Seeder
                 'parent_slug' => 'report',
                 'route_name' => 'admin.emi-dues-summary-report.index',
                 'active_routes' => 'admin.emi-dues-summary-report*',
-                'icon' => 'bi bi-bar-chart',
+                'icon' => 'bi bi-wallet2',
             ],
 
             [
-                'name' => 'Associate Advance',
+                'name' => 'Daily Collection Report',
+                'slug' => 'daily-collection-report',
+                'parent_slug' => 'report',
+                'route_name' => 'admin.daily-collection-report.index',
+                'active_routes' => 'admin.daily-collection-report*',
+                'icon' => 'bi bi-calendar-day',
+            ],
+
+            [
+                'name' => 'Daily Dues Report',
+                'slug' => 'daily-dues-report',
+                'parent_slug' => 'report',
+                'route_name' => 'admin.daily-dues-report.index',
+                'active_routes' => 'admin.daily-dues-report*',
+                'icon' => 'bi bi-calendar-x',
+            ],
+
+            [
+                'name' => 'Agent Summary Details',
+                'slug' => 'agent-summary-details-report',
+                'parent_slug' => 'report',
+                'route_name' => 'admin.agent-summary-details-report.index',
+                'active_routes' => 'admin.agent-summary-details-report*',
+                'icon' => 'bi bi-person-lines-fill',
+            ],
+
+            [
+                'name' => 'New Booking Payment Details',
+                'slug' => 'new-booking-payment-details-report',
+                'parent_slug' => 'report',
+                'route_name' => 'admin.new-booking-payment-details-report.index',
+                'active_routes' => 'admin.new-booking-payment-details-report*',
+                'icon' => 'bi bi-house-add',
+            ],
+
+            [
+                'name' => 'Associate Team New Booking Details',
+                'slug' => 'associate-team-new-booking-details-report',
+                'parent_slug' => 'report',
+                'route_name' => 'admin.associate-team-new-booking-details-report.index',
+                'active_routes' => 'admin.associate-team-new-booking-details-report*',
+                'icon' => 'bi bi-people-fill',
+            ],
+
+            [
+                'name' => 'Bounced Cheque Details',
+                'slug' => 'bounced-cheque-details-report',
+                'parent_slug' => 'report',
+                'route_name' => 'admin.bounced-cheque-details-report.index',
+                'active_routes' => 'admin.bounced-cheque-details-report*',
+                'icon' => 'bi bi-x-circle',
+            ],
+
+            [
+                'name' => 'Associate Advance Report',
                 'slug' => 'associate-advance-report',
                 'parent_slug' => 'report',
                 'route_name' => 'admin.associate-advance-report.index',
                 'active_routes' => 'admin.associate-advance-report*',
-                'icon' => 'bi bi-cash-coin',
+                'icon' => 'bi bi-currency-rupee',
+            ],
+
+            [
+                'name' => 'Cancel Plot Report',
+                'slug' => 'cancel-plot-report',
+                'parent_slug' => 'report',
+                'route_name' => 'admin.cancel-plot-report.index',
+                'active_routes' => 'admin.cancel-plot-report*',
+                'icon' => 'bi bi-file-earmark-x',
             ],
 
             [
@@ -500,7 +580,7 @@ class ModuleSeeder extends Seeder
                 'parent_slug' => 'report',
                 'route_name' => 'admin.monthly-emi-report.index',
                 'active_routes' => 'admin.monthly-emi-report*',
-                'icon' => 'bi bi-calendar-month',
+                'icon' => 'bi bi-calendar3',
             ],
 
         ];

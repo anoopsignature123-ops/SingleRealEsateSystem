@@ -1,35 +1,46 @@
 <?php
 
 use App\Http\Controllers\AgentDetailReportController;
+use App\Http\Controllers\AgentSummaryDetailsReportController;
 use App\Http\Controllers\AssociateAdvanceController;
+use App\Http\Controllers\AssociateAdvanceReportController;
 use App\Http\Controllers\AssociateChainReportController;
 use App\Http\Controllers\AssociateController;
 use App\Http\Controllers\AssociateDirectReportController;
+use App\Http\Controllers\AssociateTeamNewBookingDetailsReportController;
 use App\Http\Controllers\AssociateTreeController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BlockController;
 use App\Http\Controllers\BookingLetterController;
+use App\Http\Controllers\BouncedChequeDetailsReportController;
 use App\Http\Controllers\CancelBookingController;
 use App\Http\Controllers\CancelPlotBookingReportController;
 use App\Http\Controllers\ChequeClearanceController;
+use App\Http\Controllers\ChequeDetailsReportController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\CustomerBookingController;
 use App\Http\Controllers\CustomerDetailReportController;
 use App\Http\Controllers\CustomerLedgerReportController;
 use App\Http\Controllers\CustomerListController;
+use App\Http\Controllers\DailyCollectionReportController;
+use App\Http\Controllers\DailyDuesReportController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DesignationRankController;
 use App\Http\Controllers\DevelopmentController;
 use App\Http\Controllers\DirectAssociateController;
+use App\Http\Controllers\DuesInstallmentReportController;
 use App\Http\Controllers\EmiDueDateReportController;
+use App\Http\Controllers\EmiDuesSummaryReportController;
 use App\Http\Controllers\EmiDueStatusReportController;
 use App\Http\Controllers\EmiPaymentController;
 use App\Http\Controllers\EmiPaymentDetailsController;
 use App\Http\Controllers\ForgotPasswordController;
 use App\Http\Controllers\FullPaymentDetailsController;
 use App\Http\Controllers\GenerateEmiController;
+use App\Http\Controllers\NewBookingPaymentDetailsReportController;
 use App\Http\Controllers\OneTimePaymentController;
 use App\Http\Controllers\OneTimePaymentDueController;
+use App\Http\Controllers\PaymentCollectionDuesSummaryReportController;
 use App\Http\Controllers\PlcRateController;
 use App\Http\Controllers\PlotBookingDetailsController;
 use App\Http\Controllers\PlotDetailController;
@@ -252,4 +263,61 @@ Route::prefix('admin')->middleware('auth')->name('admin.')->group(function () {
         Route::get('/customer-ledger-report/export', 'export')->name('customer-ledger-report.export');
     });
 
+    Route::controller(PaymentCollectionDuesSummaryReportController::class)->group(function () {
+        Route::get('/payment-collection-dues-summary-report', 'index')->name('payment-collection-dues-summary-report.index');
+        Route::get('/payment-collection-dues-summary-report/export', 'export'
+        )->name('payment-collection-dues-summary-report.export');
+    });
+
+    Route::controller(DuesInstallmentReportController::class)->group(function () {
+        Route::get('/dues-installment-report', 'index')->name('dues-installment-report.index');
+        Route::get('/dues-installment-report/export', 'export')->name('dues-installment-report.export');
+    });
+
+    Route::controller(ChequeDetailsReportController::class)->group(function () {
+        Route::get('/cheque-details-report', 'index')->name('cheque-details-report.index');
+        Route::get('/cheque-details-report/export', 'export')->name('cheque-details-report.export');
+    });
+
+    Route::controller(EmiDuesSummaryReportController::class)->group(function () {
+        Route::get('/emi-dues-summary-report', 'index')->name('emi-dues-summary-report.index');
+        Route::get('/emi-dues-summary-report/export', 'export')->name('emi-dues-summary-report.export');
+    });
+
+    Route::controller(DailyCollectionReportController::class)->group(function () {
+        Route::get('/daily-collection-report', 'index')->name('daily-collection-report.index');
+        Route::get('/daily-collection-report/export', 'export')->name('daily-collection-report.export');
+    });
+
+    Route::controller(DailyDuesReportController::class)->group(function () {
+        Route::get('/daily-dues-report', 'index')->name('daily-dues-report.index');
+        Route::get('/daily-dues-report/export', 'export')->name('daily-dues-report.export');
+    });
+
+    Route::controller(AgentSummaryDetailsReportController::class)->group(function () {
+        Route::get('/agent-summary-details-report', 'index')->name('agent-summary-details-report.index');
+        Route::get('/agent-summary-details-report/export', 'export')->name('agent-summary-details-report.export');
+    });
+
+    Route::controller(NewBookingPaymentDetailsReportController::class)->group(function () {
+        Route::get('/new-booking-payment-details-report', 'index')->name('new-booking-payment-details-report.index');
+        Route::get('/new-booking-payment-details-report/export', 'export')->name('new-booking-payment-details-report.export');
+    });
+
+    Route::controller(AssociateTeamNewBookingDetailsReportController::class)->group(function () {
+        Route::get('/associate-team-new-booking-details-report', 'index')
+            ->name('associate-team-new-booking-details-report.index');
+        Route::get('/associate-team-new-booking-details-report/export', 'export')
+            ->name('associate-team-new-booking-details-report.export');
+    });
+
+    Route::controller(BouncedChequeDetailsReportController::class)->group(function () {
+        Route::get('/bounced-cheque-details-report', 'index')->name('bounced-cheque-details-report.index');
+        Route::get('/bounced-cheque-details-report/export', 'export')->name('bounced-cheque-details-report.export');
+    });
+
+    Route::controller(AssociateAdvanceReportController::class)->group(function () {
+        Route::get('/associate-advance-report','index')->name('associate-advance-report.index');
+        Route::get( '/associate-advance-report/export','export')->name('associate-advance-report.export');
+    });
 });
