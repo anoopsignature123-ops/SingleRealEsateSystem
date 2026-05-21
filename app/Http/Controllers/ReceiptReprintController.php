@@ -28,11 +28,15 @@ class ReceiptReprintController extends Controller
         $request->validate([
             'plot_id' => 'required',
             'customer_id' => 'required',
+        ], [
+            'plot_id.required' => 'Kripya list me se Plot Number select karein.',
+            'customer_id.required' => 'Customer select karna aniwarya hai.',
         ]);
+
         $plots = PlotDetail::all();
         $receipts = $this->service->search($request->plot_id, $request->customer_id);
 
-        return view('payment.receipt-reprint.index', compact('plots', 'receipts'));
+        return view('payment.receipt-reprint.index', compact('plots', 'receipts'))->with($request->only(['plot_id', 'customer_id']));
     }
 
     public function download($paymentId)
@@ -45,11 +49,10 @@ class ReceiptReprintController extends Controller
         $customers = CustomerBooking::with('primaryDetail')
             ->whereHas('plotSaleDetail', function ($query) use ($plotId) {
                 $query->where('plot_detail_id', $plotId);
-            }
-            )->get()->map(function ($booking) {
+            })->get()->map(function ($booking) {
                 return [
-                    'id' => $booking->customer_code,
-                    'text' => $booking->customer_code.' / '.($booking->primaryDetail?->name ?? ''),
+                    'id' => (string) $booking->customer_code,
+                    'text' => $booking->customer_code.' / '.($booking->primaryDetail?->name ?? 'N/A'),
                 ];
             });
 

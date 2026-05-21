@@ -28,7 +28,6 @@ class CompanyController extends Controller
 
     public function store(CompanyRequest $request)
     {
-
         $this->companyService->create($request->all());
 
         return redirect()->route('company.index')->with('success', 'Company created successfully');
@@ -43,10 +42,16 @@ class CompanyController extends Controller
 
     public function update(CompanyRequest $request, $id)
     {
-
         $this->companyService->update($id, $request->all());
 
         return redirect()->route('company.index')->with('success', 'Company updated successfully');
+    }
+
+    public function toggleStatus($id)
+    {
+        $this->companyService->updateStatus($id);
+
+        return response()->json(['success' => true, 'message' => 'Status updated. Only this company is Active now!']);
     }
 
     public function destroy($id)

@@ -83,6 +83,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('users', UserController::class);
     Route::resource('roles', RoleController::class);
     Route::resource('company', CompanyController::class);
+    Route::post('company/{id}/toggle-status', [CompanyController::class, 'toggleStatus'])->name('company.toggleStatus');
     Route::resource('projects', ProjectController::class);
     Route::resource('blocks', BlockController::class);
     Route::resource('plot-types', PlotTypeController::class);
@@ -138,6 +139,7 @@ Route::middleware('auth')->group(function () {
 
     Route::controller(ReceiptReprintController::class)->group(function () {
         Route::get('/receipt-reprint', 'index')->name('receipt-reprint.index');
+        Route::get('/receipt-reprint/search', 'index');
         Route::post('/receipt-reprint/search', 'search')->name('receipt-reprint.search');
         Route::get('/receipt-reprint/download/{payment}', 'download')->name('receipt-reprint.download');
         Route::get('/receipt-reprint/customers/{plot}', 'getCustomersByPlot')->name('receipt-reprint.customers');

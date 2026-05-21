@@ -1,32 +1,63 @@
-<div class="row">
-    <div class="col-md-6 mb-3">
-        <label class="form-label"> Designation</label>
-        <input type="text" name="designation" placeholder="Enter designation"
-            class="form-control @error('designation') is-invalid @enderror"
-            value="{{ old('designation', $designationRank->designation ?? '') }}">
+<div class="row g-4">
+    {{-- Designation --}}
+    <div class="col-md-6">
+        <label class="form-label fw-semibold text-secondary mb-2">Designation <span class="text-danger">*</span></label>
+        <div class="d-flex align-items-stretch">
+            <span class="input-group-text bg-light text-muted px-3 border-end-0 rounded-start rounded-0"
+                style="border: 1px solid #ced4da;">
+                <i class="bi bi-briefcase"></i>
+            </span>
+            <input type="text" name="designation" placeholder="Enter designation"
+                class="form-control rounded-start-0 @error('designation') is-invalid @enderror"
+                value="{{ old('designation', $designationRank->designation ?? '') }}"
+                style="border-top-left-radius: 0; border-bottom-left-radius: 0;">
+        </div>
         @error('designation')
-            <div class="invalid-feedback">{{ $message }}</div>
+            <div class="invalid-feedback d-block mt-1">{{ $message }}</div>
         @enderror
     </div>
-    <div class="col-md-6 mb-3">
-        <label class="form-label"> Rank Number</label>
-        <input type="number" name="rank_number" placeholder="Enter rank number"
-            class="form-control @error('rank_number') is-invalid @enderror"
-            value="{{ old('rank_number', $designationRank->rank_number ?? '') }}">
+
+    {{-- Rank Number --}}
+    <div class="col-md-6">
+        <label class="form-label fw-semibold text-secondary mb-2">Rank Number <span class="text-danger">*</span></label>
+        <div class="d-flex align-items-stretch">
+            <span class="input-group-text bg-light text-muted px-3 border-end-0 rounded-start rounded-0"
+                style="border: 1px solid #ced4da;">
+                <i class="bi bi-hash"></i>
+            </span>
+            <input type="number" name="rank_number" placeholder="Enter rank number"
+                class="form-control rounded-start-0 @error('rank_number') is-invalid @enderror"
+                value="{{ old('rank_number', $designationRank->rank_number ?? '') }}"
+                style="border-top-left-radius: 0; border-bottom-left-radius: 0;">
+        </div>
         @error('rank_number')
-            <div class="invalid-feedback">{{ $message }}</div>
+            <div class="invalid-feedback d-block mt-1">{{ $message }}</div>
         @enderror
     </div>
-    <div class="col-md-6 mb-3">
-        <label class="form-label">Commission</label>
-        <input type="number" step="0.01" name="commission" placeholder="Enter commission"
-            class="form-control @error('commission') is-invalid @enderror"
-            value="{{ old('commission', $designationRank->commission ?? '') }}">
+
+    {{-- Commission --}}
+    <div class="col-md-6">
+        <label class="form-label fw-semibold text-secondary mb-2">Commission (%) <span
+                class="text-danger">*</span></label>
+        <div class="d-flex align-items-stretch">
+            <span class="input-group-text bg-light text-muted px-3 border-end-0 rounded-start rounded-0"
+                style="border: 1px solid #ced4da;">
+                <i class="bi bi-percent"></i>
+            </span>
+            <input type="number" step="0.01" name="commission" placeholder="Enter commission"
+                class="form-control rounded-start-0 @error('commission') is-invalid @enderror"
+                value="{{ old('commission', $designationRank->commission ?? '') }}"
+                style="border-top-left-radius: 0; border-bottom-left-radius: 0;">
+        </div>
         @error('commission')
-            <div class="invalid-feedback">{{ $message }}</div>
+            <div class="invalid-feedback d-block mt-1">{{ $message }}</div>
         @enderror
     </div>
 </div>
-<div class="text-end">
-    <button class="btn btn-success"><i class="bi bi-check-circle"></i>Submit</button>
+
+{{-- Form Action Button --}}
+<div class="text-end mt-4">
+    <button type="submit" class="btn btn-success px-4 fw-semibold shadow-sm py-2">
+        <i class="bi bi-check-circle me-1"></i> Save Designation & Rank
+    </button>
 </div>

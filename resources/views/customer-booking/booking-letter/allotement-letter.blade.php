@@ -1,4 +1,3 @@
-{{-- allotment-letter.blade.php --}}
 <!DOCTYPE html>
 <html>
 
@@ -8,16 +7,17 @@
     <style>
         @page {
             size: A4;
-            margin: 50px 60px;
+            margin: 240px 65px 30px 65px;
         }
 
         body {
-            font-family: 'Helvetica Neue', Helvetica, Arial, DejaVu Sans, sans-serif;
-            font-size: 13.5px;
-            line-height: 1.6;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            line-height: 1.4;
             color: #000;
             margin: 0;
             padding: 0;
+            background-color: #fff;
         }
 
         .content {
@@ -25,20 +25,20 @@
         }
 
         p {
-            margin-bottom: 18px;
+            margin: 0 0 16px 0;
+            text-indent: 0px;
         }
 
         .center-heading {
             text-align: center;
             font-weight: bold;
-            font-size: 15px;
-            margin: 20px 0;
-            letter-spacing: 1px;
+            font-size: 14px;
+            margin: 16px 0;
         }
 
         .details-block {
-            margin-top: 35px;
-            line-height: 1.8;
+            margin-top: 25px;
+            line-height: 1.5;
         }
 
         .details-block div {
@@ -52,11 +52,11 @@
         }
 
         .signature-table {
-            margin-top: 60px;
+            margin-top: 55px;
         }
 
         .witness-table {
-            margin-top: 50px;
+            margin-top: 45px;
         }
 
         .signature-table td,
@@ -76,23 +76,23 @@
         .party-title {
             font-weight: bold;
             font-size: 14px;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
             text-transform: uppercase;
         }
 
         .signatory-info {
-            font-size: 13.5px;
-            line-height: 1.4;
+            font-size: 14px;
+            line-height: 1.3;
         }
 
         .company-bottom {
             font-weight: bold;
-            margin-top: 4px;
+            margin-top: 2px;
         }
 
         .witness-title {
             font-weight: bold;
-            font-size: 13.5px;
+            font-size: 14px;
         }
     </style>
 </head>
@@ -104,9 +104,7 @@
     @endphp
 
     <div class="content">
-        <p>This PAL is made on the <strong>{{ now()->format('jS') }}</strong> day of
-            <strong>{{ now()->format('F, Y') }}</strong>
-        </p>
+        <p>This PAL is made on the 21th day of May, 2026</p>
 
         <div class="center-heading">BETWEEN</div>
 
@@ -119,42 +117,37 @@
         <div class="center-heading">AND</div>
 
         <p>
-            <strong>{{ $booking->primaryDetail?->name ?? 'SHIVAM' }}</strong>, resident of
-            <strong>{{ $booking->primaryDetail?->address ?? 'SWWSSW, UP' }}</strong> (Here in after called Second Party)
-            which expression shall unless it be repugnant to the context or meaning there of shall mean and include
-            his/her legal representative, executors and administrators and assignee;
+            <strong>{{ strtoupper($booking->primaryDetail?->name ?? 'SHIVAM') }}</strong>, resident of
+            <strong>{{ $booking->primaryDetail?->permanent_address ?? 'SWWSSW, UP' }}</strong>(Here in after called
+            Second Party) which expression shall unless it be repugnant to the context or meaning there of shall mean
+            and include his/her legal representative, executors and administrators and assignee;
         </p>
 
         <p>
             This PAL between the above said both the parties is as per the Terms &amp; Conditions (Annexure-A) &amp;
             Payment Schedule (Annexure-B) of the attached Booking Form for the said Property Unit (Plot No -
-            <strong>{{ $plot?->plotDetail?->plot_number ?? 'A-1' }}</strong>, Area
+            <strong>{{ $plot?->plotDetail?->plot_number ?? 'A-1' }}</strong> , Area
             <strong>{{ $plot?->plot_area ? number_format($plot->plot_area, 2) : '1000.00' }} Sq.ft.</strong>) as per the
-            attached map of the project
-            <strong>{{ strtoupper($plot?->project?->name ?? 'SANI INFRA HEIGHT') }}</strong> of the First Party (SANI
-            INFRA HEIGHT).
+            attached map of the project SANI INFRA HEIGHT of the First Party (SANI INFRA HEIGHT).
         </p>
 
         <p>
             An amount of Rs.
             <strong>{{ $booking->payments?->first()?->booking_amount ? number_format($booking->payments->first()->booking_amount, 2) . '/-' : '10000.00/-' }}</strong>
-            - By <strong>{{ ucfirst($booking->payments?->first()?->payment_mode ?? 'Cash') }}</strong>
-            Dated-
+            - By <strong>{{ ucfirst($booking->payments?->first()?->payment_mode ?? 'Cash') }}</strong> Dated-
             <strong>{{ $booking->payments?->first()?->created_at ? $booking->payments->first()->created_at->format('d/m/Y') : '16/10/2024' }}</strong>
             received as booking amount.
         </p>
 
         <p>
-            Where as this plot allotment letter (PAL) has been executed on this
-            <strong>{{ now()->format('jS') }}</strong> the day of
-            <strong>{{ now()->format('F, Y') }}</strong> between both the parties will fully and without any pressure
-            in the presence of the witness. This PAL is being prepared and signed in the duplicate with a copy of the
-            same available with both the parties.
+            Where as this plot allotment letter (PAL) has been executed on this 21th day of May, 2026 between both the
+            parties will fully and without any pressure in the presence of the witness. This PAL is being prepared and
+            signed in the duplicate with a copy of the same available with both the parties.
         </p>
 
         <div class="details-block">
             <div>Place : Lucknow</div>
-            <div>Dated : {{ now()->format('jS F Y') }}</div>
+            <div>Dated:21th May 2026</div>
         </div>
 
         <table class="signature-table">

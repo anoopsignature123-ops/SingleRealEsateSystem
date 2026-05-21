@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Company;
 use App\Models\CustomerPayment;
 use Barryvdh\DomPDF\Facade\Pdf;
 
@@ -11,8 +12,8 @@ class ReceiptReprintService
     {
         return CustomerPayment::with(['customerBooking.primaryDetail', 'customerBooking.plotSaleDetail'])
             ->whereHas('customerBooking', function ($query) use ($plotId, $customerId) {
-                $query->where('customer_code', $customerId)->whereHas('plotSaleDetail',
-                    function ($q) use ($plotId) {
+                $query->where('customer_code', $customerId)
+                    ->whereHas('plotSaleDetail', function ($q) use ($plotId) {
                         $q->where('plot_detail_id', $plotId);
                     });
             })->get();
@@ -20,9 +21,11 @@ class ReceiptReprintService
 
     public function downloadPdf($paymentId)
     {
-        $payment = CustomerPayment::with(['customerBooking.primaryDetail'])->findOrFail($paymentId);
-        $pdf = Pdf::loadView('payment.receipt-reprint.pdf', compact('payment'));
+        $payment = CustomerPayment::with(['customerBooking.primaryDetail', 'customerBooking.plotSaleDetail'])->findOrFail($paymentId);
+        $company = Company::where('status', '1')->first();
 
-        return $pdf->download('receipt-'.$payment->receipt_number.'.pdf');
+        $pdf = Pdf::loadView('payment.receipt-reprint.pdf', compact('payment', 'company'));
+
+        return $pdf->download('receipt-'.($payment->receipt_number ?? 'REG-'.$paymentId).'.pdf');
     }
 }

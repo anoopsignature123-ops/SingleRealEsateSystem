@@ -16,5 +16,6 @@ class Company extends Model
         'contact_no',
         'address',
         'logo',
+        'status',
     ];
 }

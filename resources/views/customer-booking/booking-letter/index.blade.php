@@ -122,14 +122,24 @@
 
                                     </td>
                                     <td>
-                                        <a href="{{ route('booking-letter.allotement.pdf', $row->id) }}"
-                                            class="btn btn-sm btn-success me-1" title="Allotement Latter">
-                                            <i class="bi bi-download"></i> Allotement Latter
-                                        </a>
-                                        <a href="{{ route('booking-letter.agreement.pdf', $row->id) }}"
-                                            class="btn btn-sm btn-secondary " title="Agreement Latter">
-                                            <i class="bi bi-download"></i> Agreement Latter
-                                        </a>
+                                        <div class="d-inline-flex gap-2">
+                                            <a href="{{ route('booking-letter.allotement.pdf', $row->id) }}"
+                                                target="_blank"
+                                                class="btn btn-sm btn-outline-success px-3 py-1.5 fw-medium d-inline-flex align-items-center gap-1.5 shadow-sm"
+                                                style="border-radius: 6px; transition: all 0.2s ease;"
+                                                title="Allotment Letter">
+                                                <i class="bi bi-file-earmark-pdf-fill fs-6"></i>
+                                                <span>Allotment Letter</span>
+                                            </a>
+
+                                            <a href="{{ route('booking-letter.agreement.pdf', $row->id) }}" target="_blank"
+                                                class="btn btn-sm btn-outline-secondary px-3 py-1.5 fw-medium d-inline-flex align-items-center gap-1.5 shadow-sm"
+                                                style="border-radius: 6px; transition: all 0.2s ease;"
+                                                title="Agreement Letter">
+                                                <i class="bi bi-file-earmark-text-fill fs-6"></i>
+                                                <span>Agreement Letter</span>
+                                            </a>
+                                        </div>
                                     </td>
                                 </tr>
 

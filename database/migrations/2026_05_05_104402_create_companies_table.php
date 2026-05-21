@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('contact_no')->nullable();
             $table->longText('address')->nullable();
             $table->string('logo')->nullable();
+            $table->tinyInteger('status')->default(0)->comment('1: Active, 0: Inactive');
             $table->softDeletes();
             $table->timestamps();
         });
