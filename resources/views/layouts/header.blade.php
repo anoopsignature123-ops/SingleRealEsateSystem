@@ -1,3 +1,7 @@
+@php
+    $isAssociate = auth()->guard('associate')->check();
+    $currentUser = $isAssociate ? auth()->guard('associate')->user() : auth()->user();
+@endphp
 <nav class="app-header navbar navbar-expand bg-body">
     <div class="container-fluid">
         <ul class="navbar-nav">
@@ -15,62 +19,56 @@
         </ul>
         <ul class="navbar-nav ms-auto">
             <li class="nav-item dropdown user-menu">
-
-                <!-- TRIGGER -->
                 <a href="#" class="nav-link dropdown-toggle d-flex align-items-center" data-bs-toggle="dropdown">
-
                     <img src="{{ asset('assets/images/user2-160x160.jpg') }}" class="rounded-circle shadow-sm me-2"
                         width="34" height="34" alt="User Image">
-
                     <div class="d-none d-md-block text-start">
-                        <div class="fw-semibold text-dark">{{ auth()->user()->name }}</div>
-                        {{-- <small class="text-muted" style="font-size: 12px;">Administrator</small> --}}
+                        <div class="fw-semibold text-dark">
+                            {{ $isAssociate ? $currentUser->associate_name ?? 'Associate' : $currentUser->name ?? 'Admin' }}
+                        </div>
+                        <small class="text-muted" style="font-size: 11px; display: block; line-height: 1;">
+                            {{ $isAssociate ? 'Associate' : 'Administrator' }}
+                        </small>
                     </div>
-
                 </a>
-
-                <!-- DROPDOWN -->
                 <ul class="dropdown-menu dropdown-menu-end shadow border-0 p-0"
                     style="min-width: 260px; border-radius: 12px; overflow: hidden;">
 
-                    <!-- HEADER -->
                     <li class="bg-light text-center p-3 border-bottom">
                         <img src="{{ asset('assets/images/user2-160x160.jpg') }}" class="rounded-circle mb-2 shadow-sm"
-                            width="60" height="60">
-
-                        <div class="fw-bold">{{ auth()->user()->name }}</div>
-                        <small class="text-muted">{{ auth()->user()->email }}</small>
+                            width="60" height="60" alt="User Image">
+                        <div class="fw-bold">
+                            {{ $isAssociate ? $currentUser->associate_name ?? 'Associate' : $currentUser->name ?? 'Admin' }}
+                        </div>
+                        <small class="text-muted">
+                            {{ $isAssociate ? 'ID: ' . ($currentUser->associate_id ?? '') : $currentUser->email ?? '' }}
+                        </small>
                     </li>
-
-                    <!-- BODY -->
                     <li>
-                        <a href="#" class="dropdown-item py-2 d-flex align-items-center">
+                        <a href="{{ $isAssociate ? route('associate-panel.view-profile') : '#' }}"
+                            class="dropdown-item py-2 d-flex align-items-center">
                             <i class="bi bi-person me-2"></i> Profile
                         </a>
                     </li>
-
                     <li>
                         <a href="#" class="dropdown-item py-2 d-flex align-items-center">
                             <i class="bi bi-gear me-2"></i> Settings
                         </a>
                     </li>
-
                     <li>
                         <hr class="dropdown-divider m-0">
                     </li>
-
-                    <!-- LOGOUT -->
                     <li>
-                        <form action="{{ route('logout') }}" method="POST">
+                        <form action="{{ $isAssociate ? route('associate-panel.logout') : route('logout') }}"
+                            method="POST">
                             @csrf
-
-                            <button type="submit" class="dropdown-item text-danger py-2 d-flex align-items-center">
+                            <button type="submit" class="dropdown-item text-danger py-2 d-flex align-items-center"
+                                style="width: 100%; border: none; background: none;">
                                 <i class="bi bi-box-arrow-right me-2"></i>
                                 Sign out
                             </button>
                         </form>
                     </li>
-
                 </ul>
             </li>
         </ul>

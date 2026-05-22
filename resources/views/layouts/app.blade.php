@@ -34,6 +34,7 @@
         <main class="app-main">
 
             @yield('content')
+
         </main>
         <footer class="app-footer">
             <div class="float-end d-none d-sm-inline">Anything you want</div>
@@ -44,8 +45,8 @@
             All rights reserved.
         </footer>
     </div>
-</body>
-@include('layouts.script')
-@stack('scripts')
+    < </body>
+        @include('layouts.script')
+        @stack('scripts')
 
 </html>

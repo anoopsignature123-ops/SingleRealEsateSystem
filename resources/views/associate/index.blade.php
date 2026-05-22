@@ -95,7 +95,7 @@
                                         {{ number_format($associate->rank->commission, 2) . ' (' . $associate->rank?->designation . ')' }}
                                     </td>
                                     <td>
-                                        {{ \Illuminate\Support\Facades\Crypt::decryptString($associate->password) }}
+                                        {{ $associate->plain_password }}
                                     </td>
                                     <td>
                                         {{ $associate->created_at?->format('d-m-Y') }}

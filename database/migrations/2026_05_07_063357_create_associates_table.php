@@ -29,6 +29,7 @@ return new class extends Migration
             $table->string('pancard_number')->nullable()->unique();
             $table->string('email')->nullable()->unique();
             $table->string('password')->nullable();
+            $table->string('plain_password')->nullable();
             $table->string('aadhar_number')->nullable()->unique();
             $table->string('photo')->nullable();
             $table->string('id_proof_photo')->nullable();

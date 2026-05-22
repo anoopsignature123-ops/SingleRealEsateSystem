@@ -1,0 +1,29 @@
+  .text-theme-green {
+      color: #0f8a53 !important;
+  }
+
+  .bg-theme-green {
+      background-color: #0f8a53 !important;
+  }
+
+  .btn-theme-outline {
+      border-color: #0f8a53 !important;
+      color: #0f8a53 !important;
+      transition: all 0.2s ease-in-out;
+  }
+
+  .btn-theme-outline:hover {
+      background-color: #0f8a53 !important;
+      color: #ffffff !important;
+  }
+
+  .badge-theme-subtle {
+      background-color: rgba(15, 138, 83, 0.1) !important;
+      color: #0f8a53 !important;
+  }
+
+  .badge-plot {
+      background-color: rgba(15, 138, 83, 0.05) !important;
+      color: #0f8a53 !important;
+      border: 1px solid rgba(15, 138, 83, 0.2) !important;
+  }

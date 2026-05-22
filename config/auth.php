@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Associate;
 use App\Models\User;
 
 return [
@@ -42,6 +43,10 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+        'associate' => [
+            'driver' => 'session',
+            'provider' => 'associates', // Yeh niche wale provider se connect hoga
+        ],
     ],
 
     /*
@@ -71,6 +76,11 @@ return [
         //     'driver' => 'database',
         //     'table' => 'users',
         // ],
+        'associates' => [
+            'driver' => 'eloquent',
+            'model' => Associate::class, // Aapka Associate Model path
+        ],
+
     ],
 
     /*
@@ -95,6 +105,12 @@ return [
     'passwords' => [
         'users' => [
             'provider' => 'users',
+            'table' => env('AUTH_PASSWORD_RESET_TOKEN_TABLE', 'password_reset_tokens'),
+            'expire' => 60,
+            'throttle' => 60,
+        ],
+        'associates' => [
+            'provider' => 'associates',
             'table' => env('AUTH_PASSWORD_RESET_TOKEN_TABLE', 'password_reset_tokens'),
             'expire' => 60,
             'throttle' => 60,

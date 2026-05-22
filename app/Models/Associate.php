@@ -2,10 +2,14 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 
-class Associate extends Model
+class Associate extends Authenticatable
 {
+    use HasFactory, Notifiable;
+
     protected $fillable = [
         'associate_id',
         'sponsor_id',
@@ -23,11 +27,23 @@ class Associate extends Model
         'pancard_number',
         'email',
         'password',
+        'plain_password',
         'aadhar_number',
         'photo',
         'id_proof_photo',
         'pancard_photo',
     ];
+
+    protected $hidden = [
+        'password',
+    ];
+
+    public function getAuthPassword()
+    {
+        return $this->password; // Aapki table ka password column
+    }
+
+    // toh Laravel ko is function ke zariye batana padta hai:
 
     public function sponsor()
     {

@@ -7,6 +7,9 @@ use App\Http\Controllers\AssociateAdvanceReportController;
 use App\Http\Controllers\AssociateChainReportController;
 use App\Http\Controllers\AssociateController;
 use App\Http\Controllers\AssociateDirectReportController;
+use App\Http\Controllers\AssociatePanel\AssociateAuthController;
+use App\Http\Controllers\AssociatePanel\AssociateDashboardController;
+use App\Http\Controllers\AssociatePanel\AssociateProfileController;
 use App\Http\Controllers\AssociateTeamNewBookingDetailsReportController;
 use App\Http\Controllers\AssociateTreeController;
 use App\Http\Controllers\AuthController;
@@ -107,7 +110,7 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::resource('designations', DesignationRankController::class);
-    Route::resource('associate', AssociateController::class);
+    Route::resource('associate-user', AssociateController::class)->names('associate');
     Route::get('get-sponsor-ranks/{associateId}', [AssociateController::class, 'getSponsorRanks'])
         ->name('get.sponsor.ranks');
     Route::get('associate-export', [AssociateController::class, 'export'])->name('associate.export');
@@ -344,6 +347,28 @@ Route::middleware('auth')->group(function () {
         Route::get('enquiry/edit/{id}', 'edit')->name('enquiry.edit');
         Route::put('enquiry/update/{id}', 'update')->name('enquiry.update');
         Route::delete('enquiry/delete/{id}', 'destroy')->name('enquiry.destroy');
+    });
+});
+
+// ------------------Associate Routes-------------
+Route::prefix('associate-panel')->name('associate-panel.')->group(function () {
+    Route::middleware('guest:associate')->group(function () {
+        Route::get('/login', [AssociateAuthController::class, 'loginForm'])->name('login');
+        Route::post('/login', [AssociateAuthController::class, 'login'])->name('login.submit');
+    });
+    Route::middleware('auth:associate')->group(function () {
+        Route::get('dashboard', [AssociateDashboardController::class, 'dashboard'])->name('dashboard');
+        Route::post('/logout', [AssociateAuthController::class, 'logout'])->name('logout');
+
+        Route::controller(AssociateProfileController::class)->group(function () {
+            Route::get('view-profile', 'viewProfile')->name('view-profile');
+            Route::get('edit-profile', 'editProfile')->name('edit-profile');
+            Route::post('update-profile', 'updateProfile')->name('update-profile');
+            Route::get('change-password', 'changePassword')->name('change-password');
+            Route::post('update-password', 'updatePassword')->name('update-password');
+            Route::get('/welcome-letter', 'downloadPdf')->name('welcome-letter');
+        });
+
     });
 
 });

@@ -5,8 +5,8 @@ namespace App\Services;
 use App\Models\Associate;
 use App\Models\BankDetail;
 use App\Models\DesignationRank;
-use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 class AssociateService
@@ -48,9 +48,7 @@ class AssociateService
             $data['id_proof_photo'] = uploadFile($data['id_proof_photo'] ?? null, 'associates/id-proof');
             $data['pancard_photo'] = uploadFile($data['pancard_photo'] ?? null, 'associates/pancard_photo');
             $bankPassbook = uploadFile($data['bank_passbook'] ?? null, 'associates/passbook');
-            $password = Str::upper(
-                Str::random(8)
-            );
+            $plainPassword = Str::upper(Str::random(8));
             $associate = Associate::create([
                 'associate_id' => $associateCode,
                 'sponsor_id' => $data['sponsor_id'] ?? null,
@@ -66,7 +64,8 @@ class AssociateService
                 'state' => $data['state'] ?? null,
                 'mobile_number' => $data['mobile_number'] ?? null,
                 'email' => $data['email'] ?? null,
-                'password' => Crypt::encryptString($password),
+                'password' => Hash::make($plainPassword),
+                'plain_password' => $plainPassword,
                 'pancard_number' => $data['pancard_number'] ?? null,
                 'aadhar_number' => $data['aadhar_number'] ?? null,
                 'photo' => $data['photo'],
