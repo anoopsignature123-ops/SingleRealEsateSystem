@@ -77,15 +77,9 @@
                         </ul>
                     </li>
 
-                    <li class="nav-item">
-                        <a href="{{ route('associate-panel.register-create') }}" class="nav-link">
-                            <i class="nav-icon bi bi-person-plus"></i>
-                            <p>New Registration</p>
-                        </a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a href="#" class="nav-link">
+                    <li class="nav-item {{ request()->routeIs('associate-panel.*') ? 'menu-open' : '' }}">
+                        <a href="#"
+                            class="nav-link {{ request()->routeIs('associate-panel.*') ? 'active' : '' }}">
                             <i class="nav-icon bi bi-briefcase"></i>
                             <p>
                                 Business Details
@@ -94,29 +88,42 @@
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
-                                <a href="#" class="nav-link">
+                                <a href="{{ route('associate-panel.register-create') }}"
+                                    class="nav-link {{ request()->routeIs('associate-panel.register-create') || request()->routeIs('associate-panel.associate-edit') ? 'active' : '' }}">
+                                    <i class="nav-icon bi bi-person-plus"></i>
+                                    <p>New Registration</p>
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a href="{{ route('associate-panel.associate-detail') }}"
+                                    class="nav-link {{ request()->routeIs('associate-panel.associate-detail') ? 'active' : '' }}">
                                     <i class="nav-icon bi bi-circle"></i>
                                     <p>Associate Details</p>
                                 </a>
                             </li>
+
                             <li class="nav-item">
                                 <a href="#" class="nav-link">
                                     <i class="nav-icon bi bi-circle"></i>
                                     <p>Booking Details</p>
                                 </a>
                             </li>
+
                             <li class="nav-item">
                                 <a href="#" class="nav-link">
                                     <i class="nav-icon bi bi-circle"></i>
                                     <p>Team Business Report</p>
                                 </a>
                             </li>
+
                             <li class="nav-item">
                                 <a href="#" class="nav-link">
                                     <i class="nav-icon bi bi-circle"></i>
                                     <p>Due EMI Details</p>
                                 </a>
                             </li>
+
                             <li class="nav-item">
                                 <a href="#" class="nav-link">
                                     <i class="nav-icon bi bi-circle"></i>
@@ -198,7 +205,6 @@
                             <p>Plot Availbility</p>
                         </a>
                     </li>
-
                     <li class="nav-item">
                         <a href="#" class="nav-link">
                             <i class="nav-icon bi bi-life-preserver"></i>

@@ -11,6 +11,28 @@ use Illuminate\Support\Str;
 
 class AssociateRegistrationService
 {
+    public function getAssociateData($request)
+    {
+        $currentAssociateId = auth()->user()->associate_id;
+        $query = Associate::with(['rank', 'bankDetail', 'sponsor', 'underPlace'])
+            ->where('sponsor_id', $currentAssociateId);
+
+        if ($request->filled('joining_date')) {
+            $query->whereDate('created_at', $request->joining_date);
+        }
+        if ($request->filled('associate_name')) {
+            $query->where('associate_name', 'like', '%'.trim($request->associate_name).'%');
+        }
+        if ($request->filled('rank_id')) {
+            $query->where('rank_id', $request->rank_id);
+        }
+
+        return [
+            'associates' => $query->orderBy('id', 'desc')->get(),
+            'ranks' => DesignationRank::orderBy('rank_number', 'desc')->get(),
+        ];
+    }
+
     public function createData()
     {
         $associates = Associate::with('rank')->get();
@@ -18,7 +40,6 @@ class AssociateRegistrationService
 
         return ['associates' => $associates, 'defaultRank' => $defaultRank];
     }
-    
 
     public function store(array $data)
     {
@@ -94,7 +115,6 @@ class AssociateRegistrationService
                 $associate->id_proof_photo
             );
 
-
             $panCardPhoto = uploadFile(
                 $data['pancard_photo'] ?? null,
                 'associates/pancard',
@@ -142,6 +162,46 @@ class AssociateRegistrationService
                 ]
             );
 
+        });
+    }
+
+    public function getExportData($request)
+    {
+
+        $currentAssociateId = auth()->user()->associate_id;
+        $query = Associate::with(['rank', 'bankDetail'])
+            ->where('sponsor_id', $currentAssociateId);
+        if ($request->filled('joining_date')) {
+            $query->whereDate('created_at', $request->joining_date);
+        }
+        if ($request->filled('associate_name')) {
+            $query->where('associate_name', 'like', '%'.$request->associate_name.'%');
+        }
+        if ($request->filled('rank_id')) {
+            $query->where('rank_id', $request->rank_id);
+        }
+
+        return $query->latest()->get();
+    }
+
+    public function associateDelete($id)
+    {
+        DB::transaction(function () use ($id) {
+            $associate = Associate::with('bankDetail')->findOrFail($id);
+
+            // 1. Bank Details
+            if ($associate->bankDetail) {
+                deleteFile($associate->bankDetail->bank_passbook);
+                $associate->bankDetail->delete();
+            }
+
+            // 2. Main Associate Files
+            deleteFile($associate->photo);
+            deleteFile($associate->id_proof_photo);
+            deleteFile($associate->pancard_photo);
+
+            // 3. Delete Record
+            $associate->delete();
         });
     }
 }

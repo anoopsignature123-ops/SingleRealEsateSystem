@@ -5,46 +5,21 @@
             <div class="row">
                 <div class="col-md-4 mb-3">
                     <label class="mb-2">Sponsor Id</label>
-                    <select name="sponsor_id" id="sponsor_id" class="form-control">
-                        <option value="">Select Sponsor</option>
-                        @foreach ($associates as $item)
-                            <option value="{{ $item->associate_id }}"
-                                {{ old('sponsor_id', $associate->sponsor_id ?? '') == $item->associate_id ? 'selected' : '' }}>
-                                {{ $item->associate_name }}
-                                ({{ $item->associate_id }})
-                            </option>
-                        @endforeach
-                    </select>
-                    @error('sponsor_id')
-                        <small class="text-danger d-block">{{ $message }}</small>
-                    @enderror
+                    <input type="text" class="form-control" value="{{ $loggedInAssociate->associate_id }}" readonly>
+                    <input type="hidden" name="sponsor_id" value="{{ $loggedInAssociate->associate_id }}">
                 </div>
 
                 <div class="col-md-4 mb-3">
                     <label class="mb-2">Rank</label>
-                    <select name="rank_id" id="rank_id" class="form-control">
-                        <option value="">Select Rank</option>
-                        @if (isset($ranks))
-                            @foreach ($ranks as $rank)
-                                <option value="{{ $rank->id }}"
-                                    {{ old('rank_id', $associate->rank_id ?? '') == $rank->id ? 'selected' : '' }}>
-                                    {{ $rank->designation }}
-                                </option>
-                            @endforeach
-                        @endif
-                    </select>
-                    @error('rank_id')
-                        <small class="text-danger d-block">{{ $message }}</small>
-                    @enderror
+                    <input type="text" class="form-control"
+                        value="{{ $loggedInAssociate->rank->designation ?? 'N/A' }}" readonly>
+                    <input type="hidden" name="rank_id" value="{{ $loggedInAssociate->rank_id }}">
                 </div>
+
                 <div class="col-md-4 mb-3">
                     <label class="mb-2">Under Place Id</label>
                     <input type="text" name="under_place_id" id="under_place_id"
-                        value="{{ old('under_place_id', $associate->under_place_id ?? '') }}"
-                        placeholder="Enter under place id" class="form-control">
-                    @error('under_place_id')
-                        <small class="text-danger d-block">{{ $message }}</small>
-                    @enderror
+                        value="{{ $loggedInAssociate->associate_id }}" class="form-control" readonly>
                 </div>
                 {{-- Associate Name --}}
                 <div class="col-md-6 mb-3">

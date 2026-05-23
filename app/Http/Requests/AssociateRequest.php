@@ -13,10 +13,10 @@ class AssociateRequest extends FormRequest
 
     public function rules(): array
     {
-        $associateId = $this->route('associate');
+        $associateId = $this->route('id') ?? $this->route('associate') ?? $this->input('id');
+        $isUpdate = in_array($this->route()->getName(), ['associate-panel.associate-update', 'dusra-route-name']);
 
         return [
-
             'sponsor_id' => ['required', 'string', 'max:50'],
             'under_place_id' => ['required', 'string', 'max:50'],
             'rank_id' => ['required', 'exists:designation_ranks,id'],
@@ -25,11 +25,26 @@ class AssociateRequest extends FormRequest
             'title' => ['required', 'string', 'max:20'],
             'father_name' => ['required', 'string', 'min:3', 'max:100'],
             'dob' => ['required', 'date', 'before:today'],
+            'mobile_number' => [
+                'required',
+                'digits:10',
+                'unique:associates,mobile_number,'.$associateId,
+            ],
+            'email' => [
+                'required',
+                'email',
+                'unique:associates,email,'.$associateId,
+            ],
             'address' => ['required', 'string', 'max:500'],
             'city' => ['required', 'string', 'max:50'],
             'state' => ['required', 'string', 'max:50'],
-            'pancard_number' => ['required', 'regex:/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/', 'unique:associates,pancard_number,'.$associateId],
-            'aadhar_number' => ['required', 'regex:/^[0-9]{12}$/', 'unique:associates,aadhar_number,'.$associateId],
+            'pancard_number' => $isUpdate
+                ? ['nullable']
+                : ['required', 'regex:/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/', 'unique:associates,pancard_number,'.$associateId],
+            'aadhar_number' => $isUpdate
+                ? ['nullable']
+                : ['required', 'regex:/^[0-9]{12}$/', 'unique:associates,aadhar_number,'.$associateId],
+
             'bank_name' => ['required', 'string', 'max:100'],
             'account_number' => ['required', 'regex:/^[0-9]{9,18}$/'],
             'ifsc_code' => ['required', 'regex:/^[A-Z]{4}0[A-Z0-9]{6}$/'],
@@ -41,7 +56,6 @@ class AssociateRequest extends FormRequest
             'photo' => [$associateId ? 'nullable' : 'required', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
             'id_proof_photo' => [$associateId ? 'nullable' : 'required', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
             'pancard_photo' => [$associateId ? 'nullable' : 'required', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
-
             'bank_passbook' => [$associateId ? 'nullable' : 'required', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
         ];
     }
@@ -73,15 +87,13 @@ class AssociateRequest extends FormRequest
             'city.required' => 'City is required.',
 
             'state.required' => 'State is required.',
-
-            // Mobile
             'mobile_number.required' => 'Mobile number is required.',
-            'mobile_number.regex' => 'Mobile number must contain only numbers and be between 8 to 15 digits.',
+            'mobile_number.digits' => 'Mobile number must be exactly 10 digits.',
+            'mobile_number.unique' => 'This mobile number is already registered.',
 
-            // Email
             'email.required' => 'Email address is required.',
             'email.email' => 'Please enter a valid email address.',
-            'email.unique' => 'This email address already exists.',
+            'email.unique' => 'This email address is already registered.',
 
             // PAN
             'pancard_number.required' => 'PAN number is required.',

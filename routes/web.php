@@ -111,7 +111,7 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::resource('designations', DesignationRankController::class);
-    Route::resource('associate-user', AssociateController::class)->names('associate');
+    Route::resource('associate-user', AssociateController::class)->names('associate')->parameters(['associate-user' => 'associate']);
     Route::get('get-sponsor-ranks/{associateId}', [AssociateController::class, 'getSponsorRanks'])
         ->name('get.sponsor.ranks');
     Route::get('associate-export', [AssociateController::class, 'export'])->name('associate.export');
@@ -373,9 +373,14 @@ Route::prefix('associate-panel')->name('associate-panel.')->group(function () {
         Route::controller(AssociateRegistrationController::class)->group(function () {
             Route::get('register', 'create')->name('register-create');
             Route::post('register', 'store')->name('register-store');
-            Route::get('associate/{id}/edit', 'edit')->name('edit');
-            Route::put('associate/{id}/update', 'update')->name('update');
+            Route::get('associate/{id}/edit', 'edit')->name('associate-edit');
+            Route::put('associate/{id}/update', 'update')->name('associate-update');
+            Route::delete('associate-delete/{id}', 'associateDelete')->name('associate-delete');
+            Route::get('associate-detail', 'associateDatail')->name('associate-detail');
+            Route::get('export-associate', 'associateExport')->name('export-associate');
+            Route::get('associate/{id}/download-pdf', 'downloadPdf')->name('associat-download-pdf');
         });
+
     });
 
 });
