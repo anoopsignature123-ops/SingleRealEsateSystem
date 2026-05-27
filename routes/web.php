@@ -229,6 +229,7 @@ Route::middleware('auth')->group(function () {
             ->name('plot-booking-details-report.blocks');
         Route::get('plot-booking-details-report/block-plc/{id}', 'getBlockPlcTypes')->name('plot-booking-details-report.plc');
     });
+    
     Route::controller(EmiPaymentDetailsController::class)->group(function () {
         Route::get('emi-payment-details-report', 'index')->name('emi-payment-details-report.index');
         Route::get('emi-payment-details-report/export', 'export')->name('emi-payment-details-report.export');
