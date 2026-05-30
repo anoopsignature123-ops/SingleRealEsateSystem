@@ -21,6 +21,7 @@ class CustomerLedgerController extends Controller
         if ($request->filled('project_id')) {
             $blocks = Block::where('project_id', $request->project_id)->get();
         }
+
         if ($request->filled('block_id')) {
             $plots = PlotDetail::where('block_id', $request->block_id)->get();
         }
@@ -36,8 +37,7 @@ class CustomerLedgerController extends Controller
 
             if ($booking) {
                 $payments = CustomerPayment::where('customer_booking_id', $booking->id)
-                    ->latest()
-                    ->get();
+                    ->latest()->get();
 
                 $plotSale = $booking->plotSaleDetail;
                 $plot = $plotSale?->plotDetail;

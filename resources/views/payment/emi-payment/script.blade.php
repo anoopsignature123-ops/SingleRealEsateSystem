@@ -1,8 +1,8 @@
 @push('scripts')
     <script>
-        $(document).ready(function() {
+                        $(document).ready(function () {
             // Payment Mode Show / Hide Fields
-            $('#payment_mode').change(function() {
+                        $('#payment_mode').change(function () {
                 let mode = $(this).val();
 
                 $('.bank-field').addClass('d-none');
@@ -35,39 +35,51 @@
             $('#payment_mode').trigger('change');
 
             // Project -> Blocks
-            $('#project_id').change(function() {
+                        $('#project_id').change(function () {
                 let projectId = $(this).val();
-
+                    console.log(projectId);
                 $('#block_id').html('<option value="">Select Block</option>');
                 $('#plot_id').html('<option value="">Select Plot</option>');
 
-                $.get('/emi-payment/blocks/' + projectId, function(res) {
-                    $.each(res.data, function(key, block) {
+                    $.get('/emi-payment/blocks/' + projectId, function (res) {
+                        $.each(res.data, function (key, block) {
                         $('#block_id').append(
                             `<option value="${block.id}">${block.block}</option>`);
                     });
                 });
             });
 
-            // Block -> EMI Plots
-            $('#block_id').change(function() {
+                        $('#block_id').change(function () {
                 let blockId = $(this).val();
 
                 $('#plot_id').html('<option value="">Select Plot</option>');
 
-                $.get('/emi-payment/plots/' + blockId, function(res) {
-                    $.each(res, function(key, plot) {
+                        if (!blockId) return;
+
+                        $.get('/emi-payment/plots/' + blockId, function (res) {
+                            if (!res.status) {
+                                Swal.fire({
+                                    icon: 'warning',
+                                    title: 'Alert',
+                                    text: res.message,
+                                    confirmButtonColor: '#198754'
+                                });
+                                return;
+                            }
+
+                            $.each(res.data, function (key, plot) {
                         $('#plot_id').append(
-                            `<option value="${plot.id}">${plot.plot_number}</option>`);
+                            `<option value="${plot.id}">${plot.plot_number}</option>`
+                        );
                     });
                 });
             });
 
             // Plot -> Booking Details
-            $('#plot_id').change(function() {
+                        $('#plot_id').change(function () {
                 let plotId = $(this).val();
 
-                $.get('/emi-payment/details/' + plotId, function(res) {
+                        $.get('/emi-payment/details/' + plotId, function (res) {
                     if (!res.status) {
                         alert('EMI Booking Not Found');
                         return;
@@ -86,15 +98,15 @@
                     $('#emi_start_date').html(res.emi_start_date);
                     $('#emi_months').html(res.months_passed + ' / ' + res.emi_months + ' Months');
                     $('#monthly_emi').html('₹' + res.monthly_emi);
-
+                        $('input[name="booking_amount"]').val(res.monthly_emi);
                     let html = '';
-                    $.each(res.payment_history, function(key, payment) {
+                        $.each(res.payment_history, function (key, payment) {
                         html += `<tr>
-                            <td>${payment.receipt_no}</td>
-                            <td>${payment.date}</td>
-                            <td>₹${payment.amount}</td>
-                            <td>${payment.mode}</td>
-                        </tr>`;
+                                <td>${payment.receipt_no}</td>
+                                <td>${payment.date}</td>
+                                <td>₹${payment.amount}</td>
+                                <td>${payment.mode}</td>
+                            </tr>`;
                     });
                     $('#payment_history').html(html);
                 });

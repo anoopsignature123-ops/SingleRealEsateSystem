@@ -32,7 +32,7 @@
         @include('layouts.header')
         @include('layouts.sidebar')
         <main class="app-main">
-           
+
             @yield('content')
 
         </main>
@@ -45,8 +45,8 @@
             All rights reserved.
         </footer>
     </div>
-    < </body>
-        @include('layouts.script')
-        @stack('scripts')
+</body>
+@include('layouts.script')
+@stack('scripts')
 
 </html>

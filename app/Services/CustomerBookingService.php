@@ -247,21 +247,85 @@ class CustomerBookingService
         return $plotSale;
     }
 
+    // public function storeStepFive($customerId, array $data)
+    // {
+    //     $paymentMode = $data['payment_mode'] ?? null;
+    //     $planType = $data['plan_type'] ?? null;
+    //     $plotSaleId = $data['plot_sale_detail_id'];
+    //     $transactionNumber = $data['transaction_number'] ?? null;
+
+    //     if (! $transactionNumber) {
+    //         $transactionNumber = strtoupper($paymentMode ?: 'PAY').'-'.time();
+    //     }
+    //     $receiptNumber = $data['receipt_number'] ?? 'REC-'.Str::upper(Str::random(8));
+    //     $paymentStatus = 'hold';
+    //     if (in_array($paymentMode, ['cash', 'card'], true)) {
+    //         $paymentStatus = 'booked';
+    //     }
+    //     $oldPayment = CustomerPayment::where('customer_booking_id', $customerId)
+    //         ->where('plot_sale_detail_id', $plotSaleId)
+    //         ->first();
+
+    //     if (! $oldPayment) {
+    //         CustomerPayment::create([
+    //             'plan_type' => $planType,
+    //             'booking_amount' => $data['booking_amount'] ?? 0,
+    //             'due_amount' => $data['due_amount'] ?? 0,
+    //             'net_payable_amount' => $data['net_payable_amount'] ?? 0,
+    //             'emi_months' => $data['emi_months'] ?? null,
+    //             'emi_date' => now() ?? null,
+    //             'after_booking_payable_amount' => $data['after_booking_payable_amount'] ?? null,
+    //             'remark' => $data['remark'] ?? null,
+    //             'payment_mode' => $paymentMode,
+    //             'account_number' => $data['account_number'] ?? null,
+    //             'bank_name' => $data['bank_name'] ?? null,
+    //             'branch_name' => $data['branch_name'] ?? null,
+    //             'cheque_number' => $data['cheque_number'] ?? null,
+    //             'cheque_date' => $data['cheque_date'] ?? null,
+    //             'dd_number' => $data['dd_number'] ?? null,
+    //             'transaction_number' => $transactionNumber,
+    //             'payment_status' => $paymentStatus,
+    //             'receipt_number' => $receiptNumber,
+    //             'customer_booking_id' => $customerId,
+    //             'plot_sale_detail_id' => $plotSaleId,
+    //             'transaction_category' => 'booking_fee',
+    //         ]);
+    //     }
+
+    //     // Plot lock for all payment types
+    //     $plotSale = PlotSaleDetail::find($plotSaleId);
+    //     if ($plotSale && $plotSale->plot_detail_id) {
+    //         PlotDetail::where('id', $plotSale->plot_detail_id)->update(['status' => 'booked']);
+    //     }
+
+    //     // Booking code always generate once
+    //     $booking = CustomerBooking::find($customerId);
+    //     if ($booking && ! $booking->booking_code) {
+    //         $booking->update([
+    //             'booking_code' => 'BK-'.str_pad($booking->id, 6, '0', STR_PAD_LEFT),
+    //         ]);
+    //     }
+
+    //     // Booking status update
+    //     CustomerBooking::where('id', $customerId)->update([
+    //         'current_step' => 6,
+    //         'status' => $paymentStatus == 'booked' ? 'completed' : 'pending',
+    //     ]);
+    // }
+
     public function storeStepFive($customerId, array $data)
     {
         $paymentMode = $data['payment_mode'] ?? null;
         $planType = $data['plan_type'] ?? null;
         $plotSaleId = $data['plot_sale_detail_id'];
-        $transactionNumber = $data['transaction_number'] ?? null;
-
-        if (! $transactionNumber) {
-            $transactionNumber = strtoupper($paymentMode ?: 'PAY').'-'.time();
-        }
+        $transactionNumber = $data['transaction_number'] ?? strtoupper($paymentMode ?: 'PAY').'-'.time();
         $receiptNumber = $data['receipt_number'] ?? 'REC-'.Str::upper(Str::random(8));
-        $paymentStatus = 'hold';
-        if (in_array($paymentMode, ['cash', 'card'], true)) {
-            $paymentStatus = 'booked';
-        }
+
+        // Determine Status
+        $isInstantPayment = in_array($paymentMode, ['cash', 'card'], true);
+        $paymentStatus = $isInstantPayment ? 'booked' : 'hold';
+
+        // 1. Customer Payment Create
         $oldPayment = CustomerPayment::where('customer_booking_id', $customerId)
             ->where('plot_sale_detail_id', $plotSaleId)
             ->first();
@@ -273,7 +337,7 @@ class CustomerBookingService
                 'due_amount' => $data['due_amount'] ?? 0,
                 'net_payable_amount' => $data['net_payable_amount'] ?? 0,
                 'emi_months' => $data['emi_months'] ?? null,
-                'emi_date' => now() ?? null,
+                'emi_date' => now(),
                 'after_booking_payable_amount' => $data['after_booking_payable_amount'] ?? null,
                 'remark' => $data['remark'] ?? null,
                 'payment_mode' => $paymentMode,
@@ -291,25 +355,20 @@ class CustomerBookingService
                 'transaction_category' => 'booking_fee',
             ]);
         }
-
-        // Plot lock for all payment types
         $plotSale = PlotSaleDetail::find($plotSaleId);
         if ($plotSale && $plotSale->plot_detail_id) {
-            PlotDetail::where('id', $plotSale->plot_detail_id)->update(['status' => 'booked']);
+            $newStatus = $isInstantPayment ? 'booked' : 'hold';
+            PlotDetail::where('id', $plotSale->plot_detail_id)->update(['status' => $newStatus]);
         }
-
-        // Booking code always generate once
         $booking = CustomerBooking::find($customerId);
         if ($booking && ! $booking->booking_code) {
             $booking->update([
                 'booking_code' => 'BK-'.str_pad($booking->id, 6, '0', STR_PAD_LEFT),
             ]);
         }
-
-        // Booking status update
-        CustomerBooking::where('id', $customerId)->update([
+        $booking->update([
             'current_step' => 6,
-            'status' => $paymentStatus == 'booked' ? 'completed' : 'pending',
+            'status' => $isInstantPayment ? 'completed' : 'pending',
         ]);
     }
 

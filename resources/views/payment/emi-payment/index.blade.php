@@ -23,105 +23,103 @@
                             <div class="row">
                                 {{-- Project --}}
                                 <div class="col-md-6 mb-3">
-                                    <label class="fw-semibold">Project *</label>
+                                    <label class="fw-semibold">Project <span class="text-danger fw-bold">*</span></label>
                                     <select id="project_id" class="form-select">
                                         <option value="">Select Project</option>
                                         @foreach ($projects as $project)
                                             <option value="{{ $project->id }}">{{ $project->name }}</option>
                                         @endforeach
+
                                     </select>
-                                </div>
+                                    </div>
 
-                                {{-- Block --}}
-                                <div class="col-md-6 mb-3">
-                                    <label class="fw-semibold">Block *</label>
-                                    <select id="block_id" class="form-select">
-                                        <option value="">Select Block</option>
-                                    </select>
-                                </div>
+                                    {{-- Block --}}
+                                    <div class="col-md-6 mb-3">
+                                        <label class="fw-semibold">Block <span class="text-danger fw-bold">*</span></label>
+                                        <select id="block_id" class="form-select">
+                                            <option value="">Select Block</option>
+                                        </select>
 
-                                {{-- Plot --}}
-                                <div class="col-md-6 mb-3">
-                                    <label class="fw-semibold">Plot *</label>
-                                    <select id="plot_id" class="form-select">
-                                        <option value="">Select Plot</option>
-                                    </select>
-                                </div>
+                                    </div>
 
-                                {{-- Booking --}}
-                                <div class="col-md-6 mb-3">
-                                    <label class="fw-semibold">Booking ID</label>
-                                    <input id="booking_id" class="form-control bg-light" readonly placeholder="Auto fill">
-                                </div>
+                                    {{-- Plot --}}
+                                    <div class="col-md-6 mb-3">
+                                        <label class="fw-semibold">Plot <span class="text-danger fw-bold">*</span></label>
+                                        <select id="plot_id" class="form-select">
+                                            <option value="">Select Plot</option>
+                                        </select>
+                                    </div>
 
-                                {{-- Customer --}}
-                                <div class="col-md-6 mb-3">
-                                    <label class="fw-semibold">Customer ID</label>
-                                    <input id="customer_id" class="form-control bg-light" readonly placeholder="Auto fill">
-                                </div>
+                                    {{-- Booking --}}
+                                    <div class="col-md-6 mb-3">
+                                        <label class="fw-semibold">Booking ID</label>
+                                        <input id="booking_id" class="form-control bg-light" readonly placeholder="Auto fill">
+                                    </div>
 
-                                {{-- Customer Name --}}
-                                <div class="col-md-6 mb-3">
-                                    <label class="fw-semibold">Customer Name</label>
-                                    <input id="customer_name" class="form-control bg-light" readonly
-                                        placeholder="Auto fill">
-                                </div>
+                                    {{-- Customer --}}
+                                    <div class="col-md-6 mb-3">
+                                        <label class="fw-semibold">Customer ID</label>
+                                        <input id="customer_id" class="form-control bg-light" readonly placeholder="Auto fill">
+                                    </div>
 
-                                {{-- EMI Amount --}}
-                                <div class="col-md-6 mb-3">
-                                    <label class="fw-semibold">EMI Paid Amount *</label>
-                                    <input type="number" name="booking_amount" class="form-control"
-                                        placeholder="Enter EMI amount" value="{{ old('booking_amount') }}">
-                                </div>
+                                    {{-- Customer Name --}}
+                                    <div class="col-md-6 mb-3">
+                                        <label class="fw-semibold">Customer Name</label>
+                                        <input id="customer_name" class="form-control bg-light" readonly placeholder="Auto fill">
+                                    </div>
 
-                                {{-- Payment Mode --}}
-                                <div class="col-md-6 mb-3">
-                                    <label class="fw-semibold">Payment Mode *</label>
-                                    <select name="payment_mode" id="payment_mode" class="form-select">
-                                        <option value="cash">Cash</option>
-                                        <option value="cheque">Cheque</option>
-                                        <option value="dd">DD</option>
-                                        <option value="neft_rtgs">NEFT / RTGS</option>
-                                        <option value="card">Card</option>
-                                    </select>
-                                </div>
+                                    {{-- EMI Amount --}}
+                                    <div class="col-md-6 mb-3">
+                                        <label class="fw-semibold">
+                                            Monthly EMI Amount <span class="text-danger">*</span>
+                                        </label>
+                                        <input type="number" name="booking_amount" class="form-control" placeholder="Enter EMI amount"
+                                            value="{{ old('booking_amount') }}" readonly>
+                                    </div>
 
-                                {{-- Bank Fields --}}
-                                <div class="col-md-6 mb-3 bank-field d-none">
-                                    <label class="fw-semibold">Bank Name</label>
-                                    <input type="text" name="bank_name" class="form-control"
-                                        placeholder="Enter bank name">
-                                </div>
+                                    {{-- Payment Mode --}}
+                                    <div class="col-md-6 mb-3">
+                                        <label class="fw-semibold">Payment Mode <span class="text-danger fw-bold">*</span></label>
+                                        <select name="payment_mode" id="payment_mode" class="form-select">
+                                            <option value="cash">Cash</option>
+                                            <option value="cheque">Cheque</option>
+                                            <option value="dd">DD</option>
+                                            <option value="neft_rtgs">NEFT / RTGS</option>
+                                            <option value="card">Card</option>
+                                        </select>
+                                    </div>
 
-                                <div class="col-md-6 mb-3 bank-field d-none">
-                                    <label class="fw-semibold">Account Number</label>
-                                    <input type="text" name="account_number" class="form-control"
-                                        placeholder="Enter account number">
-                                </div>
+                                    {{-- Bank Fields --}}
+                                    <div class="col-md-6 mb-3 bank-field d-none">
+                                        <label class="fw-semibold">Bank Name</label>
+                                        <input type="text" name="bank_name" class="form-control" placeholder="Enter bank name">
+                                    </div>
 
-                                <div class="col-md-6 mb-3 bank-field d-none">
-                                    <label class="fw-semibold">Branch Name</label>
-                                    <input type="text" name="branch_name" class="form-control"
-                                        placeholder="Enter branch name">
-                                </div>
+                                    <div class="col-md-6 mb-3 bank-field d-none">
+                                        <label class="fw-semibold">Account Number</label>
+                                        <input type="text" name="account_number" class="form-control" placeholder="Enter account number">
+                                    </div>
 
-                                {{-- Cheque Fields --}}
-                                <div class="col-md-6 mb-3 cheque-field d-none">
-                                    <label class="fw-semibold">Cheque Number</label>
-                                    <input type="text" name="cheque_number" class="form-control"
-                                        placeholder="Enter cheque number">
-                                </div>
+                                    <div class="col-md-6 mb-3 bank-field d-none">
+                                        <label class="fw-semibold">Branch Name</label>
+                                        <input type="text" name="branch_name" class="form-control" placeholder="Enter branch name">
+                                    </div>
 
-                                <div class="col-md-6 mb-3 cheque-field d-none">
-                                    <label class="fw-semibold">Cheque Date</label>
-                                    <input type="date" name="cheque_date" class="form-control">
-                                </div>
+                                    {{-- Cheque Fields --}}
+                                    <div class="col-md-6 mb-3 cheque-field d-none">
+                                        <label class="fw-semibold">Cheque Number</label>
+                                        <input type="text" name="cheque_number" class="form-control" placeholder="Enter cheque number">
+                                    </div>
 
-                                {{-- DD Fields --}}
-                                <div class="col-md-6 mb-3 dd-field d-none">
-                                    <label class="fw-semibold">DD Number</label>
-                                    <input type="text" name="dd_number" class="form-control"
-                                        placeholder="Enter DD number">
+                                    <div class="col-md-6 mb-3 cheque-field d-none">
+                                        <label class="fw-semibold">Cheque Date</label>
+                                        <input type="date" name="cheque_date" class="form-control">
+                                    </div>
+
+                                    {{-- DD Fields --}}
+                                    <div class="col-md-6 mb-3 dd-field d-none">
+                                        <label class="fw-semibold">DD Number</label>
+                                        <input type="text" name="dd_number" class="form-control" placeholder="Enter DD number">
                                 </div>
 
                                 {{-- Transaction Fields --}}

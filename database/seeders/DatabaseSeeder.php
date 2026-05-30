@@ -12,9 +12,10 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([ModuleSeeder::class]);
+        //  $this->call([AssociateSeeder::class]);
         Role::firstOrCreate(['name' => 'super-admin']);
         $user = User::firstOrCreate(
-            ['email' => 'admin@com'],
+            ['email' => 'admin@gmail.com'],
             [
                 'name' => 'Super Admin',
                 'password' => Hash::make('Lucknow@123'),

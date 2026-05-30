@@ -21,7 +21,7 @@ class ChequeClearanceController extends Controller
             'plotSaleDetail.project',
             'plotSaleDetail.block',
             'plotSaleDetail.plotDetail',
-        ])->where('payment_mode', 'cheque')->latest()->get();
+        ])->whereIn('payment_mode', ['cheque', 'dd', 'neft_rtgs'])->where('cheque_status' , '!=', 'cleared')->latest()->get();
         return view('payment.multiple-cheque-clearance.index',compact('payments'));
     }
 

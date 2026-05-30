@@ -33,7 +33,7 @@ class PlotRegistryController extends Controller
 
     public function getPlots($blockId)
     {
-        return response()->json(PlotDetail::where('block_id', $blockId)->get());
+        return response()->json(PlotDetail::where('block_id', $blockId)->where('status', 'booked')->get());
     }
 
     public function getBookingData($plotId)

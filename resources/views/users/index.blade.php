@@ -100,19 +100,25 @@
 @push('scripts')
     <script>
         $(document).ready(function() {
-            $('#usersTable').DataTable({
-                "pageLength": 10,
-                "ordering": true,
-                "columnDefs": [{
-                    "orderable": false,
-                    "targets": [1, 8] // Profile image aur Actions column pe sorting off ki hai
-                }],
-                "language": {
-                    "searchPlaceholder": "Search users..."
-                }
-            });
+            // Check karein ki table exist karti hai ya nahi
+            if ($('#usersTable').length > 0) {
+                $('#usersTable').DataTable({
+                    "pageLength": 10,
+                    "ordering": true,
+                    "columnDefs": [{
+                        "orderable": false,
+                        "targets": [1, 8]
+                    }],
+                    "language": {
+                        "searchPlaceholder": "Search users...",
+                        "emptyTable": "No data available in table" // Empty hone par ye dikhega
+                    },
+                    "retrieve": true // Ye important hai error se bachne ke liye
+                });
+            }
 
-            $('.delete-btn').click(function() {
+            // Delete button logic
+            $(document).on('click', '.delete-btn', function() { // Use $(document).on for dynamic rows
                 let form = $(this).closest('form');
                 Swal.fire({
                     title: 'Are you sure?',
