@@ -180,6 +180,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/multiple-cheque-clearance', 'multipleChequeClearanceIndex')->name('multiple-cheque-clearance.index');
         Route::post('/multiple-cheque-clearance/store', 'storeMultipleChequeClearance')->name('multiple-cheque-clearance.store');
     });
+    
     Route::controller(UpdateEmiDateController::class)->group(function () {
         Route::get('/update-emi-date', 'index')->name('update-emi-date.index');
         Route::post('/update-emi-date/store', 'store')->name('update-emi-date.store');

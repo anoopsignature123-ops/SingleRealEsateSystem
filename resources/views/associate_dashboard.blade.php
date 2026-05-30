@@ -6,73 +6,62 @@
 
 @section('content')
     <div class="container-fluid px-4 py-4" style="background-color: #f4f6f9; min-height: 100vh;">
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="card border-0 shadow-lg rounded-4 overflow-hidden position-relative">
-                    <div class="bg-primary"style="height: 90px; background: linear-gradient(135deg, #166534, #16a34a);">
+        <div class="card border-0 rounded-4 mb-4 overflow-hidden position-relative shadow-sm"
+            style="background-image: url('https://images.unsplash.com/photo-1497366754035-f200968a6e72?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80'); background-size: cover; background-position: center;">
+
+            <div class="position-absolute w-100 h-100"
+                style="background: linear-gradient(135deg, rgba(48, 80, 58, 0.95) 0%, rgba(45, 146, 121, 0.9) 100%);">
+            </div>
+
+            <div class="position-absolute end-0 top-0 opacity-10 p-3">
+                <i class="bi bi-person-badge" style="font-size: 8rem; color: #ffffff;"></i>
+            </div>
+
+            <div class="card-body p-4 position-relative z-index-1">
+                <div class="row align-items-center">
+                    <div class="col-lg-5 d-flex align-items-center gap-4">
+                        <div class="shadow-lg rounded-4 d-flex align-items-center justify-content-center bg-white border border-3 border-white overflow-hidden flex-shrink-0"
+                            style="width: 90px; height: 90px;">
+                            @if ($associate->photo)
+                                <img src="{{ getFileUrl($associate->photo) }}" alt="{{ $associate->associate_name }}"
+                                    class="w-100 h-100 object-fit-cover">
+                            @else
+                                <span
+                                    class="fs-2 fw-bold text-success">{{ strtoupper(substr($associate->associate_name, 0, 1)) }}</span>
+                            @endif
+                        </div>
+                        <div class="text-white">
+                            <span class="badge bg-white text-success px-3 py-1 rounded-pill fw-bold mb-2 text-uppercase"
+                                style="font-size: 0.7rem; letter-spacing: 1px;">
+                                Active Associate
+                            </span>
+                            <h3 class="fw-bold mb-0">{{ $associate->associate_name }}</h3>
+                            <p class="mb-0 opacity-75">ID: <span
+                                    class="fw-semibold">{{ $associate->associate_id ?? 'N/A' }}</span></p>
+                        </div>
                     </div>
-                    <div class="card-body px-4 pb-4 pt-0">
-                        <div class="row align-items-center">
-                            <div class="col-lg-5">
-                                <div class="d-flex align-items-center gap-4">
-                                    <div class="shadow rounded-circle d-flex align-items-center justify-content-center bg-white text-primary fw-bold fs-2 border border-4 border-white overflow-hidden"
-                                        style="width: 95px; height: 95px; margin-top: -45px;">
-                                        @if ($associate->photo)
-                                            <img src="{{ getFileUrl($associate->photo) }}"
-                                                alt="{{ $associate->associate_name }}" class="w-100 h-100 object-fit-cover">
-                                        @else
-                                            {{ strtoupper(substr($associate->associate_name, 0, 2)) }}
-                                        @endif
-                                    </div>
-                                    <div class="pt-3">
-                                        <span
-                                            class="badge bg-success-subtle text-success px-3 py-2 rounded-pill fw-semibold mb-2">
-                                            Active Associate
-                                        </span>
-                                        <h3 class="fw-bold text-dark mb-1">{{ $associate->associate_name }}</h3>
-                                        <p class="text-muted mb-0">Associate ID :
-                                            <span
-                                                class="fw-semibold text-dark">{{ $associate->associate_id ?? 'N/A' }}</span>
-                                        </p>
+
+                    <div class="col-lg-7 mt-4 mt-lg-0">
+                        <div class="row g-3">
+                            @php
+                                $details = [
+                                    ['title' => 'Joining Date', 'value' => $associate->created_at?->format('d M Y'), 'icon' => 'bi-calendar-check'],
+                                    ['title' => 'Sponsor', 'value' => $associate->sponsor->associate_name ?? 'Direct', 'icon' => 'bi-people-fill'],
+                                    ['title' => 'Rank', 'value' => $associate->rank->designation ?? 'N/A', 'icon' => 'bi-award-fill'],
+                                ];
+                            @endphp
+                            @foreach($details as $item)
+                                <div class="col-md-4">
+                                    <div class="p-3 rounded-4 h-100 text-white"
+                                        style="background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2);">
+                                        <div class="d-flex align-items-center justify-content-between mb-1">
+                                            <small class="fw-medium opacity-75">{{ $item['title'] }}</small>
+                                            <i class="bi {{ $item['icon'] }}"></i>
+                                        </div>
+                                        <h6 class="fw-bold mb-0">{{ $item['value'] }}</h6>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="col-lg-7 mt-4 mt-lg-0">
-                                <div class="row g-3">
-                                    <div class="col-md-4">
-                                        <div class="border rounded-4 p-3 h-100 bg-light">
-                                            <div class="d-flex align-items-center justify-content-between mb-2">
-                                                <small class="text-muted fw-semibold">Joining Date</small>
-                                                <i class="bi bi-calendar-check text-primary"></i>
-                                            </div>
-                                            <h6 class="fw-bold mb-0 text-dark">
-                                                {{ $associate->created_at?->format('d M Y') ?? 'N/A' }}
-                                            </h6>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="border rounded-4 p-3 h-100 bg-light">
-                                            <div class="d-flex align-items-center justify-content-between mb-2">
-                                                <small class="text-muted fw-semibold">Sponsor</small>
-                                                <i class="bi bi-people-fill text-success"></i>
-                                            </div>
-                                            <h6 class="fw-bold mb-0 text-dark">
-                                                {{ $associate->sponsor->associate_name ?? 'Direct' }}</h6>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="border rounded-4 p-3 h-100 bg-light">
-                                            <div class="d-flex align-items-center justify-content-between mb-2">
-                                                <small class="text-muted fw-semibold">Rank</small>
-                                                <i class="bi bi-award-fill text-warning"></i>
-                                            </div>
-                                            <h6 class="fw-bold mb-0 text-dark">
-                                                {{ $associate->rank->designation ?? 'N/A' }}
-                                            </h6>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            @endforeach
                         </div>
                     </div>
                 </div>
@@ -89,6 +78,7 @@
                         'bg' => 'bg-primary-subtle',
                         'text' => 'text-primary',
                         'border' => '#0d6efd',
+                        'url' => route('associate-panel.my-direct'),
                     ],
 
                     [
@@ -98,6 +88,7 @@
                         'bg' => 'bg-success-subtle',
                         'text' => 'text-success',
                         'border' => '#198754',
+                        'url' => route('associate-panel.my-tree'),
                     ],
 
                     [
@@ -107,29 +98,32 @@
                         'bg' => 'bg-warning-subtle',
                         'text' => 'text-warning',
                         'border' => '#f59e0b',
+                        'url' => '#',
                     ],
                 ];
             @endphp
             @foreach ($cards as $card)
                 <div class="col-12 col-md-4">
-                    <div class="card border-0 shadow-sm rounded-4 h-100 overflow-hidden position-relative">
-                        <div style="height: 5px; background: {{ $card['border'] }};"></div>
-                        <div class="card-body p-4">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <p class="text-uppercase text-muted fw-semibold small mb-2"
-                                        style="letter-spacing: 1px;">
-                                        {{ $card['title'] }}
-                                    </p>
-                                    <h2 class="fw-bold text-dark mb-0">{{ $card['count'] }}</h2>
-                                </div>
-                                <div class="{{ $card['bg'] }} rounded-circle d-flex align-items-center justify-content-center shadow-sm"
-                                    style="width:70px;height:70px;">
-                                    <i class="bi {{ $card['icon'] }} {{ $card['text'] }} fs-2"></i>
+                    <a href="{{ $card['url'] }}" class="text-decoration-none h-100 d-block">
+                        <div class="card border-0 shadow-sm rounded-4 h-100 overflow-hidden position-relative transition-hover">
+                            <div style="height: 5px; background: {{ $card['border'] }};"></div>
+                            <div class="card-body p-4">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <p class="text-uppercase text-muted fw-semibold small mb-2"
+                                            style="letter-spacing: 1px;">
+                                            {{ $card['title'] }}
+                                        </p>
+                                        <h2 class="fw-bold text-dark mb-0">{{ $card['count'] }}</h2>
+                                    </div>
+                                    <div class="{{ $card['bg'] }} rounded-circle d-flex align-items-center justify-content-center shadow-sm"
+                                        style="width:70px;height:70px;">
+                                        <i class="bi {{ $card['icon'] }} {{ $card['text'] }} fs-2"></i>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
             @endforeach
         </div>
@@ -288,8 +282,7 @@
             <div class="col-12">
                 <div class="card border-0 shadow-sm bg-white rounded-3">
                     <div class="card-header bg-transparent border-0 p-4">
-                        <h5 class="fw-bold mb-0 text-dark"><i
-                                class="bi bi-receipt-cutoff text-theme-green me-2"></i>Recent
+                        <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-receipt-cutoff text-theme-green me-2"></i>Recent
                             Payment History</h5>
                     </div>
                     <div class="card-body p-0 table-responsive">
@@ -333,32 +326,32 @@
 
 @push('scripts')
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
+        document.addEventListener("DOMContentLoaded", function () {
             const businessCtx = document.getElementById('businessStackedChart').getContext('2d');
             new Chart(businessCtx, {
                 type: 'bar',
                 data: {
                     labels: ['Self Business', 'Team Business'],
                     datasets: [{
-                            label: 'Pending',
-                            data: [
+                        label: 'Pending',
+                        data: [
                                 {{ $stats['self']['pending'] }},
-                                {{ $stats['team']['pending'] }}
-                            ],
-                            backgroundColor: '#dc3545',
-                            borderRadius: 8,
-                            barThickness: 40
-                        },
-                        {
-                            label: 'Confirmed',
-                            data: [
+                            {{ $stats['team']['pending'] }}
+                        ],
+                        backgroundColor: '#dc3545',
+                        borderRadius: 8,
+                        barThickness: 40
+                    },
+                    {
+                        label: 'Confirmed',
+                        data: [
                                 {{ $stats['self']['confirmed'] }},
-                                {{ $stats['team']['confirmed'] }}
-                            ],
-                            backgroundColor: '#198754',
-                            borderRadius: 8,
-                            barThickness: 40
-                        }
+                            {{ $stats['team']['confirmed'] }}
+                        ],
+                        backgroundColor: '#198754',
+                        borderRadius: 8,
+                        barThickness: 40
+                    }
                     ]
                 },
                 options: {
@@ -383,7 +376,7 @@
                             backgroundColor: '#212529',
                             padding: 12,
                             callbacks: {
-                                label: function(context) {
+                                label: function (context) {
                                     let value = context.raw || 0;
                                     return context.dataset.label +
                                         ': ₹ ' + Number(value).toLocaleString('en-IN');
@@ -406,7 +399,7 @@
                         y: {
                             beginAtZero: true,
                             ticks: {
-                                callback: function(value) {
+                                callback: function (value) {
                                     return '₹ ' + Number(value).toLocaleString('en-IN');
                                 }
                             }
@@ -426,7 +419,7 @@
 
                         data: [
 
-                            {{ $data['confirmed_sales'] ?? 0 }},
+                                {{ $data['confirmed_sales'] ?? 0 }},
 
                             {{ $data['pending_sales'] ?? 0 }}
 
@@ -484,7 +477,7 @@
 
                             callbacks: {
 
-                                label: function(context) {
+                                label: function (context) {
 
                                     return context.label +
                                         ': ₹ ' +
