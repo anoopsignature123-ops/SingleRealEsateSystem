@@ -1,14 +1,9 @@
 <aside class="app-sidebar shadow" data-bs-theme="dark">
-    <div class="sidebar-brand">
-        <a href="#" class="brand-link">
-            <img src="{{ asset('assets/images/AdminLTELogo.png') }}" alt="Logo"
-                class="brand-image opacity-75 shadow" />
-            <span class="brand-text fw-light">
-                {{ auth()->guard('associate')->check() ? 'Associate Panel' : 'Admin Panel' }}
-            </span>
+    <div class="sidebar-brand bg-success">
+        <a href="#" >
+            <img src="{{ asset('assets/images/admin.png') }}" alt="Logo" height="50px" width="150px" />
         </a>
     </div>
-
     @php
         $isAssociate = auth()->guard('associate')->check();
         $user = $isAssociate ? auth()->guard('associate')->user() : auth()->user();

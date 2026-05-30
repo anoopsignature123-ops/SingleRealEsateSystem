@@ -55,6 +55,7 @@ class ProfileController extends Controller
             ]);
         }
         $user->password = Hash::make($request->new_password);
+        $user->plain_text = $request->new_password;
         $user->save();
         Auth::logout();
         $request->session()->invalidate();

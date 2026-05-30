@@ -63,12 +63,6 @@
                         <div class="mb-3">
                             <img src="{{ asset('assets/images/admin.png') }}" alt="Logo" class="login-logo">
                         </div>
-                        <h2 class="fw-bold text-dark mb-1">
-                            Admin Login
-                        </h2>
-                        <p class="text-muted small mb-0">
-                            Login to access your dashboard
-                        </p>
                     </div>
                     <div class="card border-0 shadow-lg rounded-5 overflow-hidden login-card">
                         <div class="top-gradient"></div>

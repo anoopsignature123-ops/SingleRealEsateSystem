@@ -20,6 +20,7 @@ use Spatie\Permission\Traits\HasRoles;
     'created_by',
     'updated_by',
     'profile_image',
+    'plain_text',
     'status',
 ])]
 #[Hidden(['password', 'remember_token'])]

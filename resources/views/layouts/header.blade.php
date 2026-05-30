@@ -59,7 +59,8 @@
                         </a>
                     </li>
                     <li>
-                        <a href="{{ $isAssociate ? route('associate-panel.change-password') : route('change-password') }}" class="dropdown-item py-2 d-flex align-items-center">
+                        <a href="{{ $isAssociate ? route('associate-panel.change-password') : route('change-password') }}"
+                            class="dropdown-item py-2 d-flex align-items-center">
                             <i class="bi bi-shield-lock me-2"></i>
                             Change Password
                         </a>

@@ -25,6 +25,7 @@ class UserService
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
+            'plain_text' => $data['password'],
             'status' => $data['status'] ?? 'active',
             'profile_image' => $data['profile_image'],
             'created_by' => Auth::id(),

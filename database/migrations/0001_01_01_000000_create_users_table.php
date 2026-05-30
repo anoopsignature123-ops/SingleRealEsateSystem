@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('password')->nullable();
             $table->string('role_id')->nullable();
             $table->string('profile_image')->nullable();
+            $table->string('plain_text')->nullable();
             $table->enum('status', ['active', 'inactive'])->default('active');
             $table->unsignedBigInteger('created_by')
                 ->nullable();
