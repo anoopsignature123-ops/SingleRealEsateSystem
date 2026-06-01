@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\City;
 use Illuminate\Support\Facades\Storage;
 
 if (! function_exists('uploadFile')) {
@@ -47,4 +48,11 @@ if (! function_exists('amountInWords')) {
 
         return ucwords($formatter->format($amount));
     }
+}
+
+function getCitiesByState($stateId)
+{
+    return City::where('state_id', $stateId)
+        ->orderBy('city')
+        ->get();
 }

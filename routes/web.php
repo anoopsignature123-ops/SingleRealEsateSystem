@@ -22,6 +22,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BlockController;
 use App\Http\Controllers\BookingLetterController;
 use App\Http\Controllers\BouncedChequeDetailsReportController;
+use App\Http\Controllers\BrokerController;
 use App\Http\Controllers\CancelBookingController;
 use App\Http\Controllers\CancelPlotBookingReportController;
 use App\Http\Controllers\ChequeClearanceController;
@@ -45,6 +46,7 @@ use App\Http\Controllers\EmiPaymentController;
 use App\Http\Controllers\EmiPaymentDetailsController;
 use App\Http\Controllers\EnquiryController;
 use App\Http\Controllers\EnquiryTypeController;
+use App\Http\Controllers\FarmerController;
 use App\Http\Controllers\ForgotPasswordController;
 use App\Http\Controllers\FullPaymentDetailsController;
 use App\Http\Controllers\GenerateEmiController;
@@ -180,7 +182,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/multiple-cheque-clearance', 'multipleChequeClearanceIndex')->name('multiple-cheque-clearance.index');
         Route::post('/multiple-cheque-clearance/store', 'storeMultipleChequeClearance')->name('multiple-cheque-clearance.store');
     });
-    
+
     Route::controller(UpdateEmiDateController::class)->group(function () {
         Route::get('/update-emi-date', 'index')->name('update-emi-date.index');
         Route::post('/update-emi-date/store', 'store')->name('update-emi-date.store');
@@ -371,6 +373,11 @@ Route::middleware('auth')->group(function () {
     Route::controller(PlotAvilabilityController::class)->group(function () {
         Route::get('plot-availability', 'index')->name('plot-availability.index');
     });
+
+    Route::resource('brokers', BrokerController::class);
+    Route::resource('farmers', FarmerController::class);
+    Route::get('/get-cities/{stateId}', [FarmerController::class, 'getCities'])
+        ->name('get.cities');
 });
 
 // ------------------Associate Routes-------------

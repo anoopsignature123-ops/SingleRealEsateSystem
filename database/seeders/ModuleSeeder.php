@@ -43,6 +43,30 @@ class ModuleSeeder extends Seeder
             ],
 
             [
+                'name' => 'Land Management',
+                'slug' => 'land-management',
+                'icon' => 'bi bi-grid',
+            ],
+
+            [
+                'name' => 'Broker Management',
+                'slug' => 'brokers',
+                'parent_slug' => 'land-management',
+                'route_name' => 'brokers.index',
+                'active_routes' => 'brokers.*',
+                'icon' => 'bi bi-people-fill',
+            ],
+
+            [
+                'name' => 'Farmer Management',
+                'slug' => 'farmers',
+                'parent_slug' => 'land-management',
+                'route_name' => 'farmers.index',
+                'active_routes' => 'farmers.*',
+                'icon' => 'bi bi-person-vcard-fill',
+            ],
+
+            [
                 'name' => 'Master',
                 'slug' => 'master',
                 'icon' => 'bi bi-grid',
