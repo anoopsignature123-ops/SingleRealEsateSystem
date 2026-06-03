@@ -15,13 +15,21 @@ class GenerateEmiController extends Controller
     public function index(Request $request)
     {
         $customers = $this->generateEmiService->getCustomers();
-        $records = $this->generateEmiService->getList($request->customer_id);
+
+        $records = $this->generateEmiService->getList(
+            $request->customer_id
+        );
+
         return view('payment.generate-emi.index', compact('customers', 'records'));
     }
 
-    public function store(GenerateEmiRequest $request, $id)
+    public function store(GenerateEmiRequest $request, $plotSaleDetailId)
     {
-        $this->generateEmiService->generate($id, $request->validated());
-        return back()->with('success', 'EMI generated successfully');
+        $this->generateEmiService->generate(
+            $plotSaleDetailId,
+            $request->validated()
+        );
+
+        return back()->with('success', 'EMI generated successfully.');
     }
 }

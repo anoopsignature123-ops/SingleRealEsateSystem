@@ -31,4 +31,6 @@ class CancelBooking extends Model
     {
         return $this->belongsTo(PlotSaleDetail::class);
     }
+
+    
 }

@@ -230,14 +230,14 @@ class ModuleSeeder extends Seeder
                 'icon' => 'bi bi-list-ul',
             ],
 
-            [
-                'name' => 'Edit Plot Booking',
-                'slug' => 'edit-plot-booking',
-                'parent_slug' => 'plot-booking',
-                'route_name' => 'edit-plot-booking.index',
-                'active_routes' => 'edit-plot-booking.index',
-                'icon' => 'bi bi-pencil-square',
-            ],
+            // [
+            //     'name' => 'Edit Plot Booking',
+            //     'slug' => 'edit-plot-booking',
+            //     'parent_slug' => 'plot-booking',
+            //     'route_name' => 'edit-plot-booking.index',
+            //     'active_routes' => 'edit-plot-booking.index',
+            //     'icon' => 'bi bi-pencil-square',
+            // ],
 
             [
                 'name' => 'Plot Registry',

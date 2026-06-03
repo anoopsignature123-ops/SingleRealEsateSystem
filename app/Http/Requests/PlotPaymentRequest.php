@@ -17,7 +17,7 @@ class PlotPaymentRequest extends FormRequest
             'manual_receipt_number' => 'nullable|string',
             'plan_type' => 'required|in:full_payment,emi_plan',
             'payment_mode' => 'required|in:cash,cheque,dd,neft_rtgs,card',
-            'booking_amount' => 'required|numeric|min:0',
+            'paid_amount' => 'required|numeric|min:0',
             'due_amount' => 'required|numeric|min:0',
             'net_payable_amount' => 'nullable|required_if:plan_type,full_payment|numeric|min:0',
             'emi_months' => 'nullable|required_if:plan_type,emi_plan|integer|min:1',

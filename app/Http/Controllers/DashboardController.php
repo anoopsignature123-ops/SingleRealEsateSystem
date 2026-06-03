@@ -17,13 +17,16 @@ class DashboardController extends Controller
         $data = [
             'projectCount' => Project::count(),
             'totalPlot' => PlotDetail::count(),
-            'totalCustomer' => CustomerBooking::count(),
+            'totalCustomer' => CustomerBooking::whereNotNull('customer_code')->count(),
             'totalAssociate' => Associate::count(),
             'plotStats' => $this->getPlotStats(),
             'visitorsData' => $this->getVisitorsData(),
             'monthlyDues' => $this->getMonthlyDues(),
             'totalOutstanding' => $this->calculateOutstanding(),
             'totalOverdue' => $this->calculateOverdue(),
+
+            'confirmedPayment' => CustomerPayment::sum('booking_amount'),
+            'pendingPayment' => CustomerPayment::sum('due_amount'),
         ];
 
         return view('dashboard', array_merge($data, $data['plotStats']));
@@ -35,39 +38,65 @@ class DashboardController extends Controller
             ->groupBy('status')
             ->pluck('total', 'status');
 
-        $registryCount = PlotRegistry::count();
-
         return [
             'booked' => $stats['booked'] ?? 0,
             'hold' => $stats['hold'] ?? 0,
-            'registry' => $registryCount,
+            'registry' => $stats['registry'] ?? PlotRegistry::count(),
             'available' => $stats['available'] ?? 0,
         ];
     }
 
     private function getMonthlyDues()
     {
-        return CustomerPayment::with(['customerBooking', 'plotSaleDetail'])
+        return CustomerPayment::with([
+            'customerBooking.primaryDetail',
+            'plotSaleDetail.project',
+            'plotSaleDetail.block',
+            'plotSaleDetail.plotDetail',
+        ])
+            ->where('plan_type', 'emi_plan')
+            ->where('payment_status', 'pending')
+            ->where('due_amount', '>', 0)
             ->whereMonth('emi_date', now()->month)
             ->whereYear('emi_date', now()->year)
-            ->where('payment_status', 'emi')
+            ->whereIn('id', function ($query) {
+                $query->selectRaw('MAX(id)')
+                    ->from('customer_payments')
+                    ->where('plan_type', 'emi_plan')
+                    ->whereNotNull('plot_sale_detail_id')
+                    ->groupBy('customer_booking_id', 'plot_sale_detail_id');
+            })
+            ->latest()
             ->get();
     }
 
     private function calculateOutstanding()
     {
-        return CustomerBooking::whereHas('latestPayment', fn ($q) => $q->where('payment_status', 'booked'))
-            ->withSum(['latestPayment as total' => fn ($q) => $q->select('due_amount')], 'due_amount')
-            ->get()->sum('total');
+        return CustomerPayment::whereIn('id', function ($query) {
+            $query->selectRaw('MAX(id)')
+                ->from('customer_payments')
+                ->whereNotNull('plot_sale_detail_id')
+                ->groupBy('customer_booking_id', 'plot_sale_detail_id');
+        })
+            ->where('payment_status', 'pending')
+            ->where('due_amount', '>', 0)
+            ->sum('due_amount');
     }
 
     private function calculateOverdue()
     {
-        return CustomerBooking::whereHas('latestPayment', function ($q) {
-            $q->where('payment_status', 'booked')->where('emi_date', '<', now());
+        return CustomerPayment::whereIn('id', function ($query) {
+            $query->selectRaw('MAX(id)')
+                ->from('customer_payments')
+                ->whereNotNull('plot_sale_detail_id')
+                ->groupBy('customer_booking_id', 'plot_sale_detail_id');
         })
-            ->withSum(['latestPayment as total' => fn ($q) => $q->select('due_amount')], 'due_amount')
-            ->get()->sum('total');
+            ->where('plan_type', 'emi_plan')
+            ->where('payment_status', 'pending')
+            ->where('due_amount', '>', 0)
+            ->whereNotNull('emi_date')
+            ->whereDate('emi_date', '<', now())
+            ->sum('due_amount');
     }
 
     private function getVisitorsData()

@@ -14,37 +14,30 @@ class PlotPaymentController extends Controller
 
     public function index(Request $request)
     {
-        $bookings = $this->plotPaymentService->getAll();
+        $payments = $this->plotPaymentService->getAll();
 
-        $selectedBooking = null;
+        $selectedPayment = null;
 
-        if ($request->filled('selected_booking')) {
-
-            $selectedBooking = $this->plotPaymentService
-                ->findById($request->selected_booking);
-
+        if ($request->filled('selected_payment')) {
+            $selectedPayment = $this->plotPaymentService->findPaymentById(
+                $request->selected_payment
+            );
         }
 
-        return view(
-            'plot-payment.index',
-            compact('bookings', 'selectedBooking')
-        );
+        return view('plot-payment.index', compact('payments', 'selectedPayment'));
     }
 
-    public function update(
-        PlotPaymentRequest $request,
-        $id
-    ) {
+    public function update(PlotPaymentRequest $request, $id)
+    {
         $this->plotPaymentService->updatePayment(
             $id,
             $request->validated()
         );
 
         return redirect()
-            ->back()
-            ->with(
-                'success',
-                'Payment updated successfully'
-            );
+            ->route('edit-payment-details.index', [
+                'selected_payment' => $id,
+            ])
+            ->with('success', 'Payment updated successfully.');
     }
 }

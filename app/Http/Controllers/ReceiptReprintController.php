@@ -9,16 +9,15 @@ use Illuminate\Http\Request;
 
 class ReceiptReprintController extends Controller
 {
-    protected $service;
-
-    public function __construct(ReceiptReprintService $service)
-    {
-        $this->service = $service;
-    }
+    public function __construct(
+        protected ReceiptReprintService $service
+    ) {}
 
     public function index()
     {
-        $plots = PlotDetail::all();
+        $plots = PlotDetail::select('id', 'plot_number')
+            ->orderBy('plot_number')
+            ->get();
 
         return view('payment.receipt-reprint.index', compact('plots'));
     }
@@ -26,17 +25,24 @@ class ReceiptReprintController extends Controller
     public function search(Request $request)
     {
         $request->validate([
-            'plot_id' => 'required',
-            'customer_id' => 'required',
+            'plot_id' => 'required|exists:plot_details,id',
+            'customer_booking_id' => 'required|exists:customer_bookings,id',
         ], [
-            'plot_id.required' => 'Kripya list me se Plot Number select karein.',
-            'customer_id.required' => 'Customer select karna aniwarya hai.',
+            'plot_id.required' => 'Please select plot number.',
+            'customer_booking_id.required' => 'Please select customer.',
         ]);
 
-        $plots = PlotDetail::all();
-        $receipts = $this->service->search($request->plot_id, $request->customer_id);
+        $plots = PlotDetail::select('id', 'plot_number')
+            ->orderBy('plot_number')
+            ->get();
 
-        return view('payment.receipt-reprint.index', compact('plots', 'receipts'))->with($request->only(['plot_id', 'customer_id']));
+        $receipts = $this->service->search(
+            $request->plot_id,
+            $request->customer_booking_id
+        );
+
+        return view('payment.receipt-reprint.index', compact('plots', 'receipts'))
+            ->with($request->only(['plot_id', 'customer_booking_id']));
     }
 
     public function download($paymentId)
@@ -47,12 +53,18 @@ class ReceiptReprintController extends Controller
     public function getCustomersByPlot($plotId)
     {
         $customers = CustomerBooking::with('primaryDetail')
-            ->whereHas('plotSaleDetail', function ($query) use ($plotId) {
-                $query->where('plot_detail_id', $plotId);
-            })->get()->map(function ($booking) {
+            ->whereHas('payments', function ($query) use ($plotId) {
+                $query->whereHas('plotSaleDetail', function ($q) use ($plotId) {
+                    $q->where('plot_detail_id', $plotId);
+                });
+            })
+            ->get()
+            ->unique('id')
+            ->values()
+            ->map(function ($booking) {
                 return [
-                    'id' => (string) $booking->customer_code,
-                    'text' => $booking->customer_code.' / '.($booking->primaryDetail?->name ?? 'N/A'),
+                    'id' => $booking->id,
+                    'text' => $booking->customer_code . ' / ' . ($booking->primaryDetail?->name ?? $booking->customer_name ?? 'N/A'),
                 ];
             });
 

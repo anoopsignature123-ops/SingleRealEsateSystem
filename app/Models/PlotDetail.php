@@ -53,4 +53,9 @@ class PlotDetail extends Model
             'plot_detail_id'
         );
     }
+
+    public function plotRegistry()
+    {
+        return $this->hasOne(PlotRegistry::class, 'plot_detail_id');
+    }
 }
