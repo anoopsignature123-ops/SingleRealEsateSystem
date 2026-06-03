@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('plot_sale_details', function (Blueprint $table) {
             $table->id();
+            $table->string('booking_code')->nullable();
             $table->foreignId('customer_booking_id')->constrained('customer_bookings')->cascadeOnDelete();
             $table->foreignId('project_id')->nullable()->constrained('projects')->nullOnDelete();
             $table->foreignId('block_id')->nullable()->constrained('blocks')->nullOnDelete();

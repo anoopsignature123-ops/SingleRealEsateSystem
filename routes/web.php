@@ -54,12 +54,15 @@ use App\Http\Controllers\NewBookingPaymentDetailsReportController;
 use App\Http\Controllers\OneTimePaymentController;
 use App\Http\Controllers\OneTimePaymentDueController;
 use App\Http\Controllers\PaymentCollectionDuesSummaryReportController;
+use App\Http\Controllers\PaymentTransferController;
 use App\Http\Controllers\PlcRateController;
 use App\Http\Controllers\PlotBookingDetailsController;
+use App\Http\Controllers\PlotChangeController;
 use App\Http\Controllers\PlotDetailController;
 use App\Http\Controllers\PlotPaymentController;
 use App\Http\Controllers\PlotRateController;
 use App\Http\Controllers\PlotRegistryController;
+use App\Http\Controllers\PlotTransferController;
 use App\Http\Controllers\PlotTypeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
@@ -376,8 +379,37 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('brokers', BrokerController::class);
     Route::resource('farmers', FarmerController::class);
-    Route::get('/get-cities/{stateId}', [FarmerController::class, 'getCities'])
-        ->name('get.cities');
+
+    Route::get('/get-cities/{stateId}', [FarmerController::class, 'getCities'])->name('get.cities');
+
+    Route::controller(PlotTransferController::class)->group(function () {
+        Route::get('plot-transfer', 'index')->name('plot-transfer.index');
+        Route::post('plot-transfer', 'store')->name('plot-transfer.store');
+        Route::get('plot-transfer/blocks/{project}', 'getBlocks')->name('plot-transfer.blocks');
+        Route::get('plot-transfer/plots/{block}', 'getPlots')->name('plot-transfer.plots');
+        Route::get('plot-transfer/booking/{plot}', 'getBookingData')->name('plot-transfer.booking');
+        Route::get('plot-transfer/customers/{bookingId}', 'getTransferCustomers')->name('plot-transfer.customers');
+    });
+
+    Route::controller(PaymentTransferController::class)->group(function () {
+        Route::get('payment-transfer', 'index')->name('payment-transfer.index');
+        Route::post('payment-transfer', 'store')->name('payment-transfer.store');
+        Route::get('payment-transfer/blocks/{project}', 'getBlocks')->name('payment-transfer.blocks');
+        Route::get('payment-transfer/plots/{block}', 'getPlots')->name('payment-transfer.plots');
+        Route::get('payment-transfer/payments/{plot}', 'getPayments')->name('payment-transfer.payments');
+        Route::get('payment-transfer/customers', 'getCustomers')->name('payment-transfer.customers');
+        Route::get('payment-transfer/customer-plots/{customerBooking}', 'getCustomerPlots')->name('payment-transfer.customer-plots');
+    });
+
+    Route::controller(PlotChangeController::class)->group(function () {
+        Route::get('plot-change', 'index')->name('plot-change.index');
+        Route::post('plot-change', 'store')->name('plot-change.store');
+        Route::get('plot-change/blocks/{project}', 'getBlocks')->name('plot-change.blocks');
+        Route::get('plot-change/booked-plots/{block}', 'getBookedPlots')->name('plot-change.booked-plots');
+        Route::get('plot-change/available-plots/{block}', 'getAvailablePlots')->name('plot-change.available-plots');
+        Route::get('plot-change/booking/{plot}', 'getBookingData')->name('plot-change.booking');
+        Route::get('plot-change/new-plot/{plot}', 'getNewPlotData')->name('plot-change.new-plot');
+    });
 });
 
 // ------------------Associate Routes-------------

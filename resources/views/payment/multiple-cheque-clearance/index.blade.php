@@ -56,7 +56,7 @@
                                 <td>{{ $payment->plotSaleDetail?->plotDetail?->plot_number ?? '-' }}</td>
 
                                 {{-- Booking --}}
-                                <td>{{ $payment->customerBooking?->booking_code ?? '-' }}</td>
+                               <td>{{ $payment->plotSaleDetail?->booking_code ?? '-' }}</td>
 
                                 {{-- Customer --}}
                                 <td>{{ $payment->customerBooking?->primaryDetail?->name ?? '-' }}</td>
@@ -95,7 +95,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="10" class="text-center text-muted py-4">No cheque records found</td>
+                                <td colspan="13" class="text-center text-muted py-4">No cheque records found</td>
                             </tr>
                         @endforelse
                     </tbody>

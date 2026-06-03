@@ -23,6 +23,7 @@ class PlotSaleDetail extends Model
         'coupon_discount',
         'total_plot_cost',
         'booking_date',
+        'booking_code',
     ];
 
     public function customerBooking()
@@ -43,5 +44,15 @@ class PlotSaleDetail extends Model
     public function plotDetail()
     {
         return $this->belongsTo(PlotDetail::class);
+    }
+
+    public function payments()
+    {
+        return $this->hasMany(CustomerPayment::class, 'plot_sale_detail_id');
+    }
+
+    public function transferHistories()
+    {
+        return $this->hasMany(PlotTransferHistory::class);
     }
 }

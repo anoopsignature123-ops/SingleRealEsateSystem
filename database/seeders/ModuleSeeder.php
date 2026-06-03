@@ -262,8 +262,26 @@ class ModuleSeeder extends Seeder
                 'slug' => 'plot-transfer',
                 'parent_slug' => 'plot-booking',
                 'route_name' => 'plot-transfer.index',
-                'active_routes' => 'plot-transfer*',
+                'active_routes' => 'plot-transfer.*',
                 'icon' => 'bi bi-arrow-left-right',
+            ],
+
+            [
+                'name' => 'Payment Transfer',
+                'slug' => 'payment-transfer',
+                'parent_slug' => 'plot-booking',
+                'route_name' => 'payment-transfer.index',
+                'active_routes' => 'payment-transfer.*',
+                'icon' => 'bi bi-cash-stack',
+            ],
+
+            [
+                'name' => 'Plot Change',
+                'slug' => 'plot-change',
+                'parent_slug' => 'plot-booking',
+                'route_name' => 'plot-change.index',
+                'active_routes' => 'plot-change.*',
+                'icon' => 'bi bi-house-gear',
             ],
 
             [

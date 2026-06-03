@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\CustomerBooking;
 use App\Models\CustomerPayment;
+use App\Models\PlotSaleDetail;
 use Exception;
 use Illuminate\Support\Facades\DB;
 
@@ -12,13 +13,21 @@ class OneTimePaymentService
     public function store(array $data)
     {
         return DB::transaction(function () use ($data) {
-            $booking = CustomerBooking::with('plotSaleDetail')->findOrFail($data['customer_booking_id']);
-            $plotSale = $booking->plotSaleDetail;
+            // $booking = CustomerBooking::with('plotSaleDetail')->findOrFail($data['customer_booking_id']);
+            // $plotSale = $booking->plotSaleDetail;
+            $booking = CustomerBooking::findOrFail($data['customer_booking_id']);
+
+            $plotSale = PlotSaleDetail::where('id', $data['plot_sale_detail_id'])
+                ->where('customer_booking_id', $booking->id)
+                ->firstOrFail();
             if (! $plotSale) {
                 throw new Exception('Plot sale details not found.');
             }
             $totalPlotCost = (float) $plotSale->total_plot_cost;
-            $alreadyPaid = CustomerPayment::where('customer_booking_id', $booking->id)->sum('booking_amount');
+            // $alreadyPaid = CustomerPayment::where('customer_booking_id', $booking->id)->sum('booking_amount');
+            $alreadyPaid = CustomerPayment::where('customer_booking_id', $booking->id)
+                ->where('plot_sale_detail_id', $plotSale->id)
+                ->sum('paid_amount');
             $payingAmount = (float) $data['booking_amount'];
             $remainingDue = $totalPlotCost - $alreadyPaid;
             if ($remainingDue <= 0) {
@@ -30,10 +39,16 @@ class OneTimePaymentService
             $lastId = (CustomerPayment::max('id') ?? 0) + 1;
             $autoReceiptNumber = 'RCP-'.date('Ymd').'-'.str_pad($lastId, 4, '0', STR_PAD_LEFT);
             $finalDue = $remainingDue - $payingAmount;
-            $paymentStatus = 'booked';
+            $bookingStatus = 'booked';
             if (in_array($data['payment_mode'], ['cheque', 'dd'])
             ) {
-                $paymentStatus = 'hold';
+                $bookingStatus = 'hold';
+            }
+
+            if ($finalDue <= 0) {
+                CustomerPayment::where('customer_booking_id', $booking->id)->where('plot_sale_detail_id', $data['plot_sale_detail_id'])
+                    ->where('payment_status', 'pending')
+                    ->update(['payment_status' => 'cleared']);
             }
 
             return CustomerPayment::create([
@@ -44,6 +59,7 @@ class OneTimePaymentService
                 'plan_type' => 'full_payment',
                 'transaction_category' => 'one_time',
                 'booking_amount' => $payingAmount,
+                'paid_amount' => $payingAmount,
                 'due_amount' => $finalDue,
                 'net_payable_amount' => $totalPlotCost,
                 'remark' => $data['remark'] ?? null,
@@ -55,11 +71,11 @@ class OneTimePaymentService
                 'cheque_date' => $data['cheque_date'] ?? null,
                 'dd_number' => $data['dd_number'] ?? null,
                 'transaction_number' => $data['transaction_number'] ?? null,
-                'payment_status' => $paymentStatus,
+                'booking_status' => $bookingStatus,
+                'payment_status' => $finalDue <= 0 ? 'cleared' : 'pending',
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
-
         });
     }
 }

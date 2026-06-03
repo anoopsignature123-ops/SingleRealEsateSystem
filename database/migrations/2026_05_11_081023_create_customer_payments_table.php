@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('manual_receipt_number')->nullable();
             $table->enum('plan_type', ['full_payment', 'emi_plan'])->nullable();
             $table->string('booking_amount')->nullable();
+            $table->string('paid_amount')->nullable();
             $table->string('due_amount')->nullable();
             $table->string('net_payable_amount')->nullable();
             $table->integer('emi_months')->nullable();
@@ -32,7 +33,8 @@ return new class extends Migration
             $table->date('cheque_date')->nullable();
             $table->string('dd_number')->nullable();
             $table->string('transaction_number')->nullable()->comment('NEFT / RTGS / Card Transaction Reference Number');
-            $table->enum('payment_status', ['booked', 'hold', 'emi'])->default('hold');
+            $table->enum('booking_status', ['booked', 'hold'])->default('hold');
+            $table->enum('payment_status', ['cleared', 'pending'])->default('pending');
             $table->enum('cheque_status', ['pending', 'cleared', 'cancelled', 'bounced'])->default('pending');
             $table->enum('transaction_category', ['booking_fee', 'one_time', 'emi_payment'])->default('booking_fee');
             $table->text('cheque_reason')->nullable();
