@@ -19,5 +19,6 @@ Route::prefix('customer-panel')->name('customer-panel.')->group(function () {
         Route::get('/payment-history', [CustomerHistoryController::class, 'paymentHistory'])->name('payment-history');
         Route::get('/my-plot-booking', [CustomerHistoryController::class, 'myPlotBooking'])->name('my-plot-booking');
         Route::get('/support', [CustomerHistoryController::class, 'support'])->name('support');
+        Route::post('/support', [CustomerHistoryController::class, 'supportStore'])->name('support.store');
     });
 });

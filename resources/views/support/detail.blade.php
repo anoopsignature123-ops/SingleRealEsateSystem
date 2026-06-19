@@ -1,6 +1,17 @@
 @extends('layouts.app')
 
 @section('content')
+    @php
+        $raisedByName = $support->associate?->associate_name
+            ?? $support->customerBooking?->primaryDetail?->name
+            ?? $support->customerBooking?->customer_name
+            ?? '-';
+        $raisedByCode = $support->associate?->associate_id
+            ?? $support->customerBooking?->customer_code
+            ?? '';
+        $raisedByType = $support->associate_id ? 'Associate' : 'Customer';
+    @endphp
+
     <div class="container-fluid mt-4">
 
         {{-- Page Header --}}
@@ -30,8 +41,11 @@
                         </div>
 
                         <div class="border rounded-4 p-3 bg-light mb-3">
-                            <small class="text-muted d-block mb-1">Associate Name</small>
-                            <div class="fw-bold">{{ $support->associate->associate_name ?? '-' }}</div>
+                            <small class="text-muted d-block mb-1">{{ $raisedByType }} Name</small>
+                            <div class="fw-bold">{{ $raisedByName }}</div>
+                            @if ($raisedByCode)
+                                <small class="text-muted">{{ $raisedByCode }}</small>
+                            @endif
                         </div>
 
                         <div class="border rounded-4 p-3 bg-light mb-3">

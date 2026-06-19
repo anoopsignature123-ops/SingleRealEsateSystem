@@ -54,7 +54,7 @@
         <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
             <div class="card-header bg-white border-0 py-3 px-4">
                 <h5 class="fw-bold mb-1">Support Tickets</h5>
-                <small class="text-muted">Manage all associate support requests</small>
+                <small class="text-muted">Manage all associate and customer support requests</small>
             </div>
 
             <div class="card-body p-3">
@@ -63,7 +63,7 @@
                         <thead class="table-light">
                             <tr>
                                 <th>#</th>
-                                <th>Associate</th>
+                                <th>Raised By</th>
                                 <th>Query</th>
                                 <th>Status</th>
                                 <th>Date</th>
@@ -72,6 +72,16 @@
                         </thead>
                         <tbody>
                             @forelse($supports as $support)
+                                @php
+                                    $raisedByName = $support->associate?->associate_name
+                                        ?? $support->customerBooking?->primaryDetail?->name
+                                        ?? $support->customerBooking?->customer_name
+                                        ?? '-';
+                                    $raisedByCode = $support->associate?->associate_id
+                                        ?? $support->customerBooking?->customer_code
+                                        ?? '';
+                                    $raisedByType = $support->associate_id ? 'Associate' : 'Customer';
+                                @endphp
                                 <tr>
                                     <td class="fw-semibold">#{{ $loop->iteration }}</td>
                                     <td>
@@ -85,15 +95,16 @@
                                                 {{-- Fallback: Agar image nahi hai to Initials dikhaye --}}
                                                 <div class="bg-dark text-white rounded-circle d-flex align-items-center justify-content-center fw-semibold"
                                                     style="width: 34px; height: 34px; font-size: 12px;">
-                                                    {{ strtoupper(substr($support->associate->associate_name ?? 'A', 0, 2)) }}
+                                                    {{ strtoupper(substr($raisedByName, 0, 2)) }}
                                                 </div>
                                             @endif
 
                                             <div>
                                                 <div class="fw-semibold small">
-                                                    {{ $support->associate->associate_name ?? '-' }}</div>
+                                                    {{ $raisedByName }}
+                                                </div>
                                                 <small
-                                                    class="text-muted">{{ $support->associate->associate_id ?? '' }}</small>
+                                                    class="text-muted">{{ $raisedByType }} {{ $raisedByCode ? '- ' . $raisedByCode : '' }}</small>
                                             </div>
                                         </div>
                                     </td>

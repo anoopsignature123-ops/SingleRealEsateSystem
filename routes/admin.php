@@ -64,6 +64,7 @@ use App\Http\Controllers\ReceiptReprintController;
 use App\Http\Controllers\RegisteredPlotDetailsController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SourceController;
+use App\Http\Controllers\AssociatePanel\SupportController;
 use App\Http\Controllers\UpdateEmiDateController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WithoutRegisteredPlotController;

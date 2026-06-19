@@ -11,7 +11,7 @@ class SupportController extends Controller
 {
     public function index()
     {
-        $enquiries = Support::where('associate_id', Auth::id())
+        $enquiries = Support::where('associate_id', Auth::guard('associate')->id())
             ->latest()
             ->get();
 
@@ -26,7 +26,7 @@ class SupportController extends Controller
         ]);
 
         Support::create([
-            'associate_id' => Auth::id(),
+            'associate_id' => Auth::guard('associate')->id(),
             'query' => $request->input('query'),
             'description' => $request->input('description'),
             'status' => 'Pending',
@@ -38,7 +38,7 @@ class SupportController extends Controller
 
     public function supportList()
     {
-        $supports = Support::with('associate')
+        $supports = Support::with(['associate', 'customerBooking.primaryDetail'])
             ->latest()
             ->paginate(15);
 

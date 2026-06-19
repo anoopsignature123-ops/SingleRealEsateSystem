@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\CustomerPanle;
 
 use App\Http\Controllers\Controller;
+use App\Models\Support;
 use Illuminate\Http\Request;
 
 class CustomerHistoryController extends Controller
@@ -110,6 +111,28 @@ class CustomerHistoryController extends Controller
 }
     public function support(Request $request)
     {
-        return view('customer-panel.support.index');
+        $enquiries = Support::where('customer_booking_id', auth()->guard('customer')->id())
+            ->latest()
+            ->get();
+
+        return view('customer-panel.support.index', compact('enquiries'));
+    }
+
+    public function supportStore(Request $request)
+    {
+        $request->validate([
+            'query' => 'required|string|max:255',
+            'description' => 'required|string',
+        ]);
+
+        Support::create([
+            'customer_booking_id' => auth()->guard('customer')->id(),
+            'query' => $request->input('query'),
+            'description' => $request->input('description'),
+            'status' => 'Pending',
+        ]);
+
+        return redirect()->route('customer-panel.support')
+            ->with('success', 'Support ticket submitted successfully!');
     }
 }
