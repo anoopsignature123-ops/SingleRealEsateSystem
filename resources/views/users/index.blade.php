@@ -42,7 +42,7 @@
                             @forelse($users as $key => $user)
                                 <tr>
                                     <td>{{ $key + 1 }}</td>
-                                   {{ getFileUrl($user->profile_image) }}
+                                   
                                     <td>
                                         <img src="{{ !empty($user->profile_image) ? getFileUrl($user->profile_image) : asset('assets/images/avatar.png') }}"
                                             class="rounded-circle border"
@@ -78,7 +78,7 @@
                                                     class="delete-form">
                                                     @csrf @method('DELETE')
                                                     <button type="button"
-                                                        class="btn btn-sm btn-light border-0 text-danger delete-btn">
+                                                        class="btn btn-sm btn-light border-0 text-danger delete-btn ms-2">
                                                         <i class="bi bi-trash"></i>
                                                     </button>
                                                 </form>

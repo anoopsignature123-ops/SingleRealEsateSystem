@@ -14,9 +14,7 @@
                         </div>
 
                         <div>
-                            <h3 class="fw-bold mb-1 text-dark">
-                                Customer List
-                            </h3>
+                            <h3 class="fw-bold mb-1 text-dark">Customer List</h3>
                             <p class="text-muted mb-0 small">
                                 View customers and their booked plot summary.
                             </p>
@@ -33,10 +31,8 @@
         {{-- Customer Table --}}
         <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
             <div class="card-body p-4">
-
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0" id="customerListTable">
-
                         <thead class="table-light">
                             <tr>
                                 <th>#</th>
@@ -57,20 +53,15 @@
                                     $primary = $customer->primaryDetail;
                                     $contact = $primary?->correspondenceDetail;
 
-                                    $address =
-                                        $primary?->permanent_address ??
+                                    $address = $primary?->permanent_address ??
                                         ($primary?->city ? $primary->city . ', ' . $primary->state : 'N/A');
 
                                     $parentCustomer = $customer->parentCustomer;
-                                    $plots = $customer->booked_plots ?? ($customer->plotSaleDetails ?? collect());
+                                    $plots = $customer->booked_plots ?? collect();
                                 @endphp
 
                                 <tr>
-                                    <td>
-                                        <span class="text-muted small">
-
-                                        </span>
-                                    </td>
+                                    <td></td>
 
                                     <td>
                                         <span class="fw-bold text-dark">
@@ -84,8 +75,7 @@
                                                 {{ $parentCustomer->customer_code }}
                                             </span>
                                         @else
-                                            <span
-                                                class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-2">
+                                            <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-2">
                                                 Self
                                             </span>
                                         @endif
@@ -101,17 +91,14 @@
                                     </td>
 
                                     <td style="max-width: 280px;">
-                                        <span class="text-muted d-inline-block text-truncate" style="max-width: 270px;"
+                                        <span class="text-muted d-inline-block text-truncate"
+                                            style="max-width: 270px;"
                                             title="{{ $address }}">
                                             {{ $address }}
                                         </span>
                                     </td>
 
-                                    <td>
-                                        <span class="text-dark">
-                                            {{ $contact?->telephone_no ?? 'N/A' }}
-                                        </span>
-                                    </td>
+                                    <td>{{ $contact?->telephone_no ?? 'N/A' }}</td>
 
                                     <td>
                                         <span class="text-muted">
@@ -127,8 +114,10 @@
                                     </td>
 
                                     <td class="text-center">
-                                        <button type="button" class="btn btn-sm btn-outline-success rounded-pill px-3"
-                                            data-bs-toggle="modal" data-bs-target="#plotModal{{ $customer->id }}">
+                                        <button type="button"
+                                            class="btn btn-sm btn-outline-success rounded-pill px-3"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#plotModal{{ $customer->id }}">
                                             <i class="bi bi-eye me-1"></i>
                                             View
                                         </button>
@@ -152,64 +141,62 @@
         @foreach ($customers as $customer)
             @php
                 $primary = $customer->primaryDetail;
-                $plots = $customer->booked_plots ?? ($customer->plotSaleDetails ?? collect());
+                $plots = $customer->booked_plots ?? collect();
             @endphp
 
             <div class="modal fade" id="plotModal{{ $customer->id }}" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable plot-modal-dialog">
                     <div class="modal-content border-0 rounded-4 shadow overflow-hidden">
-                        <div class="modal-header bg-light border-0 px-4 py-3">
+
+                        <div class="modal-header border-0 px-4 py-3 plot-modal-header">
                             <div class="d-flex align-items-center gap-3">
-                                <div class="bg-success bg-opacity-10 text-success rounded-4 d-flex align-items-center justify-content-center"
-                                    style="width:50px;height:50px;">
-                                    <i class="bi bi-grid-3x3-gap fs-4"></i>
+                                <div class="bg-success bg-opacity-10 text-success rounded-3 d-flex align-items-center justify-content-center"
+                                    style="width:42px;height:42px;">
+                                    <i class="bi bi-grid-3x3-gap fs-5"></i>
                                 </div>
 
                                 <div>
-                                    <h5 class="modal-title fw-bold mb-1">
+                                    <h6 class="modal-title fw-bold mb-1">
                                         Booked Plot Details
-                                    </h5>
+                                    </h6>
                                     <small class="text-muted">
-                                        {{ $customer->customer_code ?? 'N/A' }}
-                                        -
-                                        {{ $primary?->name ?? 'N/A' }}
+                                        {{ $customer->customer_code ?? 'N/A' }} - {{ $primary?->name ?? 'N/A' }}
                                     </small>
                                 </div>
                             </div>
 
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                         </div>
 
                         <div class="modal-body p-4">
 
-                            <div class="row g-3 mb-4">
+                            <div class="row g-3 mb-3">
                                 <div class="col-md-4">
-                                    <div class="border rounded-4 p-3 bg-light">
-                                        <small class="text-muted d-block">Customer ID</small>
-                                        <span class="fw-bold">{{ $customer->customer_code ?? 'N/A' }}</span>
+                                    <div class="plot-info-box">
+                                        <small>Customer ID</small>
+                                        <span>{{ $customer->customer_code ?? 'N/A' }}</span>
                                     </div>
                                 </div>
 
                                 <div class="col-md-4">
-                                    <div class="border rounded-4 p-3 bg-light">
-                                        <small class="text-muted d-block">Customer Name</small>
-                                        <span class="fw-bold">{{ $primary?->name ?? 'N/A' }}</span>
+                                    <div class="plot-info-box">
+                                        <small>Customer Name</small>
+                                        <span>{{ $primary?->name ?? 'N/A' }}</span>
                                     </div>
                                 </div>
 
                                 <div class="col-md-4">
-                                    <div class="border rounded-4 p-3 bg-light">
-                                        <small class="text-muted d-block">Total Bookings</small>
-                                        <span class="fw-bold">{{ $plots->count() }}</span>
+                                    <div class="plot-info-box">
+                                        <small>Total Bookings</small>
+                                        <span>{{ $plots->count() }}</span>
                                     </div>
                                 </div>
                             </div>
 
                             @if ($plots->count() > 0)
                                 <div class="table-responsive modal-table-scroll">
-                                    <table class="table table-hover align-middle mb-0">
-
-                                        <thead class="table-light">
+                                    <table class="table table-hover align-middle mb-0 plot-modal-table">
+                                        <thead>
                                             <tr>
                                                 <th>#</th>
                                                 <th>Booking ID</th>
@@ -226,45 +213,44 @@
                                         <tbody>
                                             @foreach ($plots as $plotKey => $plot)
                                                 <tr>
-                                                    <td></td>
+                                                    <td>{{ $plotKey + 1 }}</td>
+
                                                     <td>
-                                                        <span
-                                                            class="badge bg-light text-dark border rounded-pill px-3 py-2">
+                                                        <span class="badge bg-light text-dark border rounded-pill px-3 py-2">
                                                             {{ $plot->booking_code ?? 'N/A' }}
                                                         </span>
                                                     </td>
 
-                                                    <td>{{ $plot->project->name ?? 'N/A' }}</td>
+                                                    <td>{{ $plot->project?->name ?? 'N/A' }}</td>
 
-                                                    <td>{{ $plot->block->block ?? 'N/A' }}</td>
+                                                    <td>{{ $plot->block?->block ?? $plot->block?->name ?? 'N/A' }}</td>
 
                                                     <td>
                                                         <span class="fw-bold text-success">
-                                                            {{ $plot->plotDetail->plot_number ?? 'N/A' }}
-                                                        </span>
-                                                    </td>
-
-                                                    <td>{{ $plot->plot_area ?? 'N/A' }}</td>
-
-                                                    <td>
-                                                        ₹{{ number_format((float) ($plot->plot_rate ?? 0), 2) }}
-                                                    </td>
-
-                                                    <td>
-                                                        <span class="fw-bold text-dark">
-                                                            ₹{{ number_format((float) ($plot->total_plot_cost ?? 0), 2) }}
+                                                            {{ $plot->plotDetail?->plot_number ?? $plot->plotDetail?->plot_no ?? 'N/A' }}
                                                         </span>
                                                     </td>
 
                                                     <td>
-                                                        <span class="text-muted">
-                                                            {{ $plot->booking_date ? \Carbon\Carbon::parse($plot->booking_date)->format('d-m-Y') : 'N/A' }}
+                                                        {{ $plot->plot_area ?? $plot->plotDetail?->plot_area ?? 'N/A' }}
+                                                    </td>
+
+                                                    <td>
+                                                        ₹{{ number_format((float) ($plot->plot_rate ?? $plot->rate ?? 0), 2) }}
+                                                    </td>
+
+                                                    <td>
+                                                        <span class="fw-bold">
+                                                            ₹{{ number_format((float) ($plot->total_plot_cost ?? $plot->total_amount ?? 0), 2) }}
                                                         </span>
+                                                    </td>
+
+                                                    <td>
+                                                        {{ $plot->booking_date ? \Carbon\Carbon::parse($plot->booking_date)->format('d-m-Y') : 'N/A' }}
                                                     </td>
                                                 </tr>
                                             @endforeach
                                         </tbody>
-
                                     </table>
                                 </div>
                             @else
@@ -275,8 +261,9 @@
                             @endif
                         </div>
 
-                        <div class="modal-footer bg-light border-0 px-4 py-3">
-                            <button type="button" class="btn btn-outline-secondary rounded-pill px-4"
+                        <div class="modal-footer border-0 px-4 py-3">
+                            <button type="button"
+                                class="btn btn-outline-secondary rounded-pill px-4"
                                 data-bs-dismiss="modal">
                                 Close
                             </button>
@@ -286,22 +273,62 @@
                 </div>
             </div>
         @endforeach
+
     </div>
 @endsection
 
 @push('styles')
     <style>
-        .modal-xl {
-            max-width: 95%;
+        .plot-modal-dialog {
+            max-width: 980px;
+        }
+
+        .plot-modal-header {
+            background: #f8fafc;
+        }
+
+        .plot-info-box {
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            padding: 12px 14px;
+            background: #f8fafc;
+        }
+
+        .plot-info-box small {
+            display: block;
+            color: #6b7280;
+            font-size: 11px;
+            margin-bottom: 4px;
+        }
+
+        .plot-info-box span {
+            font-weight: 700;
+            font-size: 13px;
+            color: #111827;
         }
 
         .modal-table-scroll {
-            max-height: 65vh;
+            max-height: 340px;
             overflow: auto;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
         }
 
-        .modal-table-scroll table {
+        .plot-modal-table {
             white-space: nowrap;
+            font-size: 13px;
+        }
+
+        .plot-modal-table thead th {
+            background: #198754;
+            color: #fff;
+            font-size: 12px;
+            padding: 12px;
+            text-transform: uppercase;
+        }
+
+        .plot-modal-table tbody td {
+            padding: 11px 12px;
         }
 
         #customerListTable th,
@@ -321,6 +348,13 @@
             padding-top: 14px;
             padding-bottom: 14px;
         }
+
+        @media (max-width: 991px) {
+            .plot-modal-dialog {
+                max-width: 95%;
+                margin: 12px auto;
+            }
+        }
     </style>
 @endpush
 
@@ -338,6 +372,7 @@
                         searchable: false
                     }]
                 });
+
                 table.on('order.dt search.dt draw.dt', function() {
                     table.column(0, {
                         search: 'applied',
