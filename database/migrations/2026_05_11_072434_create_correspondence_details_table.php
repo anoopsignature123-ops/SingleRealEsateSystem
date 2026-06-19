@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('pin_code')->nullable();
             $table->string('city')->nullable();
             $table->string('state')->nullable();
-            $table->string('telephone_no')->nullable();
+            $table->string('mobile_number')->nullable();
             $table->string('email')->nullable();
             $table->enum('id_proof_type', ['pancard', 'aadhar'])->nullable();
             $table->string('id_proof_number')->nullable();

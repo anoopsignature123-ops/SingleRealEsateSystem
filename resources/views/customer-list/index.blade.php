@@ -42,6 +42,7 @@
                                 <th>Address</th>
                                 <th>Contact No</th>
                                 <th>Email</th>
+                                <th>Password</th>
                                 <th class="text-center">Bookings</th>
                                 <th class="text-center">Plots</th>
                             </tr>
@@ -98,11 +99,16 @@
                                         </span>
                                     </td>
 
-                                    <td>{{ $contact?->telephone_no ?? 'N/A' }}</td>
+                                    <td>{{ $contact?->mobile_number ?? 'N/A' }}</td>
 
                                     <td>
                                         <span class="text-muted">
                                             {{ $contact?->email ?? 'N/A' }}
+                                        </span>
+                                    </td> 
+                                    <td>
+                                        <span class="text-warning fw-bold">
+                                            {{ $customer?->plain_password ?? 'N/A' }}
                                         </span>
                                     </td>
 

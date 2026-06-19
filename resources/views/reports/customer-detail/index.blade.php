@@ -242,7 +242,7 @@
 
                                     <td>{{ $primary?->name ?? 'N/A' }}</td>
 
-                                    <td>+91 {{ $contact?->telephone_no ?? 'N/A' }}</td>
+                                    <td>+91 {{ $contact?->mobile_number ?? 'N/A' }}</td>
 
                                     <td>{{ $contact?->email ?? 'N/A' }}</td>
                                     <td title="{{ $address }}">

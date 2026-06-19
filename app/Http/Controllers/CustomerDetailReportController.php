@@ -36,7 +36,7 @@ class CustomerDetailReportController extends Controller
 
         if ($request->filled('mobile')) {
             $query->whereHas('primaryDetail.correspondenceDetail', function ($q) use ($request) {
-                $q->where('telephone_no', 'like', '%' . $request->mobile . '%');
+                $q->where('mobile_number', 'like', '%' . $request->mobile . '%');
             });
         }
 
@@ -91,7 +91,7 @@ class CustomerDetailReportController extends Controller
 
         if ($request->filled('mobile')) {
             $query->whereHas('primaryDetail.correspondenceDetail', function ($q) use ($request) {
-                $q->where('telephone_no', 'like', '%' . $request->mobile . '%');
+                $q->where('mobile_number', 'like', '%' . $request->mobile . '%');
             });
         }
 
@@ -147,7 +147,7 @@ class CustomerDetailReportController extends Controller
                     $customer->parentCustomer?->customer_code ?? 'Self',
                     $primary?->name ?? 'N/A',
                     $address,
-                    $contact?->telephone_no ?? 'N/A',
+                    $contact?->mobile_number ?? 'N/A',
                     $contact?->email ?? 'N/A',
                     'Booked ' . ($customer->total_bookings ?? 0) . ' Plot',
                     $customer->created_at?->format('d-m-Y') ?? 'N/A',

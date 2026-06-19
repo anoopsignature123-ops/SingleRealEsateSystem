@@ -31,9 +31,8 @@ class CustomerBookingStepTwoRequest extends FormRequest
             'same_as_permanent_address' => 'required',
 
             'correspondence_address' => 'required',
-            'telephone_no' => 'nullable',
-            'email' => 'nullable|email',
-
+            'mobile_number' => 'required',
+            'email' => 'required|email',
             // Toggle
             'fill_secondary_detail' => 'required|in:yes,no',
         ];
@@ -45,22 +44,17 @@ class CustomerBookingStepTwoRequest extends FormRequest
             $rules = array_merge(
                 $rules,
                 [
-
                     'secondary_name' => 'required',
                     'secondary_title' => 'required',
                     'secondary_relation_name' => 'required',
                     'secondary_dob' => 'required|date',
                     'secondary_gender' => 'required',
-
                     'secondary_permanent_address' => 'required',
                     'secondary_pin_code' => 'required|digits:6',
                     'secondary_city' => 'required',
                     'secondary_state' => 'required',
-
                     'secondary_same_as_permanent_address' => 'required',
-
                     'secondary_correspondence_address' => 'required',
-
                 ]
             );
         }

@@ -9,7 +9,7 @@ class CustomerBooking extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['associate_id', 'customer_id', 'booking_code', 'customer_type', 'customer_code', 'customer_name', 'associate_code', 'associate_name', 'current_step', 'status'];
+    protected $fillable = ['associate_id', 'customer_id', 'booking_code', 'customer_type', 'customer_code', 'customer_name', 'associate_code', 'associate_name', 'current_step', 'status', 'password', 'plain_password'];
 
     public function parentCustomer()
     {

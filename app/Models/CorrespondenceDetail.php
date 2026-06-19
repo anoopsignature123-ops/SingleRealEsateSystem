@@ -13,7 +13,7 @@ class CorrespondenceDetail extends Model
         'pin_code',
         'city',
         'state',
-        'telephone_no',
+        'mobile_number',
         'email',
         'id_proof_type',
         'id_proof_number',

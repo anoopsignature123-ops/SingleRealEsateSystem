@@ -92,7 +92,7 @@
                                                 </div>
 
                                                 <small class="text-muted">
-                                                    {{ $primary?->correspondenceDetail?->telephone_no ?? 'No contact' }}
+                                                    {{ $primary?->correspondenceDetail?->mobile_number ?? 'No contact' }}
                                                 </small>
                                             </div>
                                         </div>

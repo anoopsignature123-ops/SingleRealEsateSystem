@@ -108,12 +108,12 @@
 
             <div class="col-md-6">
                 <label class="form-label fw-semibold">Mobile Number</label>
-                <input type="text" name="{{ $prefix }}telephone_no"
-                    class="form-control @error($prefix . 'telephone_no') is-invalid @enderror"
+                <input type="text" name="{{ $prefix }}mobile_number"
+                    class="form-control @error($prefix . 'mobile_number') is-invalid @enderror"
                     placeholder="Enter mobile number"
-                    value="{{ old($prefix . 'telephone_no', $detail?->telephone_no) }}">
+                    value="{{ old($prefix . 'mobile_number', $detail?->mobile_number) }}">
 
-                @error($prefix . 'telephone_no')
+                @error($prefix . 'mobile_number')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
             </div>

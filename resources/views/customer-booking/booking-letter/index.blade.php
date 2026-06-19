@@ -94,7 +94,7 @@
                                             {{ $row->primaryDetail?->name ?? '-' }}
                                         </div>
                                         <small class="text-muted">
-                                            {{ $row->primaryDetail?->correspondenceDetail?->telephone_no ?? '' }}
+                                            {{ $row->primaryDetail?->correspondenceDetail?->mobile_number ?? '' }}
                                         </small>
                                     </td>
 

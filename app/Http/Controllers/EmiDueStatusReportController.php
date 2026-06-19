@@ -34,7 +34,7 @@ class EmiDueStatusReportController extends Controller
         if ($request->mobile) {
             $query->whereHas('customerBooking.primaryDetail.correspondenceDetail',
                 function ($q) use ($request) {
-                    $q->where('telephone_no', 'like', '%'.$request->mobile.'%');
+                    $q->where('mobile_number', 'like', '%' . $request->mobile . '%');
                 }
             );
         }
@@ -69,7 +69,7 @@ class EmiDueStatusReportController extends Controller
         if ($request->mobile) {
             $query->whereHas('customerBooking.primaryDetail.correspondenceDetail',
                 function ($q) use ($request) {
-                    $q->where('telephone_no', 'like', '%'.$request->mobile.'%');
+                    $q->where('mobile_number', 'like', '%' . $request->mobile . '%');
                 }
             );
         }

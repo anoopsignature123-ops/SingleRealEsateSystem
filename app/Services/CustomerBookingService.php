@@ -13,6 +13,7 @@ use App\Models\PlotSaleDetail;
 use App\Models\PrimaryDetail;
 use App\Models\Project;
 use App\Models\SecondaryDetail;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 class CustomerBookingService
@@ -61,9 +62,9 @@ class CustomerBookingService
     public function storeStepOne(array $data, $customerId = null)
     {
         $customerCode = null;
-        if (! $customerId) {
+        if (!$customerId) {
             $lastId = CustomerBooking::max('id') + 1;
-            $customerCode = 'CUST-'.str_pad($lastId, 4, '0', STR_PAD_LEFT);
+            $customerCode = 'CUST-' . str_pad($lastId, 4, '0', STR_PAD_LEFT);
         }
 
         return CustomerBooking::updateOrCreate(['id' => $customerId], [
@@ -80,6 +81,8 @@ class CustomerBookingService
 
     public function storeStepTwo($customerId, array $data)
     {
+
+        
         $primary = PrimaryDetail::updateOrCreate(['customer_booking_id' => $customerId], [
             'name' => $data['name'],
             'title' => $data['title'],
@@ -98,7 +101,7 @@ class CustomerBookingService
             'pin_code' => $data['pin_code'],
             'city' => $data['city'],
             'state' => $data['state'],
-            'telephone_no' => $data['telephone_no'] ?? null,
+            'mobile_number' => $data['mobile_number'] ?? null,
             'email' => $data['email'] ?? null,
         ]);
 
@@ -120,14 +123,18 @@ class CustomerBookingService
                 'pin_code' => $data['secondary_pin_code'],
                 'city' => $data['secondary_city'],
                 'state' => $data['secondary_state'],
-                'telephone_no' => $data['secondary_telephone_no'] ?? null,
+                'mobile_number' => $data['secondary_mobile_number'] ?? null,
                 'email' => $data['secondary_email'] ?? null,
             ]);
         } else {
             SecondaryDetail::where('customer_booking_id', $customerId)->delete();
         }
-
-        CustomerBooking::where('id', $customerId)->update(['current_step' => 3]);
+        $plainPassword = Str::upper(Str::random(8));
+        CustomerBooking::where('id', $customerId)->update([
+            'current_step' => 3,
+            'password' => Hash::make($plainPassword),
+            'plain_password' => $plainPassword,
+        ]);
     }
 
     public function storeStepThree($customerId, $request)
@@ -249,15 +256,15 @@ class CustomerBookingService
         $paymentMode = $data['payment_mode'] ?? null;
         $planType = $data['plan_type'] ?? null;
         $plotSaleId = $data['plot_sale_detail_id'];
-        $transactionNumber = $data['transaction_number'] ?? strtoupper($paymentMode ?: 'PAY').'-'.time();
-        $receiptNumber = $data['receipt_number'] ?? 'REC-'.Str::upper(Str::random(8));
+        $transactionNumber = $data['transaction_number'] ?? strtoupper($paymentMode ?: 'PAY') . '-' . time();
+        $receiptNumber = $data['receipt_number'] ?? 'REC-' . Str::upper(Str::random(8));
         $isInstantPayment = in_array($paymentMode, ['cash', 'card', 'neft_rtgs'], true);
         $bookingStatus = $isInstantPayment ? 'booked' : 'hold';
         $oldPayment = CustomerPayment::where('customer_booking_id', $customerId)
             ->where('plot_sale_detail_id', $plotSaleId)
             ->first();
 
-        if (! $oldPayment) {
+        if (!$oldPayment) {
             CustomerPayment::create([
                 'plan_type' => $planType,
                 'booking_amount' => $data['booking_amount'] ?? 0,
@@ -290,15 +297,15 @@ class CustomerBookingService
             PlotDetail::where('id', $plotSale->plot_detail_id)->update(['status' => $newStatus]);
         }
         $booking = CustomerBooking::find($customerId);
-        if ($booking && ! $booking->booking_code) {
+        if ($booking && !$booking->booking_code) {
             $booking->update([
-                'booking_code' => 'BK-'.str_pad($booking->id, 6, '0', STR_PAD_LEFT),
+                'booking_code' => 'BK-' . str_pad($booking->id, 6, '0', STR_PAD_LEFT),
             ]);
         }
-        if (! $plotSale->booking_code) {
+        if (!$plotSale->booking_code) {
 
             $plotSale->update([
-                'booking_code' => 'BK-'.str_pad($plotSale->id, 6, '0', STR_PAD_LEFT),
+                'booking_code' => 'BK-' . str_pad($plotSale->id, 6, '0', STR_PAD_LEFT),
             ]);
         }
         $booking->update([
