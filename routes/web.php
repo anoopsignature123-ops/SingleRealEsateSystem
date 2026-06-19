@@ -78,12 +78,13 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\WithoutRegisteredPlotController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('auth.login');
+Route::get('/login', fn() => abort(404));
+
+Route::middleware(['admin.key', 'guest'])->group(function () {
+    Route::get('/rs-login-panel', [AuthController::class, 'showLoginForm'])->name('login');
 });
 
-Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
+Route::post('/rs-login-panel', [AuthController::class, 'login'])->name('login.submit');
 
 Route::get('/forgot-password', [ForgotPasswordController::class, 'showForgotForm'])
     ->name('password.request');

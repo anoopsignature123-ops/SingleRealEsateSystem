@@ -2,7 +2,7 @@
 
 @section('content')
     <div class="container-fluid py-4">
-   
+
         <div class="card border-0 shadow-sm rounded-4 mb-4">
             <div class="card-body p-4">
                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
@@ -13,10 +13,10 @@
                         <p class="text-muted mb-0 small">Manage, view, and update system user accounts.</p>
                     </div>
                     @can('users-modify')
-                    <a href="{{ route('users.create') }}" class="btn btn-success px-4 shadow-sm">
-                        <i class="bi bi-plus-circle me-1"></i> Add New User
-                    </a>
-                @endcan
+                        <a href="{{ route('users.create') }}" class="btn btn-success px-4 shadow-sm">
+                            <i class="bi bi-plus-circle me-1"></i> Add New User
+                        </a>
+                    @endcan
                 </div>
             </div>
         </div>
@@ -42,10 +42,12 @@
                             @forelse($users as $key => $user)
                                 <tr>
                                     <td>{{ $key + 1 }}</td>
+                                   {{ getFileUrl($user->profile_image) }}
                                     <td>
-                                        <img src="{{ $user->profile_image ? asset('storage/' . $user->profile_image) : asset('assets/images/avatar.png') }}"
+                                        <img src="{{ !empty($user->profile_image) ? getFileUrl($user->profile_image) : asset('assets/images/avatar.png') }}"
                                             class="rounded-circle border"
-                                            style="width: 40px; height: 40px; object-fit: cover;">
+                                            style="width: 40px; height: 40px; object-fit: cover;"
+                                            onerror="this.src='{{ asset('assets/images/avatar.png') }}'">
                                     </td>
                                     <td class="fw-bold text-dark">{{ ucfirst($user->name) }}</td>
                                     <td class="text-muted">{{ $user->email }}</td>
@@ -98,45 +100,43 @@
 @endsection
 
 @push('scripts')
-<script>
-    $(document).ready(function() {
+    <script>
+        $(document).ready(function() {
 
-        if ($('#usersTable tbody tr td[colspan]').length === 0) {
-            $('#usersTable').DataTable({
-                pageLength: 10,
-                ordering: true,
-                columnDefs: [
-                    {
+            if ($('#usersTable tbody tr td[colspan]').length === 0) {
+                $('#usersTable').DataTable({
+                    pageLength: 10,
+                    ordering: true,
+                    columnDefs: [{
                         orderable: false,
                         targets: [1, 8]
+                    }],
+                    language: {
+                        searchPlaceholder: "Search users...",
+                        emptyTable: "No users found"
+                    },
+                    retrieve: true
+                });
+            }
+
+            $(document).on('click', '.delete-btn', function() {
+                let form = $(this).closest('form');
+
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You won't be able to revert this!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#198754',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Yes, delete!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit();
                     }
-                ],
-                language: {
-                    searchPlaceholder: "Search users...",
-                    emptyTable: "No users found"
-                },
-                retrieve: true
+                });
             });
-        }
 
-        $(document).on('click', '.delete-btn', function() {
-            let form = $(this).closest('form');
-
-            Swal.fire({
-                title: 'Are you sure?',
-                text: "You won't be able to revert this!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#198754',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Yes, delete!'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    form.submit();
-                }
-            });
         });
-
-    });
-</script>
+    </script>
 @endpush

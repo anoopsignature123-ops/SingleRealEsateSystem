@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\AdminAccessKey;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -14,13 +15,16 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->redirectGuestsTo(function (Request $request) {
             if ($request->is('associate-panel*')) {
-                return route('associate-panel.login'); // Associate ko associate login par bhejo
+                return route('associate-panel.login');
             }
 
-            return route('login'); // Admin/Web ko main login par bhejo
+            return route('login');
         });
 
-        // 2. Agar login hone ke baad login page par jaye toh kahan redirect karna hai
+        $middleware->alias([
+            'admin.key' => AdminAccessKey::class,
+        ]);
+
         $middleware->redirectUsersTo(function (Request $request) {
             if ($request->is('associate-panel*')) {
                 return route('associate-panel.dashboard');

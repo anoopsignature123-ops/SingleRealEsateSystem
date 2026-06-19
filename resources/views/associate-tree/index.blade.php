@@ -17,11 +17,8 @@
         </div>
 
         <form method="GET" action="{{ route('associate-tree') }}" class="tree-search-form">
-            <input type="text"
-                   name="associate_id"
-                   value="{{ request('associate_id') }}"
-                   class="form-control"
-                   placeholder="Enter associate ID">
+            <input type="text" name="associate_id" value="{{ request('associate_id') }}"
+                class="form-control" placeholder="Enter associate ID">
 
             <button type="submit" class="btn btn-success">
                 <i class="bi bi-search"></i>

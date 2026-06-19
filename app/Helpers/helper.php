@@ -29,10 +29,9 @@ if (! function_exists('getFileUrl')) {
     function getFileUrl($filePath)
     {
         if ($filePath) {
-            return asset('storage/'.$filePath);
+            return asset('storage/' . $filePath);
         }
 
-        // default image
         return asset('assets/images/avatar.png');
     }
 }

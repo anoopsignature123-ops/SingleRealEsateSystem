@@ -21,6 +21,7 @@ class UserService
     public function create(array $data)
     {
         $data['profile_image'] = uploadFile($data['profile_image'] ?? null, 'users');
+        
         $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
