@@ -99,7 +99,7 @@
                                         </span>
                                     </td>
 
-                                    <td>{{ $contact?->mobile_number ?? 'N/A' }}</td>
+                                    <td>+91 {{ $contact?->mobile_number ?? 'N/A' }}</td>
 
                                     <td>
                                         <span class="text-muted">

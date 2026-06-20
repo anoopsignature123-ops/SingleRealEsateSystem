@@ -4,21 +4,37 @@
     @php
         $primary = $customer->primaryDetail;
         $contact = $primary?->correspondenceDetail;
-        $customerName = $primary?->name ?? $customer->customer_name ?? 'Customer';
+        $customerName = $primary?->name ?? ($customer->customer_name ?? 'Customer');
         $initial = strtoupper(substr($customerName, 0, 1));
     @endphp
 
     <div class="container-fluid customer-panel-page customer-dashboard-page">
         <div class="customer-dashboard-top mb-4">
             <div class="customer-dashboard-welcome">
-                <div class="customer-avatar dashboard-avatar">{{ $initial }}</div>
+
+                @if (!empty($customer->primaryDocument->profile_picture))
+                    <img src="{{ getFileUrl($customer->primaryDocument->profile_picture) }}" alt="{{ $customerName }}"
+                        class="dashboard-avatar rounded-circle border">
+                @else
+                    <div class="customer-avatar dashboard-avatar">
+                        {{ $initial }}
+                    </div>
+                @endif
+
                 <div>
                     <span class="customer-dashboard-kicker">Customer Panel</span>
-                    <h3 class="mb-1">Welcome back, {{ $customerName }}</h3>
+
+                    <h3 class="mb-1">
+                        Welcome back, {{ $customerName }}
+                    </h3>
+
                     <p class="mb-0">
-                        Customer ID: <strong>{{ $customer->customer_code ?? 'N/A' }}</strong>
+                        Customer ID:
+                        <strong>{{ $customer->customer_code ?? 'N/A' }}</strong>
+
                         @if ($contact?->mobile_number)
-                            <span class="mx-2">|</span> {{ $contact->mobile_number }}
+                            <span class="mx-2">|</span>
+                            {{ $contact->mobile_number }}
                         @endif
                     </p>
                 </div>
@@ -124,7 +140,8 @@
                             <h5 class="mb-1">Recent Plot Bookings</h5>
                             <p class="mb-0">Latest plot bookings linked with your account.</p>
                         </div>
-                        <a href="{{ route('customer-panel.booking-history') }}" class="btn btn-success btn-sm rounded-pill px-3">
+                        <a href="{{ route('customer-panel.booking-history') }}"
+                            class="btn btn-success btn-sm rounded-pill px-3">
                             View History
                         </a>
                     </div>
@@ -146,18 +163,22 @@
                                         <td><strong>{{ $plot->booking_code ?? 'N/A' }}</strong></td>
                                         <td>{{ $plot->project?->name ?? 'N/A' }}</td>
                                         <td class="text-success fw-bold">
-                                            {{ $plot->plotDetail?->plot_number ?? $plot->plotDetail?->plot_no ?? 'N/A' }}
+                                            {{ $plot->plotDetail?->plot_number ?? ($plot->plotDetail?->plot_no ?? 'N/A') }}
                                         </td>
-                                        <td>&#8377;{{ number_format($plot->total_plot_cost ?? $plot->final_payable ?? 0, 2) }}</td>
+                                        <td>&#8377;{{ number_format($plot->total_plot_cost ?? ($plot->final_payable ?? 0), 2) }}
+                                        </td>
                                         <td>
                                             {{ $plot->booking_date
                                                 ? \Carbon\Carbon::parse($plot->booking_date)->format('d M Y')
-                                                : ($plot->created_at ? $plot->created_at->format('d M Y') : 'N/A') }}
+                                                : ($plot->created_at
+                                                    ? $plot->created_at->format('d M Y')
+                                                    : 'N/A') }}
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="5" class="text-center text-muted py-4">No recent plot booking found.</td>
+                                        <td colspan="5" class="text-center text-muted py-4">No recent plot booking found.
+                                        </td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -171,7 +192,8 @@
                             <h5 class="mb-1">Recent Payments</h5>
                             <p class="mb-0">Latest receipts and payment status.</p>
                         </div>
-                        <a href="{{ route('customer-panel.payment-history') }}" class="btn btn-outline-success btn-sm rounded-pill px-3">
+                        <a href="{{ route('customer-panel.payment-history') }}"
+                            class="btn btn-outline-success btn-sm rounded-pill px-3">
                             View Payments
                         </a>
                     </div>
@@ -184,11 +206,14 @@
                                     <small>
                                         {{ $payment->payment_date
                                             ? \Carbon\Carbon::parse($payment->payment_date)->format('d M Y')
-                                            : ($payment->created_at ? $payment->created_at->format('d M Y') : 'N/A') }}
+                                            : ($payment->created_at
+                                                ? $payment->created_at->format('d M Y')
+                                                : 'N/A') }}
                                     </small>
                                 </div>
                                 <div class="text-end">
-                                    <strong class="text-success">&#8377;{{ number_format($payment->paid_amount ?? $payment->booking_amount ?? 0, 2) }}</strong>
+                                    <strong
+                                        class="text-success">&#8377;{{ number_format($payment->paid_amount ?? ($payment->booking_amount ?? 0), 2) }}</strong>
                                     <span class="badge rounded-pill bg-light text-dark border">
                                         {{ ucfirst($payment->payment_status ?? 'N/A') }}
                                     </span>

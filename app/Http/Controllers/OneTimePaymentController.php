@@ -9,6 +9,7 @@ use App\Models\CustomerPayment;
 use App\Models\PlotDetail;
 use App\Models\Project;
 use App\Services\OneTimePaymentService;
+use Exception;
 
 class OneTimePaymentController extends Controller
 {
@@ -75,9 +76,14 @@ class OneTimePaymentController extends Controller
             ->where('plan_type', 'full_payment')
             ->get();
 
-        $totalCost = (float) ($plotSale->total_plot_cost ?? 0);
-        $totalPaid = (float) $payments->sum('paid_amount');
-        $dueAmount = max(0, $totalCost - $totalPaid);
+        $totalCost = round((float) ($plotSale->total_plot_cost ?? 0), 2);
+        $confirmedPaid = round((float) $payments
+            ->where('booking_status', 'booked')
+            ->sum('paid_amount'), 2);
+        $holdAmount = round((float) $payments
+            ->where('booking_status', 'hold')
+            ->sum('paid_amount'), 2);
+        $dueAmount = round(max(0, $totalCost - $confirmedPaid), 2);
 
         $paymentHistory = $payments
             ->sortByDesc('id')
@@ -89,6 +95,8 @@ class OneTimePaymentController extends Controller
                         : '-',
                     'paid_amount' => number_format((float) $payment->paid_amount, 2),
                     'payment_mode' => strtoupper(str_replace('_', '/', $payment->payment_mode)),
+                    'booking_status' => ucfirst($payment->booking_status ?? 'N/A'),
+                    'payment_status' => ucfirst($payment->payment_status ?? 'N/A'),
                 ];
             })
             ->values();
@@ -106,14 +114,21 @@ class OneTimePaymentController extends Controller
 
             'payment_type' => 'Full Payment',
             'total_cost' => number_format($totalCost, 2, '.', ''),
-            'total_paid' => number_format($totalPaid, 2, '.', ''),
+            'total_paid' => number_format($confirmedPaid, 2, '.', ''),
+            'hold_amount' => number_format($holdAmount, 2, '.', ''),
             'due_amount' => number_format($dueAmount, 2, '.', ''),
             'payment_history' => $paymentHistory,
         ]);
     }
     public function store(OneTimePaymentRequest $request)
     {
-        $this->service->store($request->validated());
+        try {
+            $this->service->store($request->validated());
+        } catch (Exception $exception) {
+            return back()
+                ->withErrors(['booking_amount' => $exception->getMessage()])
+                ->withInput();
+        }
 
         return redirect()->back()->with('success', 'Payment added successfully');
     }

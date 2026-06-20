@@ -9,7 +9,11 @@ class ChequeClearanceService
 {
     public function store(array $data)
     {
-        $paymentIds = explode(',', $data['payment_ids']);
+        $paymentIds = collect(explode(',', $data['payment_ids']))
+            ->map(fn ($id) => (int) trim($id))
+            ->filter()
+            ->unique()
+            ->values();
 
         $payments = CustomerPayment::whereIn('id', $paymentIds)->get();
 
@@ -29,6 +33,20 @@ class ChequeClearanceService
                     ->update([
                         'status' => 'booked',
                     ]);
+
+                $totalPlotCost = (float) ($payment->plotSaleDetail->total_plot_cost ?? 0);
+                $confirmedPaid = (float) CustomerPayment::where('customer_booking_id', $payment->customer_booking_id)
+                    ->where('plot_sale_detail_id', $payment->plot_sale_detail_id)
+                    ->where('booking_status', 'booked')
+                    ->sum('paid_amount');
+
+                if ($totalPlotCost > 0 && $confirmedPaid >= $totalPlotCost) {
+                    CustomerPayment::where('customer_booking_id', $payment->customer_booking_id)
+                        ->where('plot_sale_detail_id', $payment->plot_sale_detail_id)
+                        ->where('plan_type', $payment->plan_type)
+                        ->where('booking_status', 'booked')
+                        ->update(['payment_status' => 'cleared']);
+                }
             }
         }
 

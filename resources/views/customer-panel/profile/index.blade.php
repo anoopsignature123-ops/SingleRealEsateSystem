@@ -5,7 +5,7 @@
         $primary = $customer->primaryDetail;
         $contact = $primary?->correspondenceDetail;
 
-        $customerName = $primary?->name ?? $customer->customer_name ?? 'Customer';
+        $customerName = $primary?->name ?? ($customer->customer_name ?? 'Customer');
         $email = $contact?->email ?? 'N/A';
         $mobile = $contact?->mobile_number ? '+91 ' . $contact->mobile_number : 'N/A';
         $address = $primary?->permanent_address ?? 'N/A';
@@ -15,12 +15,23 @@
     <div class="container-fluid customer-panel-page customer-profile-page">
         <div class="customer-profile-hero mb-4">
             <div class="customer-profile-main">
-                <div class="customer-avatar profile-avatar">{{ $initial }}</div>
+
+                @if (!empty($customer->primaryDocument->profile_picture))
+                    <img src="{{ getFileUrl($customer->primaryDocument->profile_picture) }}" alt="{{ $customerName }}"
+                        class="profile-avatar rounded-circle border">
+                @else
+                    <div class="customer-avatar profile-avatar">
+                        {{ $initial }}
+                    </div>
+                @endif
+
                 <div>
                     <span class="customer-dashboard-kicker">My Profile</span>
                     <h3 class="mb-1">{{ $customerName }}</h3>
+
                     <p class="mb-0">
-                        Customer Code: <strong>{{ $customer->customer_code ?? 'N/A' }}</strong>
+                        Customer Code:
+                        <strong>{{ $customer->customer_code ?? 'N/A' }}</strong>
                     </p>
                 </div>
             </div>
@@ -29,7 +40,10 @@
                 <span class="badge bg-white text-success border rounded-pill px-3 py-2">
                     {{ ucwords(str_replace('_', ' ', $customer->customer_type ?? 'Customer')) }}
                 </span>
-                <small>Joined {{ $customer->created_at?->format('d M Y') ?? 'N/A' }}</small>
+
+                <small>
+                    Joined {{ $customer->created_at?->format('d M Y') ?? 'N/A' }}
+                </small>
             </div>
         </div>
 
@@ -202,10 +216,11 @@
                                     <div class="customer-profile-mini">
                                         <span>Plot No</span>
                                         <strong class="text-success">
-                                            {{ $latestPlot->plotDetail?->plot_number ?? $latestPlot->plotDetail?->plot_no ?? 'N/A' }}
+                                            {{ $latestPlot->plotDetail?->plot_number ?? ($latestPlot->plotDetail?->plot_no ?? 'N/A') }}
                                         </strong>
                                     </div>
-                                    <a href="{{ route('customer-panel.my-plot-booking') }}" class="btn btn-outline-success rounded-pill px-4 mt-3">
+                                    <a href="{{ route('customer-panel.my-plot-booking') }}"
+                                        class="btn btn-outline-success rounded-pill px-4 mt-3">
                                         View Plot Details
                                     </a>
                                 @else
@@ -230,14 +245,15 @@
                                     <div class="customer-profile-mini">
                                         <span>Amount</span>
                                         <strong class="text-success">
-                                            &#8377;{{ number_format($latestPayment->paid_amount ?? $latestPayment->booking_amount ?? 0, 2) }}
+                                            &#8377;{{ number_format($latestPayment->paid_amount ?? ($latestPayment->booking_amount ?? 0), 2) }}
                                         </strong>
                                     </div>
                                     <div class="customer-profile-mini">
                                         <span>Status</span>
                                         <strong>{{ ucfirst($latestPayment->payment_status ?? 'N/A') }}</strong>
                                     </div>
-                                    <a href="{{ route('customer-panel.payment-history') }}" class="btn btn-outline-success rounded-pill px-4 mt-3">
+                                    <a href="{{ route('customer-panel.payment-history') }}"
+                                        class="btn btn-outline-success rounded-pill px-4 mt-3">
                                         View Payment History
                                     </a>
                                 @else

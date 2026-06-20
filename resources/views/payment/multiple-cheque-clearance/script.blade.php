@@ -3,20 +3,32 @@
         $(document).ready(function() {
             let selectedPayments = [];
 
+            function formatAmount(amount) {
+                return Number(amount || 0).toFixed(2);
+            }
+
+            function setSaveLoading(isLoading) {
+                const button = $('#saveChequeStatusBtn');
+                button.prop('disabled', isLoading);
+                button.find('.btn-label').toggleClass('d-none', isLoading);
+                button.find('.btn-loader').toggleClass('d-none', !isLoading);
+            }
+
             function updateBulkButton() {
                 selectedPayments = [];
+                let selectedAmount = 0;
 
                 $('.payment_checkbox:checked').each(function() {
                     selectedPayments.push($(this).val());
+                    selectedAmount += parseFloat($(this).data('amount')) || 0;
                 });
 
                 $('#payment_ids').val(selectedPayments.join(','));
+                $('#selected_count, #modal_selected_count').text(selectedPayments.length);
+                $('#selected_amount').text(formatAmount(selectedAmount));
 
-                if (selectedPayments.length > 0) {
-                    $('#bulk_action_btn').removeClass('d-none');
-                } else {
-                    $('#bulk_action_btn').addClass('d-none');
-                }
+                const hasSelection = selectedPayments.length > 0;
+                $('#bulk_action_btn, #selection_summary').toggleClass('d-none', !hasSelection);
             }
 
             $('#select_all').on('change', function() {
@@ -27,19 +39,39 @@
             $(document).on('change', '.payment_checkbox', function() {
                 updateBulkButton();
 
-                let total = $('.payment_checkbox').length;
-                let checked = $('.payment_checkbox:checked').length;
-                $('#select_all').prop('checked', total === checked);
+                const total = $('.payment_checkbox').length;
+                const checked = $('.payment_checkbox:checked').length;
+                $('#select_all').prop('checked', total > 0 && total === checked);
             });
 
             $('#cheque_status').on('change', function() {
-                let status = $(this).val();
+                const status = $(this).val();
+                $('#reason_box').toggleClass('d-none', !['cancelled', 'bounced', 'pending'].includes(status));
+            });
 
-                if (['cancelled', 'bounced', 'pending'].includes(status)) {
-                    $('#reason_box').removeClass('d-none');
-                } else {
-                    $('#reason_box').addClass('d-none');
+            $('#statusModal').on('show.bs.modal', function(event) {
+                if (selectedPayments.length === 0) {
+                    event.preventDefault();
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'No records selected',
+                        text: 'Please select at least one cheque or DD record.'
+                    });
                 }
+            });
+
+            $('#chequeStatusForm').on('submit', function(event) {
+                if (selectedPayments.length === 0) {
+                    event.preventDefault();
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'No records selected',
+                        text: 'Please select at least one cheque or DD record.'
+                    });
+                    return;
+                }
+
+                setSaveLoading(true);
             });
 
             $('#cheque_status').trigger('change').select2({

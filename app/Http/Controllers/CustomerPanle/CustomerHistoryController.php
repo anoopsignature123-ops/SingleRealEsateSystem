@@ -19,6 +19,7 @@ class CustomerHistoryController extends Controller
         $customer->load([
             'primaryDetail.correspondenceDetail',
             'plotSaleDetails.project',
+            'primaryDocument',
             'plotSaleDetails.block',
             'plotSaleDetails.plotDetail',
             'payments',

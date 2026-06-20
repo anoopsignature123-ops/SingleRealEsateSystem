@@ -24,11 +24,22 @@ class ChequeClearanceController extends Controller
             'plotSaleDetail.plotDetail',
         ])
             ->whereIn('payment_mode', ['cheque', 'dd'])
-            ->where('cheque_status', '!=', 'cleared')
+            ->where(function ($query) {
+                $query->whereNull('cheque_status')
+                    ->orWhere('cheque_status', '!=', 'cleared');
+            })
             ->latest()
             ->get();
 
-        return view('payment.multiple-cheque-clearance.index', compact('payments'));
+        $summary = [
+            'total' => $payments->count(),
+            'pending' => $payments->where('cheque_status', 'pending')->count()
+                + $payments->whereNull('cheque_status')->count(),
+            'bounced' => $payments->where('cheque_status', 'bounced')->count(),
+            'amount' => (float) $payments->sum('paid_amount'),
+        ];
+
+        return view('payment.multiple-cheque-clearance.index', compact('payments', 'summary'));
     }
 
     public function storeMultipleChequeClearance(MultipleChequeClearanceRequest $request)

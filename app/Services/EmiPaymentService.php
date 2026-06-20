@@ -12,7 +12,7 @@ class EmiPaymentService
     {
         return DB::transaction(function () use ($data) {
 
-            $lastId = CustomerPayment::max('id') + 1;
+            $lastId = (CustomerPayment::max('id') ?? 0) + 1;
 
             $data['receipt_number'] = 'RCP-'.date('Ymd').'-'.str_pad($lastId, 4, '0', STR_PAD_LEFT);
 
@@ -21,12 +21,12 @@ class EmiPaymentService
                 ->latest()
                 ->first();
 
-            $oldDueAmount = (float) ($oldPayment->due_amount ?? 0);
-            $paidAmount = (float) ($data['booking_amount'] ?? 0);
+            $oldDueAmount = round((float) ($oldPayment->due_amount ?? 0), 2);
+            $paidAmount = round((float) ($data['booking_amount'] ?? 0), 2);
 
-            $newDueAmount = max(0, $oldDueAmount - $paidAmount);
+            $newDueAmount = round(max(0, $oldDueAmount - $paidAmount), 2);
 
-            $fixedMonthlyEmi = (float) ($oldPayment->after_booking_payable_amount ?? 0);
+            $fixedMonthlyEmi = round((float) ($oldPayment->after_booking_payable_amount ?? 0), 2);
 
             // Remaining EMI Months
             $remainingEmiMonths = $fixedMonthlyEmi > 0
@@ -40,9 +40,9 @@ class EmiPaymentService
             $data['net_payable_amount'] = $newDueAmount;
             $data['transaction_category'] = 'emi_payment';
             $data['emi_date'] = now();
-            $data['booking_status'] = in_array($data['payment_mode'], ['cheque', 'dd'])? 'hold' : 'booked';
-            // $data['payment_status'] = $newDueAmount <= 0? 'cleared': 'pending';
-            $data['payment_status'] = $newDueAmount <= 0 ? 'cleared' : 'paid';
+            $isHoldPayment = in_array($data['payment_mode'], ['cheque', 'dd']);
+            $data['booking_status'] = $isHoldPayment ? 'hold' : 'booked';
+            $data['payment_status'] = (!$isHoldPayment && $newDueAmount <= 0) ? 'cleared' : 'pending';
             $fields = [
                 'bank_name',
                 'account_number',
@@ -57,9 +57,11 @@ class EmiPaymentService
                 $data[$field] = $data[$field] ?? null;
             }
             // Due Amount 0 => All Payments Cleared
-            if ($newDueAmount <= 0) {
+            if (!$isHoldPayment && $newDueAmount <= 0) {
                 CustomerPayment::where('customer_booking_id', $data['customer_booking_id'])
                     ->where('plot_sale_detail_id', $data['plot_sale_detail_id'])
+                    ->where('plan_type', 'emi_plan')
+                    ->where('booking_status', 'booked')
                     ->update(['payment_status' => 'cleared']);
             }
             return CustomerPayment::create($data);

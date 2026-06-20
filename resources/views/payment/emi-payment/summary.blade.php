@@ -1,79 +1,92 @@
 <div class="col-lg-4">
-    <div class="card border-0 shadow-sm sticky-top" style="top:20px;">
-        <div class="card-body p-4">
-            {{-- Heading --}}
-            <div class="border-bottom pb-3 mb-4">
+    <div class="emi-summary-card sticky-top">
+        <div class="emi-summary-loader d-none" id="emi_summary_loader">
+            <div class="emi-loader-box">
+                <span class="spinner-border spinner-border-sm text-success" role="status" aria-hidden="true"></span>
+                <strong>Loading EMI details...</strong>
+            </div>
+        </div>
+
+        <div class="emi-summary-head">
+            <span class="emi-summary-icon">
+                <i class="bi bi-calendar2-check"></i>
+            </span>
+            <div>
                 <h4 class="fw-bold mb-1 text-dark">EMI Summary</h4>
-                <small class="text-muted">Payment & Installment Details</small>
+                <small class="text-muted">Installment and payment details</small>
+            </div>
+        </div>
+
+        <div class="emi-summary-grid">
+            <div class="emi-summary-box">
+                <small>Total Plot Cost</small>
+                <strong>&#8377;<span id="total_cost">0.00</span></strong>
             </div>
 
-            {{-- Total Plot Cost --}}
-            <div class="bg-light rounded-3 p-3 mb-3">
-                <small class="text-muted d-block mb-1">Total Plot Cost</small>
-                <h4 id="total_cost" class="fw-bold text-dark mb-0">₹0.00</h4>
+            <div class="emi-summary-box primary">
+                <small>Booking Amount</small>
+                <strong>&#8377;<span id="booking_amount">0.00</span></strong>
             </div>
 
-            {{-- Booking Amount --}}
-            <div class="bg-light rounded-3 p-3 mb-3">
-                <small class="text-muted d-block mb-1">Booking Amount</small>
-                <h4 id="booking_amount" class="fw-bold text-primary mb-0">₹0.00</h4>
+            <div class="emi-summary-box success">
+                <small>Confirmed Paid</small>
+                <strong>&#8377;<span id="total_paid">0.00</span></strong>
             </div>
 
-            {{-- EMI Start Date --}}
-            <div class="bg-light rounded-3 p-3 mb-3">
-                <small class="text-muted d-block mb-1">EMI Start Date</small>
-                <h5 id="emi_start_date" class="fw-bold text-secondary mb-0">-</h5>
+            <div class="emi-summary-box warning">
+                <small>Hold Amount</small>
+                <strong>&#8377;<span id="hold_amount">0.00</span></strong>
             </div>
 
-            {{-- EMI Progress --}}
-            <div class="bg-light rounded-3 p-3 mb-3">
-                <small class="text-muted d-block mb-1">EMI Progress</small>
-                <h4 id="emi_months" class="fw-bold text-warning mb-0">0 / 0 Months</h4>
+            <div class="emi-summary-box info">
+                <small>Monthly EMI</small>
+                <strong>&#8377;<span id="monthly_emi">0.00</span></strong>
+                <button type="button" class="btn btn-sm btn-outline-info mt-2 w-100 d-none" id="fill_monthly_emi">
+                    <i class="bi bi-calendar-check me-1"></i> Pay Current EMI
+                </button>
             </div>
 
-            {{-- Monthly EMI --}}
-            <div class="bg-light rounded-3 p-3 mb-4">
-                <small class="text-muted d-block mb-1">Monthly EMI</small>
-                <h4 id="monthly_emi" class="fw-bold text-info mb-0">₹0.00</h4>
+            <div class="emi-summary-box danger">
+                <small>Due Amount</small>
+                <strong>&#8377;<span id="due_amount">0.00</span></strong>
+                <button type="button" class="btn btn-sm btn-outline-danger mt-2 w-100 d-none" id="fill_due_amount">
+                    <i class="bi bi-cash-stack me-1"></i> Pay Full Due
+                </button>
             </div>
+        </div>
 
-            {{-- Payment History --}}
-            <div class="border rounded-3 p-3 mb-4">
-                <h6 class="fw-bold mb-3">Payment History</h6>
-                <div class="table-responsive">
-                    <table class="table table-sm align-middle mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Receipt</th>
-                                <th>Date</th>
-                                <th>Paid</th>
-                                <th>Mode</th>
-                            </tr>
-                        </thead>
-                        <tbody id="payment_history">
-                            <tr>
-                                <td colspan="4" class="text-center text-muted py-3">No Payment Found</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+        <div class="emi-progress-box mb-3">
+            <div>
+                <small>EMI Start Date</small>
+                <strong id="emi_start_date">-</strong>
             </div>
+            <div>
+                <small>EMI Progress</small>
+                <strong id="emi_months">0 / 0 Months</strong>
+            </div>
+        </div>
 
-            {{-- Bottom Summary --}}
-            <div class="row">
-                <div class="col-6">
-                    <div class="bg-success bg-opacity-10 rounded-3 p-3">
-                        <small class="text-muted d-block">Total Paid</small>
-                        <h5 id="total_paid" class="fw-bold text-success mb-0">₹0.00</h5>
-                    </div>
-                </div>
-
-                <div class="col-6">
-                    <div class="bg-danger bg-opacity-10 rounded-3 p-3">
-                        <small class="text-muted d-block">Due Amount</small>
-                        <h5 id="due_amount" class="fw-bold text-danger mb-0">₹0.00</h5>
-                    </div>
-                </div>
+        <div class="emi-history-box">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <h6 class="fw-bold mb-0">Payment History</h6>
+                <span class="badge bg-light text-dark border" id="payment_history_count">0 Records</span>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-sm align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Receipt</th>
+                            <th>Date</th>
+                            <th>Paid</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="payment_history">
+                        <tr>
+                            <td colspan="4" class="text-center text-muted py-3">No Payment Found</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>

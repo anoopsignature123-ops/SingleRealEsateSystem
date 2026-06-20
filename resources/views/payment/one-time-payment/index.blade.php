@@ -1,29 +1,39 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="container-fluid mt-4">
-        <div class="card border-0 shadow-sm rounded-4 mb-4">
-            <div class="card-body p-4">
-                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-                    <div>
-                        <h3 class="fw-bold mb-1 text-dark">One Time Payment </h3>
-                        <p class="text-muted mb-0 small"> Select project, block and plot </p>
-                    </div>
+    <div class="container-fluid mt-4 one-time-payment-page">
+        <div class="one-time-payment-hero mb-4">
+            <div class="d-flex align-items-center gap-3">
+                <span class="one-time-payment-hero-icon">
+                    <i class="bi bi-cash-coin"></i>
+                </span>
+                <div>
+                    <span class="text-success fw-bold text-uppercase small">Payment Collection</span>
+                    <h3 class="fw-bold mb-1 text-dark">One Time Payment</h3>
+                    <p class="text-muted mb-0 small">Select project, block and plot to collect pending payment.</p>
                 </div>
             </div>
         </div>
+
+        @if ($errors->any())
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <strong>Please check:</strong> {{ $errors->first() }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
         <form method="POST" action="{{ route('one-time-payment.store') }}" id="paymentForm">
             @csrf
             <div class="row">
                 {{-- LEFT SIDE --}}
                 <div class="col-lg-8">
-                    <div class="card border-0 shadow-sm">
+                    <div class="card border-0 shadow-sm one-time-payment-card">
                         <div class="card-body p-4">
                             {{-- Hidden Fields --}}
                             <input type="hidden" name="customer_booking_id" id="customer_booking_id"
                                 value="{{ old('customer_booking_id') }}">
                             <input type="hidden" name="plot_sale_detail_id" id="plot_sale_detail_id"
                                 value="{{ old('plot_sale_detail_id') }}">
+                            <input type="hidden" id="max_due_amount" value="0">
 
                             <div class="row">
                                 {{-- Project --}}
@@ -99,7 +109,7 @@
                                 {{-- Amount --}}
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label fw-semibold">Paid Amount *</label>
-                                    <input type="number" step="0.01" name="booking_amount" id="paid_amount"
+                                    <input type="text" inputmode="decimal" name="booking_amount" id="paid_amount"
                                         value="{{ old('booking_amount') }}"
                                         class="form-control @error('booking_amount') is-invalid @enderror"
                                         placeholder="Enter payment amount">
@@ -180,7 +190,16 @@
 
                                 {{-- Submit --}}
                                 <div class="col-md-12">
-                                    <button type="submit" class="btn btn-success px-4">Submit Payment</button>
+                                    <button type="submit" class="btn btn-success px-4" id="submitPaymentBtn">
+                                        <span class="btn-label">
+                                            <i class="bi bi-check2-circle me-1"></i> Submit Payment
+                                        </span>
+                                        <span class="btn-loader d-none">
+                                            <span class="spinner-border spinner-border-sm me-2" role="status"
+                                                aria-hidden="true"></span>
+                                            Processing...
+                                        </span>
+                                    </button>
                                 </div>
                             </div>
                         </div>

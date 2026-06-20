@@ -41,7 +41,13 @@ class ReceiptReprintController extends Controller
             $request->customer_booking_id
         );
 
-        return view('payment.receipt-reprint.index', compact('plots', 'receipts'))
+        $summary = [
+            'count' => $receipts->count(),
+            'amount' => (float) $receipts->sum(fn ($receipt) => $receipt->paid_amount ?? $receipt->booking_amount ?? 0),
+            'latest' => $receipts->max('created_at'),
+        ];
+
+        return view('payment.receipt-reprint.index', compact('plots', 'receipts', 'summary'))
             ->with($request->only(['plot_id', 'customer_booking_id']));
     }
 
@@ -58,6 +64,7 @@ class ReceiptReprintController extends Controller
                     $q->where('plot_detail_id', $plotId);
                 });
             })
+            ->orderBy('customer_code')
             ->get()
             ->unique('id')
             ->values()

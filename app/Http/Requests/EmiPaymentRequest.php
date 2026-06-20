@@ -11,6 +11,17 @@ class EmiPaymentRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('booking_amount')) {
+            $amount = preg_replace('/[^\d.]/', '', (string) $this->input('booking_amount'));
+
+            $this->merge([
+                'booking_amount' => $amount,
+            ]);
+        }
+    }
+
     public function rules(): array
     {
         return [

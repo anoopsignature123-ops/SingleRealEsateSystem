@@ -13,6 +13,7 @@ class CustomerDashboardController extends Controller
 
         $customer->load([
             'primaryDetail.correspondenceDetail',
+            'primaryDocument',
             'plotSaleDetails.project',
             'plotSaleDetails.block',
             'plotSaleDetails.plotDetail',

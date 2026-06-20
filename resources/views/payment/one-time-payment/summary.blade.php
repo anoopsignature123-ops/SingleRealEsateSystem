@@ -1,45 +1,68 @@
 <div class="col-lg-4">
-    <div class="card border-0 shadow-sm sticky-top" style="top:20px;">
-        <div class="card-body p-4">
-            <div class="border-bottom pb-3 mb-4">
-                <h4 class="fw-bold mb-1 text-dark">Paid Amount Details</h4>
-                <small class="text-muted">Payment & Transaction Details</small>
+    <div class="one-time-summary-card sticky-top">
+        <div class="one-time-summary-loader d-none" id="one_time_summary_loader">
+            <div class="one-time-loader-box">
+                <span class="spinner-border spinner-border-sm text-success" role="status" aria-hidden="true"></span>
+                <strong>Loading booking details...</strong>
+            </div>
+        </div>
+
+        <div class="one-time-summary-head">
+            <span class="one-time-summary-icon">
+                <i class="bi bi-receipt"></i>
+            </span>
+            <div>
+                <h4 class="fw-bold mb-1 text-dark">Payment Summary</h4>
+                <small class="text-muted">Confirmed, hold and due details</small>
+            </div>
+        </div>
+
+        <div class="one-time-summary-grid">
+            <div class="one-time-summary-box">
+                <small>Total Cost</small>
+                <strong>&#8377;<span id="total_cost">0.00</span></strong>
             </div>
 
-            <div class="bg-light rounded-3 p-3 mb-3">
-                <small class="text-muted d-block mb-1">Total Cost</small>
-                <h4 class="fw-bold text-dark mb-0">₹<span id="total_cost">0.00</span></h4>
+            <div class="one-time-summary-box success">
+                <small>Confirmed Paid</small>
+                <strong>&#8377;<span id="total_paid">0.00</span></strong>
             </div>
 
-            <div class="bg-light rounded-3 p-3 mb-3">
-                <small class="text-muted d-block mb-1">Total Paid</small>
-                <h4 class="fw-bold text-success mb-0">₹<span id="total_paid">0.00</span></h4>
+            <div class="one-time-summary-box warning">
+                <small>Hold Amount</small>
+                <strong>&#8377;<span id="hold_amount">0.00</span></strong>
             </div>
 
-            <div class="bg-light rounded-3 p-3 mb-4">
-                <small class="text-muted d-block mb-1">Due Amount</small>
-                <h4 class="fw-bold text-danger mb-0">₹<span id="due_amount">0.00</span></h4>
+            <div class="one-time-summary-box danger">
+                <small>Due Amount</small>
+                <strong>&#8377;<span id="due_amount">0.00</span></strong>
+                <button type="button" class="btn btn-sm btn-outline-danger mt-2 w-100 d-none" id="fill_due_amount">
+                    <i class="bi bi-cash-stack me-1"></i> Pay Full Due Amount
+                </button>
             </div>
+        </div>
 
-            <div class="border rounded-3 p-3">
-                <h6 class="fw-bold mb-3">Payment History</h6>
-                <div class="table-responsive">
-                    <table class="table table-sm align-middle mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Receipt</th>
-                                <th>Date</th>
-                                <th>Paid</th>
-                                <th>Mode</th>
-                            </tr>
-                        </thead>
-                        <tbody id="payment_history">
-                            <tr>
-                                <td colspan="4" class="text-center text-muted py-3">No Payment Found</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+        <div class="one-time-history-box">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <h6 class="fw-bold mb-0">Payment History</h6>
+                <span class="badge bg-light text-dark border" id="payment_history_count">0 Records</span>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-sm align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Receipt</th>
+                            <th>Date</th>
+                            <th>Paid</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="payment_history">
+                        <tr>
+                            <td colspan="4" class="text-center text-muted py-3">No Payment Found</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
