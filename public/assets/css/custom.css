@@ -119,6 +119,36 @@
     margin-right: 12px;
 }
 
+.sidebar-menu .nav-link p {
+    align-items: center;
+    display: flex;
+    gap: 8px;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.sidebar-count-badge {
+    align-items: center;
+    background: #f97316;
+    border: 1px solid rgba(255, 255, 255, 0.52);
+    border-radius: 999px;
+    color: #ffffff;
+    display: inline-flex;
+    flex: 0 0 auto;
+    font-size: 11px;
+    font-weight: 900;
+    justify-content: center;
+    line-height: 1;
+    min-height: 22px;
+    min-width: 22px;
+    padding: 5px 7px;
+}
+
+.sidebar-menu .nav-link.active .sidebar-count-badge {
+    background: #198754;
+    border-color: #198754;
+}
+
 /* =========================
    HEADER
 ========================= */
@@ -2865,6 +2895,66 @@
     min-height: 38px;
 }
 
+.emi-payment-action-bar {
+    align-items: center;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: space-between;
+    padding: 14px;
+}
+
+.emi-payment-status-note {
+    align-items: center;
+    color: #475569;
+    display: flex;
+    font-size: 13px;
+    font-weight: 800;
+    gap: 8px;
+}
+
+.emi-payment-status-note i {
+    color: #198754;
+    font-size: 18px;
+}
+
+.emi-status-badge {
+    border-radius: 999px;
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 900;
+    padding: 5px 10px;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.emi-status-badge.pending {
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    color: #475569;
+}
+
+.emi-status-badge.hold {
+    background: #fff7ed;
+    border: 1px solid #fed7aa;
+    color: #f97316;
+}
+
+.emi-status-badge.paid {
+    background: #ecfdf5;
+    border: 1px solid #bbf7d0;
+    color: #198754;
+}
+
+.emi-status-badge.cleared {
+    background: #e0f2fe;
+    border: 1px solid #7dd3fc;
+    color: #0369a1;
+}
+
 .emi-progress-box {
     display: grid;
     gap: 12px;
@@ -2892,6 +2982,33 @@
 .emi-progress-box strong {
     color: #0f172a;
     font-weight: 900;
+}
+
+.emi-history-box table thead th {
+    background: #2f9b5f !important;
+    color: #ffffff !important;
+    font-size: 12px !important;
+}
+
+.emi-history-box table tbody td {
+    font-size: 13px;
+}
+
+@media (max-width: 768px) {
+    .emi-payment-action-bar {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .emi-payment-action-bar .btn {
+        justify-content: center;
+        width: 100%;
+    }
+
+    .emi-summary-grid,
+    .emi-progress-box {
+        grid-template-columns: 1fr;
+    }
 }
 
 .receipt-reprint-page {

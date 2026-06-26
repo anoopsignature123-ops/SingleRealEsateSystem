@@ -134,7 +134,7 @@
 
             @php
                 $firstPayment = $ledgerData->payments->first();
-                $paidAmount = $ledgerData->payments->where('payment_status', 'booked')->sum('net_payable_amount');
+                $paidAmount = $ledgerData->payments->whereIn('payment_status', ['paid', 'cleared'])->sum('paid_amount');
                 $dueAmount = $ledgerData->plot_amount - $paidAmount;
                 $emiMonths = $firstPayment?->emi_months ?? 0;
                 $installmentAmount = $firstPayment?->after_booking_payable_amount ?? 0;
@@ -371,7 +371,7 @@
                             $bookingDate = \Carbon\Carbon::parse($firstPayment->created_at);
                             $paidEmiPayments = $ledgerData->payments
                                 ->where('transaction_category', 'emi_payment')
-                                ->where('payment_status', 'booked')
+                                ->whereIn('payment_status', ['paid', 'cleared'])
                                 ->values();
                             $paidCount = $paidEmiPayments->count();
                         @endphp
@@ -485,17 +485,21 @@
                                         <td>{{ ucfirst($payment->payment_mode) }}</td>
                                         <td>{{ $payment->created_at->format('d-M-Y') }}</td>
                                         <td>
-                                            @if ($payment->payment_status == 'booked')
+                                            @if (in_array($payment->payment_status, ['paid', 'cleared']))
                                                 <span class="badge bg-success">Included</span>
                                             @else
                                                 <span class="badge bg-danger">Not Proceeded</span>
                                             @endif
                                         </td>
                                         <td>
-                                            @if ($payment->payment_status == 'booked')
-                                                <span class="badge bg-success">Clear</span>
-                                            @else
+                                            @if ($payment->payment_status == 'cleared')
+                                                <span class="badge bg-info">Cleared</span>
+                                            @elseif ($payment->payment_status == 'paid')
+                                                <span class="badge bg-success">Paid</span>
+                                            @elseif ($payment->payment_status == 'hold')
                                                 <span class="badge bg-warning text-dark">Hold</span>
+                                            @else
+                                                <span class="badge bg-secondary">Pending</span>
                                             @endif
                                         </td>
                                     </tr>

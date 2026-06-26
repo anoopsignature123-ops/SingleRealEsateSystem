@@ -42,13 +42,14 @@ class OneTimePaymentService
             $finalDue = round($remainingDue - $payingAmount, 2);
             $isHoldPayment = in_array($data['payment_mode'], ['cheque', 'dd']);
             $bookingStatus = $isHoldPayment ? 'hold' : 'booked';
-            $paymentStatus = (!$isHoldPayment && $finalDue <= 0) ? 'cleared' : 'pending';
+            $paymentStatus = $isHoldPayment ? 'hold' : ($finalDue <= 0 ? 'cleared' : 'paid');
 
             if (!$isHoldPayment && $finalDue <= 0) {
                 CustomerPayment::where('customer_booking_id', $booking->id)
                     ->where('plot_sale_detail_id', $plotSale->id)
                     ->where('plan_type', 'full_payment')
                     ->where('booking_status', 'booked')
+                    ->whereIn('payment_status', ['pending', 'paid'])
                     ->update(['payment_status' => 'cleared']);
             }
 

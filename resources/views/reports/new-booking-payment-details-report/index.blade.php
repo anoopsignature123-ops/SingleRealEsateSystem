@@ -62,7 +62,7 @@
             </div>
         </div>
         @php
-            $totalAmount = $reports->sum('booking_amount');
+            $totalAmount = $reports->sum('paid_amount');
         @endphp
         <div class="card report-card">
             <div class="report-header">

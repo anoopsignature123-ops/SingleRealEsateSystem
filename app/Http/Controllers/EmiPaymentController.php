@@ -40,8 +40,8 @@ class EmiPaymentController extends Controller
         $plots = PlotDetail::where('block_id', $blockId)
             ->whereHas('plotSaleDetail.payments', function ($query) {
                 $query->where('plan_type', 'emi_plan')
-                    ->where('booking_status', 'booked')
-                    ->where('payment_status', 'pending');
+                    ->where('due_amount', '>', 0)
+                    ->whereIn('payment_status', ['pending', 'paid', 'hold']);
             })
             ->orderBy('plot_number')
             ->get(['id', 'plot_number']);
@@ -89,8 +89,11 @@ class EmiPaymentController extends Controller
         $latestPayment = $payments->sortByDesc('id')->first();
 
         $totalCost = round((float) ($saleDetail->total_plot_cost ?? 0), 2);
-        $totalPaid = round((float) $payments->where('booking_status', 'booked')->sum('paid_amount'), 2);
-        $holdAmount = round((float) $payments->where('booking_status', 'hold')->sum('paid_amount'), 2);
+        $confirmedPayments = $payments->whereIn('payment_status', ['paid', 'cleared']);
+        $holdPayments = $payments->where('payment_status', 'hold');
+
+        $totalPaid = round((float) $confirmedPayments->sum('paid_amount'), 2);
+        $holdAmount = round((float) $holdPayments->sum('paid_amount'), 2);
         $dueAmount = round((float) ($latestPayment->due_amount ?? max(0, $totalCost - $totalPaid)), 2);
         $bookingAmount = round((float) ($firstPayment->booking_amount ?? 0), 2);
         $emiMonths = (int) ($latestPayment->emi_months ?? 0);
@@ -98,7 +101,10 @@ class EmiPaymentController extends Controller
         $emiStartDate = $firstPayment?->created_at
             ? Carbon::parse($firstPayment->created_at)->format('d-M-Y')
             : '-';
-        $monthsPassed = $payments->where('transaction_category', 'emi_payment')->count();
+        $monthsPassed = $payments
+            ->where('transaction_category', 'emi_payment')
+            ->whereIn('payment_status', ['paid', 'cleared'])
+            ->count();
 
         $history = $payments->map(function ($payment) {
             return [
@@ -106,7 +112,9 @@ class EmiPaymentController extends Controller
                 'date' => $payment->created_at ? $payment->created_at->format('d-M-Y') : '-',
                 'amount' => number_format((float) $payment->paid_amount, 2),
                 'mode' => strtoupper(str_replace('_', '/', $payment->payment_mode)),
-                'status' => ucfirst($payment->booking_status ?? 'N/A') . ' / ' . ucfirst($payment->payment_status ?? 'N/A'),
+                'booking_status' => $payment->booking_status,
+                'payment_status' => $payment->payment_status,
+                'status' => ucfirst($payment->payment_status ?? 'N/A'),
             ];
         })->values();
 

@@ -5,6 +5,22 @@
                 return Number(amount || 0).toFixed(2);
             }
 
+            function refreshSelect($select) {
+                if ($select.hasClass('select2-hidden-accessible')) {
+                    $select.trigger('change.select2');
+                }
+            }
+
+            function statusBadgeClass(status) {
+                status = String(status || '').toLowerCase();
+
+                if (status === 'cleared') return 'emi-status-badge cleared';
+                if (status === 'paid') return 'emi-status-badge paid';
+                if (status === 'hold') return 'emi-status-badge hold';
+
+                return 'emi-status-badge pending';
+            }
+
             function sanitizeAmount(value) {
                 value = String(value || '').replace(/[^\d.]/g, '');
                 const firstDot = value.indexOf('.');
@@ -151,6 +167,8 @@
                 const projectId = $(this).val();
                 $('#block_id').html('<option value="">Select Block</option>');
                 $('#plot_id').html('<option value="">Select Plot</option>');
+                refreshSelect($('#block_id'));
+                refreshSelect($('#plot_id'));
                 clearBookingData();
 
                 if (!projectId) return;
@@ -161,12 +179,14 @@
                     $.each(res.data, function(index, block) {
                         $('#block_id').append(`<option value="${block.id}">${block.block}</option>`);
                     });
+                    refreshSelect($('#block_id'));
                 });
             });
 
             $('#block_id').on('change', function() {
                 const blockId = $(this).val();
                 $('#plot_id').html('<option value="">Select Plot</option>');
+                refreshSelect($('#plot_id'));
                 clearBookingData();
 
                 if (!blockId) return;
@@ -185,6 +205,7 @@
                     $.each(res.data, function(index, plot) {
                         $('#plot_id').append(`<option value="${plot.id}">${plot.plot_number}</option>`);
                     });
+                    refreshSelect($('#plot_id'));
                 });
             });
 
@@ -236,7 +257,7 @@
                                 <td>${payment.receipt_no ?? '-'}</td>
                                 <td>${payment.date ?? '-'}</td>
                                 <td>&#8377;${payment.amount ?? '0'}</td>
-                                <td><span class="badge bg-light text-dark border">${payment.status ?? '-'}</span></td>
+                                <td><span class="${statusBadgeClass(payment.payment_status)}">${payment.status ?? '-'}</span></td>
                             </tr>`;
                         });
                         $('#payment_history_count').text(res.payment_history.length + ' Records');

@@ -78,10 +78,10 @@ class OneTimePaymentController extends Controller
 
         $totalCost = round((float) ($plotSale->total_plot_cost ?? 0), 2);
         $confirmedPaid = round((float) $payments
-            ->where('booking_status', 'booked')
+            ->whereIn('payment_status', ['paid', 'cleared'])
             ->sum('paid_amount'), 2);
         $holdAmount = round((float) $payments
-            ->where('booking_status', 'hold')
+            ->where('payment_status', 'hold')
             ->sum('paid_amount'), 2);
         $dueAmount = round(max(0, $totalCost - $confirmedPaid), 2);
 

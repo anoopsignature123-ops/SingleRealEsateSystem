@@ -25,9 +25,14 @@ class CustomerDashboardController extends Controller
 
         $totalBooking = $plots->whereNotNull('booking_code')->count();
         $totalPlotCost = $plots->sum(fn ($plot) => $plot->total_plot_cost ?? $plot->final_payable ?? 0);
-        $totalPaid = $payments->sum(fn ($payment) => $payment->paid_amount ?? $payment->booking_amount ?? 0);
+        $totalPaid = $payments
+            ->whereIn('payment_status', ['paid', 'cleared'])
+            ->sum(fn ($payment) => $payment->paid_amount ?? $payment->booking_amount ?? 0);
         $dueAmount = max($totalPlotCost - $totalPaid, 0);
-        $pendingPayments = $payments->where('payment_status', 'pending')->count();
+        $pendingPayments = $payments
+            ->whereIn('payment_status', ['pending', 'hold', 'paid'])
+            ->where('due_amount', '>', 0)
+            ->count();
         $paidPercent = $totalPlotCost > 0 ? min(round(($totalPaid / $totalPlotCost) * 100), 100) : 0;
         $latestPlots = $plots->sortByDesc('created_at')->take(3);
         $latestPayments = $payments->sortByDesc('created_at')->take(4);

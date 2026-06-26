@@ -23,7 +23,7 @@ class NewBookingPaymentDetailsReportController extends Controller
             'customerBooking.primaryDetail',
             'customerBooking.associate',
             'plotSaleDetail.plotDetail',
-        ])->where('payment_status', 'booking')->latest();
+        ])->where('transaction_category', 'booking_fee')->latest();
         if ($request->filled('associate_id')) {
             $reports->whereHas('customerBooking', function ($q) use ($request) {
                 $q->where('associate_id', $request->associate_id);
@@ -46,7 +46,7 @@ class NewBookingPaymentDetailsReportController extends Controller
             'customerBooking.primaryDetail',
             'customerBooking.associate',
             'plotSaleDetail.plotDetail',
-        ])->where('payment_status', 'booking')->latest();
+        ])->where('transaction_category', 'booking_fee')->latest();
         if ($request->filled('associate_id')) {
             $reports->whereHas('customerBooking', function ($q) use ($request) {
                 $q->where('associate_id', $request->associate_id);

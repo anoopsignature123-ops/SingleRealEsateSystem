@@ -45,7 +45,9 @@ class EmiDueStatusReportController extends Controller
         foreach ($emis as $emi) {
             $emi->paid_installment =
                 CustomerPayment::where('customer_booking_id', $emi->customer_booking_id)
-                    ->where('payment_status', 'emi')->count();
+                    ->where('plot_sale_detail_id', $emi->plot_sale_detail_id)
+                    ->where('transaction_category', 'emi_payment')
+                    ->whereIn('payment_status', ['paid', 'cleared'])->count();
         }
 
         return view('reports.emi_due_status_report.index', compact('emis'));
@@ -80,7 +82,9 @@ class EmiDueStatusReportController extends Controller
         foreach ($emis as $emi) {
             $emi->paid_installment =
                 CustomerPayment::where('customer_booking_id', $emi->customer_booking_id)
-                    ->where('payment_status', 'emi')->count();
+                    ->where('plot_sale_detail_id', $emi->plot_sale_detail_id)
+                    ->where('transaction_category', 'emi_payment')
+                    ->whereIn('payment_status', ['paid', 'cleared'])->count();
         }
 
         return $this->excelExportService->export($emis, 'emi-due-status-report',

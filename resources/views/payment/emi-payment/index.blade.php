@@ -143,16 +143,23 @@
                                 </div>
 
                                 <div class="col-md-12">
-                                    <button type="submit" class="btn btn-success px-4" id="submitEmiPaymentBtn">
-                                        <span class="btn-label">
-                                            <i class="bi bi-check2-circle me-1"></i> Submit EMI Payment
-                                        </span>
-                                        <span class="btn-loader d-none">
-                                            <span class="spinner-border spinner-border-sm me-2" role="status"
-                                                aria-hidden="true"></span>
-                                            Processing...
-                                        </span>
-                                    </button>
+                                    <div class="emi-payment-action-bar">
+                                        <div class="emi-payment-status-note">
+                                            <i class="bi bi-info-circle"></i>
+                                            <span>Cash/Card/NEFT will be marked Paid. Cheque/DD will stay Hold until clearance.</span>
+                                        </div>
+
+                                        <button type="submit" class="btn btn-success px-4" id="submitEmiPaymentBtn">
+                                            <span class="btn-label">
+                                                <i class="bi bi-check2-circle me-1"></i> Submit EMI Payment
+                                            </span>
+                                            <span class="btn-loader d-none">
+                                                <span class="spinner-border spinner-border-sm me-2" role="status"
+                                                    aria-hidden="true"></span>
+                                                Processing...
+                                            </span>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>

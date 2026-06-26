@@ -90,7 +90,9 @@
                                 @php
                                     $plotSale = $report->plotSaleDetail;
                                     $payment = $report->payment;
-                                    $paidAmount = $report->payments->sum('booking_amount');
+                                    $paidAmount = $report->payments
+                                        ->whereIn('payment_status', ['paid', 'cleared'])
+                                        ->sum('paid_amount');
                                     $finalAmount = $payment?->net_payable_amount ?? 0;
                                     $dueAmount = $finalAmount - $paidAmount;
                                     $totalCost += $finalAmount;

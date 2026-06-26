@@ -89,7 +89,9 @@
                             @foreach ($reports as $key => $report)
                                 @php
                                     $totalAmount = $report->net_payable_amount ?? 0;
-                                    $paidAmount = $report->customerBooking?->payments?->sum('booking_amount') ?? 0;
+                                    $paidAmount = $report->customerBooking?->payments
+                                        ?->whereIn('payment_status', ['paid', 'cleared'])
+                                        ->sum('paid_amount') ?? 0;
                                     $balance = $totalAmount - $paidAmount;
                                     $emiMonths = $report->emi_months ?? 1;
                                     $installment = 0;

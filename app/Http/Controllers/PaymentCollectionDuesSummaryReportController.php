@@ -59,7 +59,9 @@ class PaymentCollectionDuesSummaryReportController extends Controller
         return $this->excelExportService->export($reports, 'payment-collection-dues-summary-report',
             ['Customer ID', 'Customer Name', 'Booking ID', 'Total Cost', 'Paid Amount', 'Due Amount', 'Plot No'],
             function ($report) {
-                $paidAmount = $report->payments->sum('booking_amount');
+                $paidAmount = $report->payments
+                    ->whereIn('payment_status', ['paid', 'cleared'])
+                    ->sum('paid_amount');
                 $finalAmount = $report->payment?->net_payable_amount ?? 0;
                 $dueAmount = $finalAmount - $paidAmount;
 

@@ -264,6 +264,10 @@ class CustomerBookingService
         $receiptNumber = $data['receipt_number'] ?? 'REC-' . Str::upper(Str::random(8));
         $isInstantPayment = in_array($paymentMode, ['cash', 'card', 'neft_rtgs'], true);
         $bookingStatus = $isInstantPayment ? 'booked' : 'hold';
+        $dueAmount = round((float) ($data['due_amount'] ?? 0), 2);
+        $paymentStatus = $bookingStatus === 'hold'
+            ? 'hold'
+            : ($dueAmount <= 0 ? 'cleared' : 'paid');
         $oldPayment = CustomerPayment::where('customer_booking_id', $customerId)
             ->where('plot_sale_detail_id', $plotSaleId)
             ->first();
@@ -273,7 +277,7 @@ class CustomerBookingService
                 'plan_type' => $planType,
                 'booking_amount' => $data['booking_amount'] ?? 0,
                 'paid_amount' => $data['booking_amount'] ?? 0,
-                'due_amount' => $data['due_amount'] ?? 0,
+                'due_amount' => $dueAmount,
                 'net_payable_amount' => $data['net_payable_amount'] ?? 0,
                 'emi_months' => $data['emi_months'] ?? null,
                 'emi_date' => now(),
@@ -288,7 +292,7 @@ class CustomerBookingService
                 'dd_number' => $data['dd_number'] ?? null,
                 'transaction_number' => $transactionNumber,
                 'booking_status' => $bookingStatus,
-                'payment_status' => 'pending',
+                'payment_status' => $paymentStatus,
                 'receipt_number' => $receiptNumber,
                 'customer_booking_id' => $customerId,
                 'plot_sale_detail_id' => $plotSaleId,

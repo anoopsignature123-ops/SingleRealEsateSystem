@@ -307,7 +307,12 @@
                                                 <a href="{{ $child->route_name && Route::has($child->route_name) ? route($child->route_name) : '#' }}"
                                                     class="nav-link {{ request()->routeIs(...explode(',', $child->active_routes)) ? 'active' : '' }}">
                                                     <i class="nav-icon {{ $child->icon }}"></i>
-                                                    <p>{{ $child->name }}</p>
+                                                    <p>
+                                                        <span>{{ $child->name }}</span>
+                                                        @if ($child->slug === 'multiple-cheque-clearance' && ($chequeClearanceCount ?? 0) > 0)
+                                                            <span class="sidebar-count-badge">{{ $chequeClearanceCount }}</span>
+                                                        @endif
+                                                    </p>
                                                 </a>
                                             </li>
                                         @endforeach

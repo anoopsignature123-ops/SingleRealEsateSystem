@@ -172,7 +172,9 @@ class PlotBookingDetailsController extends Controller
             function ($booking) {
                 $plotSale = $booking->plotSaleDetail;
                 $payment = $booking->payment;
-                $paidAmount = $booking->payments->sum('booking_amount');
+                $paidAmount = $booking->payments
+                    ->whereIn('payment_status', ['paid', 'cleared'])
+                    ->sum('paid_amount');
                 $installmentAmount = 0;
                 if (($payment?->plan_type ?? '') == 'emi_plan' && ($payment?->emi_months ?? 0) > 0) {
                     $installmentAmount = $payment->net_payable_amount / $payment->emi_months;

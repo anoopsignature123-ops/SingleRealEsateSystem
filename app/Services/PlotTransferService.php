@@ -107,7 +107,7 @@ class PlotTransferService
         $totalPlotCost = (float) ($plotSale->total_plot_cost ?? 0);
 
         $totalPaid = (float) $payments
-            ->where('booking_status', 'booked')
+            ->whereIn('payment_status', ['paid', 'cleared'])
             ->sum('paid_amount');
 
         $remainingAmount = max(0, $totalPlotCost - $totalPaid);
@@ -123,7 +123,7 @@ class PlotTransferService
 
             $paidEmis = $payments
                 ->where('transaction_category', 'emi_payment')
-                ->where('booking_status', 'booked')
+                ->whereIn('payment_status', ['paid', 'cleared'])
                 ->count();
 
             $dueMonths = max(0, $emiMonths - $paidEmis);

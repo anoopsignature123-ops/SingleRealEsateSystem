@@ -24,6 +24,7 @@ class ChequeClearanceService
             $payment->update([
                 'cheque_status' => $data['cheque_status'],
                 'booking_status' => $isCleared ? 'booked' : 'hold',
+                'payment_status' => $isCleared ? 'paid' : 'hold',
                 'cheque_reason' => $data['cheque_reason'] ?? null,
                 'cheque_date' => $data['cheque_date'],
             ]);
@@ -45,6 +46,7 @@ class ChequeClearanceService
                         ->where('plot_sale_detail_id', $payment->plot_sale_detail_id)
                         ->where('plan_type', $payment->plan_type)
                         ->where('booking_status', 'booked')
+                        ->whereIn('payment_status', ['pending', 'paid'])
                         ->update(['payment_status' => 'cleared']);
                 }
             }

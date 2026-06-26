@@ -243,7 +243,9 @@
                                 @php
                                     $plotSale = $booking->plotSaleDetail;
                                     $payment = $booking->payment;
-                                    $paidAmount = $booking->payments->sum('booking_amount');
+                                    $paidAmount = $booking->payments
+                                        ->whereIn('payment_status', ['paid', 'cleared'])
+                                        ->sum('paid_amount');
                                     $plotRate = $plotSale?->plot_rate ?? 0;
                                     $plotArea = $plotSale?->plot_area ?? 0;
                                     $installmentAmount = 0;

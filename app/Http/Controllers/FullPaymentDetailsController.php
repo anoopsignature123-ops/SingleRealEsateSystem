@@ -114,7 +114,7 @@ class FullPaymentDetailsController extends Controller
                     $payment->net_payable_amount ?? 0,
                     $payment->booking_amount ?? 0,
                     strtoupper($payment->payment_mode ?? 'N/A'),
-                    $payment->payment_status == 'booked' ? 'Booking Amount' : 'Full Payment',
+                    $payment->transaction_category === 'booking_fee' ? 'Booking Amount' : 'Full Payment',
                     strtoupper($payment->cheque_status ?? 'CLEAR'),
                     $payment->cheque_date ? $payment->cheque_date->format('d-m-Y') : 'N/A',
                     $payment->created_at ? $payment->created_at->format('d-m-Y') : 'N/A',

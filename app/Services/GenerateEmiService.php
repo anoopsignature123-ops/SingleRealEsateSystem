@@ -68,7 +68,7 @@ class GenerateEmiService
         $totalPlotCost = (float) ($plotSale->total_plot_cost ?? 0);
 
         $totalPaid = (float) $plotSale->payments()
-            ->where('booking_status', 'booked')
+            ->whereIn('payment_status', ['paid', 'cleared'])
             ->sum('paid_amount');
 
         $dueAmount = max(0, $totalPlotCost - $totalPaid);
@@ -112,7 +112,7 @@ class GenerateEmiService
             'after_booking_payable_amount' => $emiAmount,
             'due_amount' => $dueAmount,
             'net_payable_amount' => $dueAmount,
-            'payment_status' => 'pending',
+            'payment_status' => $latestPayment->booking_status === 'hold' ? 'hold' : 'paid',
         ]);
 
         return true;

@@ -30,9 +30,11 @@ class CustomerHistoryController extends Controller
         $totalPlotCost = $plots->sum(function ($plot) {
             return $plot->total_plot_cost ?? $plot->total_amount ?? 0;
         });
-        $totalPaid = $payments->sum(function ($payment) {
-            return $payment->booking_amount ?? $payment->paid_amount ?? 0;
-        });
+        $totalPaid = $payments
+            ->whereIn('payment_status', ['paid', 'cleared'])
+            ->sum(function ($payment) {
+                return $payment->paid_amount ?? $payment->booking_amount ?? 0;
+            });
         $dueAmount = max($totalPlotCost - $totalPaid, 0);
         $paidPercent = $totalPlotCost > 0 ? min(round(($totalPaid / $totalPlotCost) * 100), 100) : 0;
         $latestPlot = $plots->sortByDesc('created_at')->first();
@@ -142,7 +144,7 @@ class CustomerHistoryController extends Controller
             ->with(['project', 'block', 'plotDetail', 'payments'])->whereNotNull('booking_code')->latest()->get()
             ->map(function ($booking) {
                 $payments = $booking->payments;
-                $confirmedPayments = $payments->where('booking_status', 'booked');
+                $confirmedPayments = $payments->whereIn('payment_status', ['paid', 'cleared']);
                 $latestPayment = $payments->sortByDesc('id')->first();
 
                 $totalCost = (float) ($booking->total_plot_cost ?? $booking->final_payable ?? 0);
@@ -174,16 +176,18 @@ class CustomerHistoryController extends Controller
         $payments = $customer->payments()
             ->with(['plotSaleDetail.project', 'plotSaleDetail.block', 'plotSaleDetail.plotDetail'])->latest()->get();
 
-        $confirmedPaid = $payments->where('booking_status', 'booked')
+        $confirmedPaid = $payments->whereIn('payment_status', ['paid', 'cleared'])
             ->sum(fn($payment) => $payment->paid_amount ?? $payment->booking_amount ?? 0);
 
-        $holdAmount = $payments->where('booking_status', 'hold')
+        $holdAmount = $payments->where('payment_status', 'hold')
             ->sum(fn($payment) => $payment->paid_amount ?? $payment->booking_amount ?? 0);
 
         $plotDueTotal = $payments->pluck('plotSaleDetail')->filter()->unique('id')
             ->sum(function ($plotSale) {
                 $totalCost = (float) ($plotSale->total_plot_cost ?? $plotSale->final_payable ?? 0);
-                $paid = (float) $plotSale->payments()->where('booking_status', 'booked')->sum('paid_amount');
+                $paid = (float) $plotSale->payments()
+                    ->whereIn('payment_status', ['paid', 'cleared'])
+                    ->sum('paid_amount');
                 return max(0, $totalCost - $paid);
             });
         return view('customer-panel.payment-history.index', compact('payments', 'confirmedPaid', 'holdAmount', 'plotDueTotal'));
@@ -209,8 +213,8 @@ class CustomerHistoryController extends Controller
             ->with(['project', 'block', 'plotDetail', 'payments',])->whereNotNull('booking_code')->latest()->get()
             ->map(function ($plot) {
                 $payments = $plot->payments;
-                $confirmedPayments = $payments->where('booking_status', 'booked');
-                $holdPayments = $payments->where('booking_status', 'hold');
+                $confirmedPayments = $payments->whereIn('payment_status', ['paid', 'cleared']);
+                $holdPayments = $payments->where('payment_status', 'hold');
                 $latestPayment = $payments->sortByDesc('id')->first();
 
                 $totalCost = (float) ($plot->total_plot_cost ?? $plot->final_payable ?? 0);

@@ -48,7 +48,7 @@
         </div>
         @if (request()->has('search'))
             @php
-                $totalPaidAmount = $reports->sum('booking_amount');
+                $totalPaidAmount = $reports->sum('paid_amount');
             @endphp
             <div class="card report-card">
                 <div class="report-header">

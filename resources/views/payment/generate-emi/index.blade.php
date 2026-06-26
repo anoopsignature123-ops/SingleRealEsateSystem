@@ -9,7 +9,7 @@
         foreach ($records as $record) {
             $payments = $record->payments ?? collect();
             $totalCost = (float) ($record->total_plot_cost ?? 0);
-            $paid = (float) $payments->where('booking_status', 'booked')->sum('paid_amount');
+            $paid = (float) $payments->whereIn('payment_status', ['paid', 'cleared'])->sum('paid_amount');
             $due = max(0, $totalCost - $paid);
             $latestPayment = $payments->sortByDesc('id')->first();
 
@@ -174,7 +174,7 @@
                                 $booking = $row->customerBooking;
                                 $payments = $row->payments ?? collect();
                                 $totalCost = (float) ($row->total_plot_cost ?? 0);
-                                $paid = (float) $payments->where('booking_status', 'booked')->sum('paid_amount');
+                                $paid = (float) $payments->whereIn('payment_status', ['paid', 'cleared'])->sum('paid_amount');
                                 $due = max(0, $totalCost - $paid);
                                 $latestPayment = $payments->sortByDesc('id')->first();
                                 $currentEmiMonths = $latestPayment?->emi_months;

@@ -43,7 +43,7 @@ class PlotRegistryService
             ->where('status', 'booked')
             ->whereHas('plotSaleDetail.payments', function ($query) {
                 $query->whereIn('booking_status', ['booked'])
-                    ->whereIn('payment_status', ['cleared', 'pending']);
+                    ->where('payment_status', 'cleared');
             })
             ->whereDoesntHave('plotRegistry')
             ->select('id', 'plot_number')
@@ -76,7 +76,7 @@ class PlotRegistryService
         $payments = $plotSale->payments;
 
         $totalPaid = (float) $payments
-            ->where('booking_status', 'booked')
+            ->whereIn('payment_status', ['paid', 'cleared'])
             ->sum('paid_amount');
 
         $totalCost = (float) ($plotSale->total_plot_cost ?? 0);

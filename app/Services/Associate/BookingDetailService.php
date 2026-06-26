@@ -116,7 +116,9 @@ class BookingDetailService
                 $allPayments = CustomerPayment::where('customer_booking_id', $booking->id)
                     ->orderBy('id')->get();
                 $bookingPayment = $allPayments->where('transaction_category', 'booking_fee')->first();
-                $emiPayments = $allPayments->where('transaction_category', 'emi_payment');
+                $emiPayments = $allPayments
+                    ->where('transaction_category', 'emi_payment')
+                    ->whereIn('payment_status', ['paid', 'cleared']);
 
                 $totalInstallments = (int) ($bookingPayment?->emi_months ?? 0);
                 $currentDueAmount = (float) ($payment->due_amount ?? 0);

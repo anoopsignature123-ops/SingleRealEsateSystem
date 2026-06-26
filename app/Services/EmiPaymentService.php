@@ -42,7 +42,7 @@ class EmiPaymentService
             $data['emi_date'] = now();
             $isHoldPayment = in_array($data['payment_mode'], ['cheque', 'dd']);
             $data['booking_status'] = $isHoldPayment ? 'hold' : 'booked';
-            $data['payment_status'] = (!$isHoldPayment && $newDueAmount <= 0) ? 'cleared' : 'pending';
+            $data['payment_status'] = $isHoldPayment ? 'hold' : 'paid';
             $fields = [
                 'bank_name',
                 'account_number',
@@ -56,12 +56,13 @@ class EmiPaymentService
             foreach ($fields as $field) {
                 $data[$field] = $data[$field] ?? null;
             }
-            // Due Amount 0 => All Payments Cleared
+            // Due Amount 0 => EMI plan is fully completed.
             if (!$isHoldPayment && $newDueAmount <= 0) {
                 CustomerPayment::where('customer_booking_id', $data['customer_booking_id'])
                     ->where('plot_sale_detail_id', $data['plot_sale_detail_id'])
                     ->where('plan_type', 'emi_plan')
                     ->where('booking_status', 'booked')
+                    ->whereIn('payment_status', ['pending', 'paid'])
                     ->update(['payment_status' => 'cleared']);
             }
             return CustomerPayment::create($data);

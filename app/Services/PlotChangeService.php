@@ -93,7 +93,7 @@ class PlotChangeService
         $payments = $plotSale->payments;
 
         $totalPaid = (float) $payments
-            ->where('booking_status', 'booked')
+            ->whereIn('payment_status', ['paid', 'cleared'])
             ->sum('paid_amount');
 
         $oldTotalCost = (float) ($plotSale->total_plot_cost ?? 0);
@@ -195,7 +195,7 @@ class PlotChangeService
             $payments = $plotSale->payments;
 
             $totalPaid = (float) $payments
-                ->where('booking_status', 'booked')
+                ->whereIn('payment_status', ['paid', 'cleared'])
                 ->sum('paid_amount');
 
             $oldTotalCost = (float) ($plotSale->total_plot_cost ?? 0);

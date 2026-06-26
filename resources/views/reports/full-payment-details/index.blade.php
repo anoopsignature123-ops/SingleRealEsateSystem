@@ -185,7 +185,7 @@
                                     <td>₹{{ number_format($paidAmount, 2) }}</td>
                                     <td>{{ strtoupper($payment->payment_mode ?? '-') }}</td>
                                     <td>
-                                        {{ $payment->payment_status == 'booked' ? 'Booking Amount' : 'Full Payment' }}
+                                        {{ $payment->transaction_category === 'booking_fee' ? 'Booking Amount' : 'Full Payment' }}
                                     </td>
                                     <td>{{ strtoupper($payment->cheque_status ?? 'CLEAR') }}</td>
                                     <td>

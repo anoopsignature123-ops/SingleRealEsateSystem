@@ -50,7 +50,9 @@ class PlotPaymentService
             ? 'hold'
             : 'booked';
 
-        $paymentStatus = $dueAmount <= 0 ? 'cleared' : 'pending';
+        $paymentStatus = $bookingStatus === 'hold'
+            ? 'hold'
+            : ($dueAmount <= 0 ? 'cleared' : 'paid');
 
         $afterBookingPayableAmount = null;
 

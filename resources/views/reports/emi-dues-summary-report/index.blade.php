@@ -141,7 +141,9 @@
                                         $plotSale = $report->plotSaleDetail;
                                         $payment = $report->payment;
                                         $payableAmount = (float) ($payment?->net_payable_amount ?? 0);
-                                        $paidAmount = (float) $report->payments->sum('booking_amount');
+                                        $paidAmount = (float) $report->payments
+                                            ->whereIn('payment_status', ['paid', 'cleared'])
+                                            ->sum('paid_amount');
                                         $months = (int) ($payment?->emi_months ?? 0);
                                         $installmentAmount = 0;
                                         if ($months > 0) {

@@ -410,7 +410,7 @@
                             </small>
 
                             <h3 class="fw-bold text-success mb-0">
-                                &#8377; {{ number_format($confirmedPayment + $pendingPayment, 2) }}
+                                &#8377; {{ number_format($confirmedPayment + $holdPayment + $pendingPayment, 2) }}
                             </h3>
 
                         </div>
@@ -431,6 +431,23 @@
 
                                 <div class="badge bg-success-subtle text-success px-3 py-2">
                                     Received
+                                </div>
+                            </div>
+
+                            <div class="earning-box warning">
+                                <div class="icon">
+                                    <i class="bi bi-pause-circle-fill"></i>
+                                </div>
+
+                                <div class="flex-grow-1">
+                                    <small class="text-muted">Hold Payment</small>
+                                    <h5 class="fw-bold mb-0 text-warning">
+                                        &#8377; {{ number_format($holdPayment, 2) }}
+                                    </h5>
+                                </div>
+
+                                <div class="badge bg-warning-subtle text-warning px-3 py-2">
+                                    Cheque/DD
                                 </div>
                             </div>
 

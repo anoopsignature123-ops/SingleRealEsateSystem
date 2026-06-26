@@ -189,22 +189,18 @@
                                     <td>
 
                                         <span
-                                            class="badge 
-                                            {{ $payment?->payment_status == 'booked'
-                                                ? 'bg-success'
-                                                : ($payment?->payment_status == 'hold'
-                                                    ? 'bg-warning text-dark'
-                                                    : ($payment?->payment_status == 'emi'
-                                                        ? 'bg-info'
+                                            class="badge
+                                            {{ $payment?->payment_status == 'cleared'
+                                                ? 'bg-info'
+                                                : ($payment?->payment_status == 'paid'
+                                                    ? 'bg-success'
+                                                    : ($payment?->payment_status == 'hold'
+                                                        ? 'bg-warning text-dark'
                                                         : 'bg-secondary')) }}">
 
-                                            {{ $payment?->payment_status == 'booked'
-                                                ? 'Booked'
-                                                : ($payment?->payment_status == 'hold'
-                                                    ? 'Hold'
-                                                    : ($payment?->payment_status == 'emi'
-                                                        ? 'EMI'
-                                                        : 'N/A')) }}
+                                            {{ $payment?->payment_status
+                                                ? ucfirst($payment->payment_status)
+                                                : 'N/A' }}
 
                                         </span>
 
