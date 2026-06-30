@@ -2,7 +2,6 @@
     <script>
         $(document).ready(function() {
             let selectedIds = new Set();
-            let dataTable = null;
 
             function visibleCheckboxes() {
                 return $('.payment_checkbox:visible');
@@ -82,13 +81,17 @@
             });
 
             if ($('#emiDateTable tbody tr td').attr('colspan') === undefined) {
-                dataTable = $('#emiDateTable').DataTable({
+                $('#emiDateTable').DataTable({
                     pageLength: 10,
                     responsive: true,
                     order: [],
                     columnDefs: [
                         { orderable: false, targets: 0 }
                     ],
+                    language: {
+                        search: '',
+                        searchPlaceholder: 'Search EMI records...'
+                    },
                     drawCallback: function() {
                         syncSelectionUi();
                     }

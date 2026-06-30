@@ -1,5 +1,7 @@
 @push('scripts')
 <script>
+let currentBookingData = null;
+
 $(document).ready(function () {
     $('#projectId').on('change', function () {
 
@@ -51,7 +53,7 @@ $(document).ready(function () {
                 Swal.fire({
                     icon: 'warning',
                     title: 'No Plot Found',
-                    text: 'Is block me transfer ke liye koi booked plot nahi hai.'
+                    text: 'No booked plot was found in this block for transfer.'
                 });
             }
 
@@ -82,7 +84,7 @@ $(document).ready(function () {
                 Swal.fire({
                     icon: 'warning',
                     title: 'Booking Not Found',
-                    text: 'Selected plot ki booking details nahi mili.'
+                    text: 'Booking details were not found for the selected plot.'
                 });
                 return;
             }
@@ -98,6 +100,7 @@ $(document).ready(function () {
             $('#currentOwner').val(r.customer_name);
 
             loadTransferCustomers(r.customer_booking_id);
+            currentBookingData = r;
             renderBookingDetails(r);
 
             $('#bookingDetailsCard').removeClass('d-none');
@@ -111,6 +114,7 @@ $(document).ready(function () {
         let transferCharge = $('#transferCharge').val();
         let transferDate = $('#transferDate').val();
         let transferReason = $('#transferReason').val();
+        let selectedPlotSaleIds = getSelectedPlotSaleIds();
 
         if (!plotSaleDetailId) {
             Swal.fire('Error', 'Please select plot first.', 'error');
@@ -122,9 +126,14 @@ $(document).ready(function () {
             return;
         }
 
+        if (selectedPlotSaleIds.length === 0) {
+            Swal.fire('Error', 'Please select at least one plot for transfer.', 'error');
+            return;
+        }
+
         Swal.fire({
             title: 'Transfer Plot?',
-            text: 'Are you sure you want to transfer this plot?',
+            text: `${selectedPlotSaleIds.length} selected plot(s) ownership will be transferred. Are you sure?`,
             icon: 'warning',
             showCancelButton: true,
             confirmButtonText: 'Yes Transfer',
@@ -142,6 +151,7 @@ $(document).ready(function () {
                         _token: "{{ csrf_token() }}",
                         customer_booking_id: customerBookingId,
                         plot_sale_detail_id: plotSaleDetailId,
+                        plot_sale_detail_ids: selectedPlotSaleIds,
                         new_customer_booking_id: newCustomerBookingId,
                         transfer_charge: transferCharge,
                         transfer_date: transferDate,
@@ -175,6 +185,12 @@ $(document).ready(function () {
         $(this).val(sanitizeAmount($(this).val()));
     });
 
+    $(document).on('change', '.transfer-plot-checkbox', function () {
+        if (currentBookingData) {
+            updateSelectedPlotSummary(currentBookingData);
+        }
+    });
+
 });
 
 function loadTransferCustomers(bookingId)
@@ -206,120 +222,108 @@ function renderBookingDetails(r)
             ? 'bg-success'
             : 'bg-warning text-dark';
 
+    const planBadge = r.plan_type === 'emi_plan'
+        ? '<span class="badge bg-primary">EMI Plan</span>'
+        : (r.plan_type === 'mixed'
+            ? '<span class="badge bg-warning text-dark">Mixed Plan</span>'
+            : '<span class="badge bg-success">Full Payment</span>');
+
+    const plotRows = (r.plots || []).map(function(plot) {
+        return `
+            <tr>
+                <td class="text-center">
+                    <input type="checkbox" class="form-check-input transfer-plot-checkbox"
+                        value="${plot.plot_sale_id}" checked
+                        data-cost="${parseAmount(plot.total_cost)}">
+                </td>
+                <td>
+                    <strong>${plot.plot_number}</strong>
+                    <small class="text-muted d-block">${plot.project} / Block ${plot.block}</small>
+                </td>
+                <td>${plot.area} Sq.Ft.</td>
+                <td>Rs. ${plot.rate}</td>
+                <td class="fw-bold">Rs. ${plot.total_cost}</td>
+            </tr>
+        `;
+    }).join('');
+
     $('#bookingDetailsContent').html(`
-        <table class="table table-bordered mb-0">
+        <div class="p-3">
+            <div class="row g-3 mb-3">
+                <div class="col-md-3">
+                    <div class="transaction-summary-box h-100">
+                        <small class="text-muted fw-bold text-uppercase">Plots</small>
+                        <h5 class="fw-bold mb-0 text-success" id="selectedPlotCount">${r.plot_count || 1}</h5>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="transaction-summary-box h-100">
+                        <small class="text-muted fw-bold text-uppercase">Total Cost</small>
+                        <h6 class="fw-bold mb-0">Rs. <span id="selectedTotalCost">${r.total_plot_cost}</span></h6>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="transaction-summary-box h-100">
+                        <small class="text-muted fw-bold text-uppercase">Total Paid</small>
+                        <h6 class="fw-bold mb-0 text-success">Rs. ${r.total_paid}</h6>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="transaction-summary-box h-100">
+                        <small class="text-muted fw-bold text-uppercase">Balance Due</small>
+                        <h6 class="fw-bold mb-0 text-danger">Rs. ${r.remaining_amount}</h6>
+                    </div>
+                </div>
+            </div>
 
-            <tr>
-                <th>Project</th>
-                <td>${r.project_name}</td>
+            <div class="table-responsive mb-3">
+                <table class="table table-bordered align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th width="54" class="text-center">Pick</th>
+                            <th>Plot</th>
+                            <th>Area</th>
+                            <th>Rate</th>
+                            <th>Total Cost</th>
+                        </tr>
+                    </thead>
+                    <tbody>${plotRows}</tbody>
+                </table>
+            </div>
 
-                <th>Plot Rate</th>
-                <td>Rs. ${r.plot_rate}</td>
-            </tr>
-
-            <tr>
-                <th>Block</th>
-                <td>${r.block_name}</td>
-
-                <th>Plot Area</th>
-                <td>${r.plot_area}</td>
-            </tr>
-
-            <tr>
-                <th>Plot No</th>
-                <td>${r.plot_number}</td>
-
-                <th>Plan Type</th>
-                <td>
-                    ${
-                        r.plan_type === 'emi_plan'
-                        ? '<span class="badge bg-primary">EMI Plan</span>'
-                        : '<span class="badge bg-success">Full Payment</span>'
-                    }
-                </td>
-            </tr>
-
-            <tr class="table-light">
-                <th colspan="4" class="text-center">
-                    PAYMENT DETAILS
-                </th>
-            </tr>
-
-            <tr>
-                <th>Payment Status</th>
-                <td>
-                    <span class="badge ${paymentStatusClass}">
-                        ${r.payment_status}
-                    </span>
-                </td>
-
-                <th>Booking Status</th>
-                <td>
-                    <span class="badge ${bookingStatusClass}">
-                        ${r.booking_status}
-                    </span>
-                </td>
-            </tr>
-
-            <tr>
-                <th>Payment Mode</th>
-                <td>${r.payment_mode}</td>
-
-                <th>Booking Amount</th>
-                <td>Rs. ${r.booking_amount}</td>
-            </tr>
-
-            <tr>
-                <th>Total Cost</th>
-                <td>Rs. ${r.total_plot_cost}</td>
-
-                <th>Total Paid</th>
-                <td class="text-success fw-bold">
-                    Rs. ${r.total_paid}
-                </td>
-            </tr>
-
-            <tr>
-                <th>Balance Due</th>
-                <td colspan="3" class="text-danger fw-bold">
-                    Rs. ${r.remaining_amount}
-                </td>
-            </tr>
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <small class="text-muted fw-bold text-uppercase d-block">Plan Type</small>
+                    ${planBadge}
+                </div>
+                <div class="col-md-3">
+                    <small class="text-muted fw-bold text-uppercase d-block">Payment Status</small>
+                    <span class="badge ${paymentStatusClass}">${r.payment_status}</span>
+                </div>
+                <div class="col-md-3">
+                    <small class="text-muted fw-bold text-uppercase d-block">Booking Status</small>
+                    <span class="badge ${bookingStatusClass}">${r.booking_status}</span>
+                </div>
+                <div class="col-md-3">
+                    <small class="text-muted fw-bold text-uppercase d-block">Payment Mode</small>
+                    <span class="badge bg-light text-dark border">${r.payment_mode}</span>
+                </div>
+            </div>
 
             ${
                 r.plan_type === 'emi_plan'
                 ? `
-                    <tr>
-                        <th>EMI Summary</th>
-                        <td colspan="3">
-                            <span class="badge bg-primary">
-                                Total EMI : ${r.emi_months}
-                            </span>
-
-                            <span class="badge bg-success">
-                                Paid EMI : ${r.paid_emis}
-                            </span>
-
-                            <span class="badge bg-danger">
-                                Due EMI : ${r.due_months}
-                            </span>
-                        </td>
-                    </tr>
+                    <div class="alert alert-primary mt-3 mb-0">
+                        <strong>EMI Summary:</strong>
+                        Total EMI ${r.emi_months}, Paid EMI ${r.paid_emis}, Due EMI ${r.due_months}
+                    </div>
                 `
-                : `
-                    <tr>
-                        <th>Plan</th>
-                        <td colspan="3">
-                            <span class="badge bg-success">
-                                Full Payment
-                            </span>
-                        </td>
-                    </tr>
-                `
+                : ''
             }
-
-        </table>
+        </div>
     `);
+
+    updateSelectedPlotSummary(r);
 }
 function clearSelection(clearPlot = true)
 {
@@ -341,10 +345,48 @@ function clearSelection(clearPlot = true)
 
     $('#bookingDetailsCard').addClass('d-none');
     $('#transferSection').addClass('d-none');
+    currentBookingData = null;
 
     if (clearPlot) {
         $('#plotSaleId').html('<option value="">Select Plot</option>');
     }
+}
+
+function getSelectedPlotSaleIds()
+{
+    return $('.transfer-plot-checkbox:checked').map(function () {
+        return $(this).val();
+    }).get();
+}
+
+function updateSelectedPlotSummary(r)
+{
+    const selected = $('.transfer-plot-checkbox:checked');
+    let selectedCost = 0;
+
+    selected.each(function () {
+        selectedCost += parseFloat($(this).data('cost')) || 0;
+    });
+
+    $('#selectedPlotCount').text(selected.length);
+    $('#selectedTotalCost').text(formatAmount(selectedCost));
+
+    const selectedIds = getSelectedPlotSaleIds();
+    $('#plotSaleDetailId').val(selectedIds[0] || r.plot_sale_id);
+    $('#bookingCode').val(r.booking_id);
+}
+
+function parseAmount(value)
+{
+    return parseFloat(String(value || '0').replace(/,/g, '')) || 0;
+}
+
+function formatAmount(value)
+{
+    return Number(value || 0).toLocaleString('en-IN', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
 }
 
 function setTransferLoading(isLoading)

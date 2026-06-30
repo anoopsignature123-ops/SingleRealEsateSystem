@@ -298,6 +298,18 @@
                     $('#transactionNumber').attr('placeholder', 'Enter card transaction number');
                 }
 
+                let hasBankField =
+                    mode == 'cheque' ||
+                    mode == 'dd' ||
+                    mode == 'neft_rtgs' ||
+                    mode == 'card';
+
+                if (hasBankField) {
+                    $('.payment-bank-empty').addClass('d-none');
+                } else {
+                    $('.payment-bank-empty').removeClass('d-none');
+                }
+
                 calculateAmounts();
             }
 
@@ -327,18 +339,6 @@
             $('#bookingAmount, #emiMonths').on('keyup change', calculateAmounts);
 
             loadPaymentFields();
-
-            let hasBankField =
-                mode == 'cheque' ||
-                mode == 'dd' ||
-                mode == 'neft_rtgs' ||
-                mode == 'card';
-
-            if (hasBankField) {
-                $('.payment-bank-empty').addClass('d-none');
-            } else {
-                $('.payment-bank-empty').removeClass('d-none');
-            }
         });
     </script>
 @endpush

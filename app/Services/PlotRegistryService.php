@@ -39,16 +39,37 @@ class PlotRegistryService
 
     public function getPlots($blockId)
     {
-        return PlotDetail::where('block_id', $blockId)
-            ->where('status', 'booked')
-            ->whereHas('plotSaleDetail.payments', function ($query) {
+        return PlotSaleDetail::with([
+            'plotDetail',
+            'customerBooking.primaryDetail',
+        ])
+            ->where('block_id', $blockId)
+            ->whereHas('plotDetail', function ($query) {
+                $query->where('status', 'booked')
+                    ->whereDoesntHave('plotRegistry');
+            })
+            ->whereHas('payments', function ($query) {
                 $query->whereIn('booking_status', ['booked'])
                     ->where('payment_status', 'cleared');
             })
-            ->whereDoesntHave('plotRegistry')
-            ->select('id', 'plot_number')
-            ->orderBy('plot_number')
-            ->get();
+            ->whereHas('customerBooking', function ($query) {
+                $query->where('status', '!=', 'cancelled');
+            })
+            ->get()
+            ->map(function ($sale) {
+                $customerName = $sale->customerBooking?->primaryDetail?->name
+                    ?? $sale->customerBooking?->customer_name
+                    ?? 'N/A';
+
+                return [
+                    'id' => $sale->plot_detail_id,
+                    'plot_number' => ($sale->plotDetail?->plot_number ?? 'N/A')
+                        .' | '.($sale->booking_code ?? 'N/A')
+                        .' | '.$customerName,
+                ];
+            })
+            ->sortBy('plot_number')
+            ->values();
     }
 
     public function getBookingData($plotId)
@@ -121,6 +142,31 @@ class PlotRegistryService
     public function create(array $data): PlotRegistry
     {
         return DB::transaction(function () use ($data) {
+            $plotSale = PlotSaleDetail::with(['plotDetail', 'payments'])
+                ->where('plot_detail_id', $data['plot_detail_id'])
+                ->where('customer_booking_id', $data['customer_booking_id'])
+                ->first();
+
+            if (! $plotSale || ! $plotSale->plotDetail) {
+                throw new \Exception('Selected plot booking was not found.');
+            }
+
+            if ($plotSale->plotDetail->status !== 'booked') {
+                throw new \Exception('Only booked plots can be registered.');
+            }
+
+            if (PlotRegistry::where('plot_detail_id', $data['plot_detail_id'])->exists()) {
+                throw new \Exception('This plot is already registered.');
+            }
+
+            $totalPaid = (float) $plotSale->payments
+                ->whereIn('payment_status', ['paid', 'cleared'])
+                ->sum('paid_amount');
+            $totalCost = (float) ($plotSale->total_plot_cost ?? 0);
+
+            if (($totalCost - $totalPaid) > 0.01) {
+                throw new \Exception('Registry is allowed only after full payment clearance.');
+            }
 
             $registry = PlotRegistry::create([
                 'project_id' => $data['project_id'],

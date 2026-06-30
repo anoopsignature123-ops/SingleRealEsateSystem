@@ -210,6 +210,12 @@
 
                         <tbody>
                             @forelse ($histories as $key => $history)
+                                @php
+                                    $plotCount = (int) ($history->group_plot_count ?? 1);
+                                    $projects = $history->group_projects ?: ($history->plotSaleDetail?->project?->name ?? '-');
+                                    $blocks = $history->group_blocks ?: ($history->plotSaleDetail?->block?->block ?? '-');
+                                    $plotNumbers = $history->group_plot_numbers ?: ($history->plotSaleDetail?->plotDetail?->plot_number ?? '-');
+                                @endphp
                                 <tr>
                                     <td>{{ $key + 1 }}</td>
 
@@ -221,15 +227,20 @@
 
                                     <td>
                                         <div class="fw-semibold">
-                                            {{ $history->plotSaleDetail?->project?->name ?? '-' }}
+                                            {{ $projects }}
                                         </div>
                                         <small class="text-muted">
                                             Block:
-                                            {{ $history->plotSaleDetail?->block?->block ?? '-' }}
+                                            {{ $blocks }}
                                             |
                                             Plot:
-                                            {{ $history->plotSaleDetail?->plotDetail?->plot_number ?? '-' }}
+                                            {{ $plotNumbers }}
                                         </small>
+                                        @if ($plotCount > 1)
+                                            <span class="badge bg-success-subtle text-success border border-success-subtle ms-1">
+                                                {{ $plotCount }} Plots
+                                            </span>
+                                        @endif
                                     </td>
 
                                     <td>

@@ -143,7 +143,8 @@
                                     </small>
                                 </div>
                                 <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
-                                    Select Payments
+                                    <span id="selectedPaymentCount">0</span> Selected
+                                    <span class="ms-2">Rs. <span id="selectedPaymentAmount">0.00</span></span>
                                 </span>
                             </div>
                         </div>
@@ -157,6 +158,7 @@
                                                 <input type="checkbox" id="selectAllPayments" class="form-check-input">
                                             </th>
                                             <th>Receipt</th>
+                                            <th>Plot</th>
                                             <th>Date</th>
                                             <th>Plan Type</th>
                                             <th>Category</th>
@@ -168,7 +170,7 @@
                                     </thead>
                                     <tbody id="paymentListBody">
                                         <tr>
-                                            <td colspan="9" class="text-center text-muted py-4">
+                                            <td colspan="10" class="text-center text-muted py-4">
                                                 No payment found.
                                             </td>
                                         </tr>
@@ -290,19 +292,28 @@
                                     <td>{{ $key + 1 }}</td>
 
                                     <td>
-                                        {{ $history->customerPayment?->receipt_number ?? '-' }}
+                                        {{ $history->group_receipts ?: ($history->customerPayment?->receipt_number ?? '-') }}
+                                        @if (($history->group_payment_count ?? 1) > 1)
+                                            <small class="text-muted d-block">{{ $history->group_payment_count }} payments</small>
+                                        @endif
                                     </td>
 
                                     <td>
                                         <span class="badge bg-warning-subtle text-warning border border-warning-subtle">
                                             {{ $history->old_booking_code ?? '-' }}
                                         </span>
+                                        @if ($history->group_old_plots ?? false)
+                                            <small class="text-muted d-block">Plot {{ $history->group_old_plots }}</small>
+                                        @endif
                                     </td>
 
                                     <td>
                                         <span class="badge bg-success-subtle text-success border border-success-subtle">
                                             {{ $history->new_booking_code ?? '-' }}
                                         </span>
+                                        @if ($history->group_new_plots ?? false)
+                                            <small class="text-muted d-block">Plot {{ $history->group_new_plots }}</small>
+                                        @endif
                                     </td>
 
                                     <td>
@@ -324,7 +335,7 @@
                                     </td>
 
                                     <td class="fw-bold text-success text-end">
-                                        &#8377;{{ number_format((float) $history->transfer_amount, 2) }}
+                                        &#8377;{{ number_format((float) ($history->group_transfer_amount ?? $history->transfer_amount), 2) }}
                                     </td>
 
                                     <td>

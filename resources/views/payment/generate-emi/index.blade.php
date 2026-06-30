@@ -7,19 +7,15 @@
         $alreadyGeneratedCount = 0;
 
         foreach ($records as $record) {
-            $payments = $record->payments ?? collect();
-            $totalCost = (float) ($record->total_plot_cost ?? 0);
-            $paid = (float) $payments->whereIn('payment_status', ['paid', 'cleared'])->sum('paid_amount');
-            $due = max(0, $totalCost - $paid);
-            $latestPayment = $payments->sortByDesc('id')->first();
+            $due = (float) ($record->group_due ?? 0);
 
             $totalDue += $due;
 
-            if ($due > 0 && $latestPayment) {
+            if ($record->group_can_generate ?? false) {
                 $emiReadyCount++;
             }
 
-            if (($latestPayment?->plan_type ?? null) === 'emi_plan') {
+            if ($record->group_is_emi_generated ?? false) {
                 $alreadyGeneratedCount++;
             }
         }
@@ -172,14 +168,13 @@
                         @forelse ($records as $row)
                             @php
                                 $booking = $row->customerBooking;
-                                $payments = $row->payments ?? collect();
-                                $totalCost = (float) ($row->total_plot_cost ?? 0);
-                                $paid = (float) $payments->whereIn('payment_status', ['paid', 'cleared'])->sum('paid_amount');
-                                $due = max(0, $totalCost - $paid);
-                                $latestPayment = $payments->sortByDesc('id')->first();
-                                $currentEmiMonths = $latestPayment?->emi_months;
-                                $isEmiPlan = ($latestPayment?->plan_type ?? null) === 'emi_plan';
-                                $canGenerateEmi = $due > 0 && $latestPayment;
+                                $totalCost = (float) ($row->group_total_cost ?? 0);
+                                $paid = (float) ($row->group_paid ?? 0);
+                                $due = (float) ($row->group_due ?? 0);
+                                $currentEmiMonths = $row->group_current_emi_months;
+                                $isEmiGenerated = (bool) ($row->group_is_emi_generated ?? false);
+                                $canGenerateEmi = (bool) ($row->group_can_generate ?? false);
+                                $plotCount = (int) ($row->group_plot_count ?? 1);
                             @endphp
 
                             <tr>
@@ -199,10 +194,15 @@
                                         {{ $row->booking_code ?? ($booking?->booking_code ?? '-') }}
                                     </div>
                                     <small class="text-muted">
-                                        {{ $row->project?->name ?? '-' }} /
-                                        Block {{ $row->block?->block ?? '-' }} /
-                                        Plot {{ $row->plotDetail?->plot_number ?? '-' }}
+                                        {{ $row->group_projects ?: ($row->project?->name ?? '-') }} /
+                                        Block {{ $row->group_blocks ?: ($row->block?->block ?? '-') }} /
+                                        Plot {{ $row->group_plot_numbers ?: ($row->plotDetail?->plot_number ?? '-') }}
                                     </small>
+                                    @if ($plotCount > 1)
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle ms-1">
+                                            {{ $plotCount }} Plots
+                                        </span>
+                                    @endif
                                 </td>
                                 <td class="fw-bold">&#8377;{{ number_format($totalCost, 2) }}</td>
                                 <td class="text-success fw-bold">&#8377;{{ number_format($paid, 2) }}</td>
@@ -228,7 +228,7 @@
 
                                             <button type="submit" class="btn btn-sm btn-success generate-emi-btn">
                                                 <span class="btn-label">
-                                                    <i class="bi {{ $isEmiPlan ? 'bi-arrow-repeat' : 'bi-calendar-plus' }} me-1"></i>
+                                                    <i class="bi {{ $isEmiGenerated ? 'bi-arrow-repeat' : 'bi-calendar-plus' }} me-1"></i>
                                                     Generate EMI
                                                 </span>
                                                 <span class="btn-loader d-none">

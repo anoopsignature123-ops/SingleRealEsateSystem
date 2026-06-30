@@ -38,7 +38,9 @@ class CustomerBookingStepFiveRequest extends FormRequest
             'cheque_date' => 'nullable|required_if:payment_mode,cheque,dd,neft_rtgs|date',
 
             'remark' => 'nullable|string|max:500',
-            'plot_sale_detail_id' => 'required|exists:plot_sale_details,id',
+            'plot_sale_detail_id' => 'nullable|required_without:plot_sale_detail_ids|exists:plot_sale_details,id',
+            'plot_sale_detail_ids' => 'nullable|array|min:1',
+            'plot_sale_detail_ids.*' => 'exists:plot_sale_details,id|distinct',
         ];
     }
 

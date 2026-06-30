@@ -2603,6 +2603,40 @@
     padding: 14px;
 }
 
+.one-time-payment-page .form-check-input:checked {
+    background-color: #198754;
+    border-color: #198754;
+}
+
+.one-time-payment-page .one-time-detail-table,
+.one-time-payment-page .one-time-history-table {
+    border-color: #e2e8f0;
+}
+
+.one-time-payment-page .one-time-detail-table thead th,
+.one-time-payment-page .one-time-history-table thead th {
+    background: #f8fafc !important;
+    border-color: #e2e8f0 !important;
+    color: #475569 !important;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0;
+    text-transform: uppercase;
+}
+
+.one-time-payment-page .one-time-detail-table tbody td,
+.one-time-payment-page .one-time-history-table tbody td {
+    border-color: #e2e8f0;
+    color: #0f172a;
+    padding: 12px;
+    vertical-align: middle;
+}
+
+.one-time-payment-page .one-time-detail-table tbody tr:hover,
+.one-time-payment-page .one-time-history-table tbody tr:hover {
+    background: #f8fafc;
+}
+
 .cheque-clearance-page {
     background: linear-gradient(180deg, #f3fbf7 0%, #f8fafc 48%, #f8fafc 100%);
 }
@@ -2719,7 +2753,7 @@
     background: #198754;
     color: #ffffff;
     font-size: 13px;
-    letter-spacing: 0.02em;
+    letter-spacing: 0;
     text-transform: uppercase;
     white-space: nowrap;
 }
@@ -2920,6 +2954,40 @@
 .emi-payment-status-note i {
     color: #198754;
     font-size: 18px;
+}
+
+.emi-payment-page .form-check-input:checked {
+    background-color: #198754;
+    border-color: #198754;
+}
+
+.emi-payment-page .emi-detail-table,
+.emi-payment-page .emi-history-table {
+    border-color: #e2e8f0;
+}
+
+.emi-payment-page .emi-detail-table thead th,
+.emi-payment-page .emi-history-table thead th {
+    background: #f8fafc !important;
+    border-color: #e2e8f0 !important;
+    color: #475569 !important;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0;
+    text-transform: uppercase;
+}
+
+.emi-payment-page .emi-detail-table tbody td,
+.emi-payment-page .emi-history-table tbody td {
+    border-color: #e2e8f0;
+    color: #0f172a;
+    padding: 12px;
+    vertical-align: middle;
+}
+
+.emi-payment-page .emi-detail-table tbody tr:hover,
+.emi-payment-page .emi-history-table tbody tr:hover {
+    background: #f8fafc;
 }
 
 .emi-status-badge {
@@ -3798,290 +3866,6 @@
 
 .select2-container--open {
     z-index: 2055;
-}
-
-.update-emi-date-page {
-    background: linear-gradient(180deg, #f3fbf7 0%, #f8fafc 48%, #f8fafc 100%);
-    padding-bottom: 28px;
-}
-
-.update-emi-date-hero {
-    background:
-        linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(236, 253, 245, 0.9)),
-        url('../images/customer.jpg') center/cover no-repeat;
-    border: 1px solid #dcefe6;
-    border-radius: 8px;
-    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.07);
-    padding: 22px 24px;
-}
-
-.update-emi-date-hero-icon,
-.update-emi-date-table-icon,
-.update-emi-date-modal-icon {
-    align-items: center;
-    background: #ecfdf5;
-    border-radius: 8px;
-    color: #198754;
-    display: inline-flex;
-    flex: 0 0 auto;
-    justify-content: center;
-}
-
-.update-emi-date-hero-icon {
-    font-size: 26px;
-    height: 58px;
-    width: 58px;
-}
-
-.update-emi-date-table-icon,
-.update-emi-date-modal-icon {
-    border: 1px solid #bbf7d0;
-    font-size: 19px;
-    height: 42px;
-    width: 42px;
-}
-
-.update-emi-date-primary {
-    border-radius: 8px;
-    font-weight: 800;
-    min-height: 44px;
-    padding-left: 18px;
-    padding-right: 18px;
-}
-
-.update-emi-date-table-card {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    box-shadow: 0 10px 26px rgba(15, 23, 42, 0.07);
-    overflow: hidden;
-}
-
-.update-emi-date-table-head {
-    align-items: center;
-    border-bottom: 1px solid #eef2f7;
-    display: flex;
-    gap: 14px;
-    justify-content: space-between;
-    padding: 18px 20px;
-}
-
-.update-emi-date-count,
-.update-emi-date-selection {
-    background: #ecfdf5;
-    border: 1px solid #bbf7d0;
-    border-radius: 999px;
-    color: #087f5b;
-    font-size: 12px;
-    font-weight: 900;
-    padding: 7px 12px;
-}
-
-.update-emi-date-toolbar {
-    align-items: center;
-    background: #f8fafc;
-    border-bottom: 1px solid #e2e8f0;
-    display: flex;
-    gap: 12px;
-    justify-content: space-between;
-    padding: 13px 20px;
-}
-
-.update-emi-date-select-all {
-    align-items: center;
-    color: #334155;
-    display: flex;
-    font-size: 14px;
-    font-weight: 800;
-    gap: 9px;
-    margin: 0;
-}
-
-.update-emi-date-page .form-check-input {
-    border-color: #86efac;
-    cursor: pointer;
-    height: 18px;
-    width: 18px;
-}
-
-.update-emi-date-page .form-check-input:checked {
-    background-color: #198754;
-    border-color: #198754;
-}
-
-.update-emi-date-table-wrap {
-    padding: 0 20px 20px;
-}
-
-.update-emi-date-table-card .dataTables_wrapper {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    overflow: hidden;
-}
-
-.update-emi-date-table-card .dataTables_wrapper > .row:first-child {
-    align-items: center;
-    background: #f8fafc;
-    border-bottom: 1px solid #e2e8f0;
-    margin: 0;
-    padding: 13px 14px;
-}
-
-.update-emi-date-table-card .dataTables_wrapper > .row:last-child {
-    align-items: center;
-    background: #ffffff;
-    border-top: 1px solid #eef2f7;
-    margin: 0;
-    padding: 12px 14px;
-}
-
-.update-emi-date-table-card .dataTables_length,
-.update-emi-date-table-card .dataTables_filter,
-.update-emi-date-table-card .dataTables_info,
-.update-emi-date-table-card .dataTables_paginate {
-    color: #475569;
-    font-size: 13px;
-    margin: 0;
-}
-
-.update-emi-date-table-card .dataTables_length label,
-.update-emi-date-table-card .dataTables_filter label {
-    align-items: center;
-    display: flex;
-    gap: 8px;
-    margin: 0;
-}
-
-.update-emi-date-table-card .dataTables_length select {
-    border: 1px solid #cfe4da;
-    border-radius: 8px;
-    min-height: 38px;
-    min-width: 78px;
-}
-
-.update-emi-date-table-card .dataTables_filter {
-    display: flex;
-    justify-content: flex-end;
-}
-
-.update-emi-date-table-card .dataTables_filter input {
-    border: 1px solid #cfe4da;
-    border-radius: 8px;
-    margin-left: 8px;
-    min-height: 38px;
-    min-width: 260px;
-    padding: 7px 12px;
-}
-
-.update-emi-date-table-card .dataTables_filter input:focus,
-.update-emi-date-table-card .dataTables_length select:focus {
-    border-color: #198754;
-    box-shadow: 0 0 0 0.18rem rgba(25, 135, 84, 0.12);
-    outline: 0;
-}
-
-.update-emi-date-table-card .page-link {
-    border-color: #d7eadf;
-    color: #198754;
-    font-size: 13px;
-}
-
-.update-emi-date-table-card .page-item.active .page-link {
-    background: #198754;
-    border-color: #198754;
-    color: #ffffff;
-}
-
-.update-emi-date-table {
-    min-width: 1120px;
-}
-
-.update-emi-date-table thead th {
-    background: #198754;
-    border-bottom: 0;
-    color: #ffffff;
-    font-size: 12px;
-    letter-spacing: 0.02em;
-    padding: 14px 16px;
-    text-transform: uppercase;
-    white-space: nowrap;
-}
-
-.update-emi-date-table tbody td {
-    border-color: #eef2f7;
-    color: #0f172a;
-    font-size: 14px;
-    padding: 13px 16px;
-    vertical-align: middle;
-}
-
-.update-emi-date-table tbody tr:hover {
-    background: #f8fffb;
-}
-
-.update-emi-date-table small {
-    font-size: 12px;
-}
-
-.update-emi-date-table .badge {
-    border-radius: 6px;
-    font-weight: 800;
-    padding: 6px 8px;
-}
-
-.update-emi-date-modal .modal-content {
-    border: 0;
-    border-radius: 8px;
-    box-shadow: 0 24px 70px rgba(15, 23, 42, 0.24);
-    overflow: hidden;
-}
-
-.update-emi-date-modal .modal-header {
-    background:
-        linear-gradient(135deg, rgba(255, 255, 255, 0.97), rgba(236, 253, 245, 0.94)),
-        url('../images/customer.jpg') center/cover no-repeat;
-    border-bottom: 1px solid #dcefe6;
-    padding: 14px 18px;
-}
-
-.update-emi-date-modal .modal-body {
-    background: #f8fafc;
-    padding: 18px;
-}
-
-.update-emi-date-modal .modal-footer {
-    background: #ffffff;
-    border-top: 1px solid #eef2f7;
-    padding: 14px 18px;
-}
-
-.update-emi-date-modal .form-control {
-    border-color: #cfe4da;
-    border-radius: 8px;
-    min-height: 42px;
-}
-
-.update-emi-date-modal .form-control:focus {
-    border-color: #198754;
-    box-shadow: 0 0 0 0.18rem rgba(25, 135, 84, 0.12);
-}
-
-.update-emi-date-modal .btn {
-    border-radius: 8px;
-    font-weight: 800;
-    min-height: 42px;
-}
-
-.update-emi-date-modal-summary {
-    align-items: center;
-    background: #ecfdf5;
-    border: 1px solid #bbf7d0;
-    border-radius: 8px;
-    color: #087f5b;
-    display: flex;
-    gap: 10px;
-    padding: 12px;
 }
 
 .associate-advance-page {

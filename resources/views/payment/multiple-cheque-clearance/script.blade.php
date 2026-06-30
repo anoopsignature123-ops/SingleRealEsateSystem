@@ -17,14 +17,21 @@
             function updateBulkButton() {
                 selectedPayments = [];
                 let selectedAmount = 0;
+                let selectedGroups = 0;
 
                 $('.payment_checkbox:checked').each(function() {
-                    selectedPayments.push($(this).val());
+                    selectedGroups++;
+                    String($(this).val()).split(',').forEach(function(id) {
+                        id = id.trim();
+                        if (id) selectedPayments.push(id);
+                    });
                     selectedAmount += parseFloat($(this).data('amount')) || 0;
                 });
 
+                selectedPayments = [...new Set(selectedPayments)];
+
                 $('#payment_ids').val(selectedPayments.join(','));
-                $('#selected_count, #modal_selected_count').text(selectedPayments.length);
+                $('#selected_count, #modal_selected_count').text(selectedGroups);
                 $('#selected_amount').text(formatAmount(selectedAmount));
 
                 const hasSelection = selectedPayments.length > 0;

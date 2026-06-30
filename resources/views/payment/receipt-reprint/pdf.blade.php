@@ -109,6 +109,32 @@
             word-wrap: break-word;
         }
 
+        .plot-detail-table {
+            border-collapse: collapse;
+            margin: 4px 0 6px;
+            width: 100%;
+        }
+
+        .plot-detail-table th {
+            background: #f2f2f2;
+            border: 1px solid #333;
+            font-size: 7.6px;
+            font-weight: bold;
+            padding: 4px 3px;
+            text-align: left;
+        }
+
+        .plot-detail-table td {
+            border: 1px solid #333;
+            font-size: 7.6px;
+            padding: 4px 3px;
+            vertical-align: top;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
         .label-col {
             font-weight: bold;
             width: 18%;
@@ -155,7 +181,16 @@
     $booking = $payment->customerBooking;
     $plotSale = $payment->plotSaleDetail;
 
-    $paidAmount = (float) ($payment->paid_amount ?? 0);
+    $receiptPayments = ($receiptPayments ?? collect([$payment]))->values();
+    $receiptTotals = $receiptTotals ?? [
+        'paid' => (float) ($payment->paid_amount ?? $payment->booking_amount ?? 0),
+        'due' => (float) ($payment->due_amount ?? 0),
+        'total_cost' => (float) ($plotSale?->total_plot_cost ?? 0),
+        'plot_count' => 1,
+    ];
+    $paidAmount = (float) $receiptTotals['paid'];
+    $totalCost = (float) $receiptTotals['total_cost'];
+    $dueAmount = (float) $receiptTotals['due'];
 
     $paymentAs = 'Payment';
     if ($payment->transaction_category === 'booking_fee') {
@@ -250,14 +285,14 @@
                                 <tr>
                                     <td class="label-col">Block :</td>
                                     <td class="value-col">
-                                        {{ $plotSale?->block?->block ?? 'N/A' }}
+                                        {{ $receiptPayments->pluck('plotSaleDetail.block.block')->filter()->unique()->implode(', ') ?: 'N/A' }}
                                     </td>
 
                                     <td class="space-col"></td>
 
                                     <td class="label-col">Plot No. :</td>
                                     <td class="value-col">
-                                        {{ $plotSale?->plotDetail?->plot_number ?? 'N/A' }}
+                                        {{ $receiptPayments->pluck('plotSaleDetail.plotDetail.plot_number')->filter()->unique()->implode(', ') ?: 'N/A' }}
                                     </td>
                                 </tr>
 
@@ -271,7 +306,7 @@
 
                                     <td class="label-col">Area :</td>
                                     <td class="value-col">
-                                        {{ number_format((float) ($plotSale?->plot_area ?? 0), 2) }} Sq.Ft.
+                                        {{ number_format((float) $receiptPayments->pluck('plotSaleDetail')->filter()->sum('plot_area'), 2) }} Sq.Ft.
                                     </td>
                                 </tr>
 
@@ -285,28 +320,72 @@
 
                                     <td class="label-col">Plot Rate :</td>
                                     <td class="value-col">
-                                        Rs. {{ number_format((float) ($plotSale?->plot_rate ?? 0), 2) }}/Sq.Ft.
+                                        {{ $receiptTotals['plot_count'] > 1 ? 'Multiple' : 'Rs. '.number_format((float) ($plotSale?->plot_rate ?? 0), 2).'/Sq.Ft.' }}
                                     </td>
                                 </tr>
 
                                 <tr>
                                     <td class="label-col">Plot Cost :</td>
                                     <td class="value-col">
-                                        Rs. {{ number_format((float) ($plotSale?->plot_cost ?? 0), 2) }}
+                                        Rs. {{ number_format((float) $receiptPayments->pluck('plotSaleDetail')->filter()->sum('plot_cost'), 2) }}
                                     </td>
 
                                     <td class="space-col"></td>
 
                                     <td class="label-col">PLC Amount :</td>
                                     <td class="value-col">
-                                        Rs. {{ number_format((float) ($plotSale?->plc_amount ?? 0), 2) }}
+                                        Rs. {{ number_format((float) $receiptPayments->pluck('plotSaleDetail')->filter()->sum('plc_amount'), 2) }}
                                     </td>
                                 </tr>
+
+                                @if (($receiptTotals['plot_count'] ?? 1) > 1)
+                                    <tr>
+                                        <td class="label-col">Plot Details :</td>
+                                        <td class="value-col" colspan="4">
+                                            <table class="plot-detail-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>#</th>
+                                                        <th>Project</th>
+                                                        <th>Block</th>
+                                                        <th>Plot</th>
+                                                        <th class="text-right">Area</th>
+                                                        <th class="text-right">Rate</th>
+                                                        <th class="text-right">Plot Cost</th>
+                                                        <th class="text-right">PLC</th>
+                                                        <th class="text-right">Total</th>
+                                                        <th class="text-right">Paid</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach ($receiptPayments as $rowPayment)
+                                                        @php
+                                                            $rowPlotSale = $rowPayment->plotSaleDetail;
+                                                            $rowPaid = (float) ($rowPayment->paid_amount ?? $rowPayment->booking_amount ?? 0);
+                                                        @endphp
+                                                        <tr>
+                                                            <td>{{ $loop->iteration }}</td>
+                                                            <td>{{ $rowPlotSale?->project?->name ?? 'N/A' }}</td>
+                                                            <td>{{ $rowPlotSale?->block?->block ?? 'N/A' }}</td>
+                                                            <td>{{ $rowPlotSale?->plotDetail?->plot_number ?? 'N/A' }}</td>
+                                                            <td class="text-right">{{ number_format((float) ($rowPlotSale?->plot_area ?? 0), 2) }}</td>
+                                                            <td class="text-right">{{ number_format((float) ($rowPlotSale?->plot_rate ?? 0), 2) }}</td>
+                                                            <td class="text-right">{{ number_format((float) ($rowPlotSale?->plot_cost ?? 0), 2) }}</td>
+                                                            <td class="text-right">{{ number_format((float) ($rowPlotSale?->plc_amount ?? 0), 2) }}</td>
+                                                            <td class="text-right">{{ number_format((float) ($rowPlotSale?->total_plot_cost ?? 0), 2) }}</td>
+                                                            <td class="text-right">{{ number_format($rowPaid, 2) }}</td>
+                                                        </tr>
+                                                    @endforeach
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                @endif
 
                                 <tr>
                                     <td class="label-col">Total Cost :</td>
                                     <td class="value-col">
-                                        Rs. {{ number_format((float) ($plotSale?->total_plot_cost ?? 0), 2) }}
+                                        Rs. {{ number_format($totalCost, 2) }}
                                     </td>
 
                                     <td class="space-col"></td>
@@ -327,7 +406,7 @@
 
                                     <td class="label-col">Due Amount :</td>
                                     <td class="value-col">
-                                        Rs. {{ number_format((float) ($payment->due_amount ?? 0), 2) }}
+                                        Rs. {{ number_format($dueAmount, 2) }}
                                     </td>
                                 </tr>
 

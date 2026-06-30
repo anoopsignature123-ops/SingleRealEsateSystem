@@ -36,6 +36,19 @@
 
         <div class="row g-3">
 
+            <div class="col-md-12">
+                <label class="form-label fw-semibold">Booking Mode</label>
+                <select name="booking_mode" id="bookingMode" class="form-select">
+                    <option value="single" {{ old('booking_mode', ($plotSales ?? collect())->count() > 1 ? 'multiple' : 'single') == 'single' ? 'selected' : '' }}>
+                        Single Plot Booking
+                    </option>
+                    <option value="multiple" {{ old('booking_mode', ($plotSales ?? collect())->count() > 1 ? 'multiple' : 'single') == 'multiple' ? 'selected' : '' }}>
+                        Multiple Plot Booking
+                    </option>
+                </select>
+                <small class="text-muted">Single booking old flow jaisa chalega. Multiple me ek booking ID ke under many plots add honge.</small>
+            </div>
+
             {{-- Property Name --}}
             <div class="col-md-6">
                 <label class="form-label fw-semibold">
@@ -92,6 +105,7 @@
             {{-- Hidden Plot ID --}}
             <input type="hidden" name="plot_detail_id" id="plotId"
                 value="{{ old('plot_detail_id', $plotSale?->plot_detail_id) }}">
+            <div id="selectedPlotHiddenFields"></div>
 
             <div class="col-md-12 mt-2">
                 <div class="card border-0 bg-light rounded-4">

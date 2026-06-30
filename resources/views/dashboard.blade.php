@@ -290,6 +290,13 @@
 
                                 <tbody>
                                     @forelse($monthlyDues as $index => $due)
+                                        @php
+                                            $plotCount = (int) ($due->group_plot_count ?? 1);
+                                            $projects = $due->group_projects ?: ($due->plotSaleDetail?->project?->name ?? 'N/A');
+                                            $blocks = $due->group_blocks ?: ($due->plotSaleDetail?->block?->block ?? 'N/A');
+                                            $plotNumbers = $due->group_plot_numbers ?: ($due->plotSaleDetail?->plotDetail?->plot_number ?? 'N/A');
+                                            $dueAmount = (float) ($due->group_due_amount ?? $due->due_amount ?? 0);
+                                        @endphp
                                         <tr>
                                             <td>
                                                 <span class="text-muted small">#{{ $index + 1 }}</span>
@@ -302,7 +309,10 @@
                                             </td>
 
                                             <td>
-                                                {{ $due->plotSaleDetail?->project?->name ?? 'N/A' }}
+                                                {{ $projects }}
+                                                @if ($blocks !== 'N/A')
+                                                    <small class="text-muted d-block">Block {{ $blocks }}</small>
+                                                @endif
                                             </td>
 
                                             <td>
@@ -316,8 +326,13 @@
 
                                             <td>
                                                 <span class="badge dashboard-light-badge rounded-pill px-3">
-                                                    {{ $due->plotSaleDetail?->plotDetail?->plot_number ?? 'N/A' }}
+                                                    {{ $plotNumbers }}
                                                 </span>
+                                                @if ($plotCount > 1)
+                                                    <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2 ms-1">
+                                                        {{ $plotCount }} Plots
+                                                    </span>
+                                                @endif
                                             </td>
 
                                             <td>
@@ -350,7 +365,7 @@
 
                                             <td>
                                                 <span class="text-danger fw-bold">
-                                                    &#8377;{{ number_format((float) ($due->due_amount ?? 0), 2) }}
+                                                    &#8377;{{ number_format($dueAmount, 2) }}
                                                 </span>
                                             </td>
 

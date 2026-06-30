@@ -1,6 +1,8 @@
 @push('scripts')
     <script>
         $(document).ready(function() {
+            let allPlotGroups = [];
+
             function formatAmount(amount) {
                 return Number(amount || 0).toFixed(2);
             }
@@ -32,6 +34,10 @@
                 return value;
             }
 
+            function selectedPlotType() {
+                return $('input[name="payment_plot_type"]:checked').val() || 'single';
+            }
+
             function setSummaryLoading(isLoading) {
                 $('#emi_summary_loader').toggleClass('d-none', !isLoading);
                 $('#project_id, #block_id, #plot_id, #booking_amount_input, #payment_mode, #submitEmiPaymentBtn')
@@ -61,6 +67,7 @@
             function clearBookingData() {
                 $('#customer_booking_id').val('');
                 $('#plot_sale_detail_id').val('');
+                $('#plot_sale_detail_ids_container').empty();
                 $('#booking_id').val('');
                 $('#customer_id').val('');
                 $('#customer_name').val('');
@@ -79,14 +86,102 @@
                 $('#max_due_amount').val('0');
                 $('#minimum_emi').html('&#8377;0.00');
                 $('#payment_history_count').text('0 Records');
+                $('#form_selected_plots_box').addClass('d-none');
+                $('#form_selected_plot_count').text('0 Plots');
+                $('#form_selected_plot_mode').text('Verify EMI plot details before entering amount.');
+                $('#form_selected_plots').html(`
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-3">
+                            Select booking group to view EMI details.
+                        </td>
+                    </tr>
+                `);
 
                 $('#payment_history').html(`
                     <tr>
-                        <td colspan="4" class="text-center text-muted py-3">No Payment Found</td>
+                        <td colspan="5" class="text-center text-muted py-3">No Payment Found</td>
                     </tr>
                 `);
 
                 updateQuickButtons();
+            }
+
+            function resetPlotGroups() {
+                $('#plot_group_hint').text('Select project and block to load EMI groups.');
+            }
+
+            function renderPlotGroups(plots) {
+                resetPlotGroups();
+                $('#plot_id').html('<option value="">Select booking group</option>');
+
+                const mode = selectedPlotType();
+                const filteredPlots = (Array.isArray(plots) ? plots : []).filter(function(plot) {
+                    return mode === 'multiple' ? Boolean(plot.is_multiple) : !Boolean(plot.is_multiple);
+                });
+
+                if (filteredPlots.length === 0) {
+                    $('#plot_group_hint').text(
+                        mode === 'multiple'
+                            ? 'No multiple plot EMI booking found for this block.'
+                            : 'No single plot EMI booking found for this block.'
+                    );
+                    refreshSelect($('#plot_id'));
+                    return;
+                }
+
+                $.each(filteredPlots, function(index, plot) {
+                    const bookingText = plot.booking_code ? ` | ${plot.booking_code}` : '';
+                    const customerText = plot.customer_name ? ` | ${plot.customer_name}` : '';
+                    $('#plot_id').append(
+                        `<option value="${plot.id}">${plot.plot_number}${bookingText}${customerText}</option>`
+                    );
+                });
+
+                $('#plot_group_hint').text(
+                    filteredPlots.length + (filteredPlots.length > 1 ? ' EMI groups found.' : ' EMI group found.')
+                );
+                refreshSelect($('#plot_id'));
+            }
+
+            function renderPlotSaleInputs(plotSaleIds) {
+                const ids = Array.isArray(plotSaleIds) && plotSaleIds.length ? plotSaleIds : [];
+                $('#plot_sale_detail_ids_container').empty();
+
+                $.each(ids, function(index, id) {
+                    $('#plot_sale_detail_ids_container').append(
+                        `<input type="hidden" name="plot_sale_detail_ids[]" value="${id}">`
+                    );
+                });
+            }
+
+            function renderSelectedPlots(plots) {
+                if (!Array.isArray(plots) || plots.length === 0) {
+                    $('#form_selected_plots_box').addClass('d-none');
+                    return;
+                }
+
+                let html = '';
+                $.each(plots, function(index, plot) {
+                    html += `<tr>
+                        <td>
+                            <span class="fw-bold text-dark">${plot.plot_no ?? '-'}</span>
+                            <span class="d-block small text-muted">${plot.project ?? '-'} / Block ${plot.block ?? '-'}</span>
+                        </td>
+                        <td class="text-nowrap">${plot.area ?? '0.00'} Sq.Ft.</td>
+                        <td class="text-nowrap">&#8377;${plot.total_cost ?? '0.00'}</td>
+                        <td class="text-nowrap">&#8377;${plot.monthly_emi ?? '0.00'}</td>
+                        <td class="text-end text-nowrap fw-semibold">&#8377;${plot.due_amount ?? '0.00'}</td>
+                    </tr>`;
+                });
+
+                $('#form_selected_plots').html(html);
+                $('#form_selected_plot_count').text(plots.length + (plots.length > 1 ? ' Plots' : ' Plot'));
+                $('#form_selected_plot_mode').text(
+                    plots.length > 1
+                        ? 'Multiple EMI group selected. One receipt will cover these plots.'
+                        : 'Single EMI plot selected.'
+                );
+                $('#form_selected_plots_box').removeClass('d-none');
             }
 
             function validateAmount(showAlert = true) {
@@ -166,7 +261,9 @@
             $('#project_id').on('change', function() {
                 const projectId = $(this).val();
                 $('#block_id').html('<option value="">Select Block</option>');
-                $('#plot_id').html('<option value="">Select Plot</option>');
+                $('#plot_id').html('<option value="">Select booking group</option>');
+                allPlotGroups = [];
+                resetPlotGroups();
                 refreshSelect($('#block_id'));
                 refreshSelect($('#plot_id'));
                 clearBookingData();
@@ -185,7 +282,9 @@
 
             $('#block_id').on('change', function() {
                 const blockId = $(this).val();
-                $('#plot_id').html('<option value="">Select Plot</option>');
+                $('#plot_id').html('<option value="">Select booking group</option>');
+                allPlotGroups = [];
+                resetPlotGroups();
                 refreshSelect($('#plot_id'));
                 clearBookingData();
 
@@ -202,11 +301,19 @@
                         return;
                     }
 
-                    $.each(res.data, function(index, plot) {
-                        $('#plot_id').append(`<option value="${plot.id}">${plot.plot_number}</option>`);
-                    });
-                    refreshSelect($('#plot_id'));
+                    allPlotGroups = Array.isArray(res.data) ? res.data : [];
+                    renderPlotGroups(allPlotGroups);
                 });
+            });
+
+            $('input[name="payment_plot_type"]').on('change', function() {
+                clearBookingData();
+                renderPlotGroups(allPlotGroups);
+                $('#payment_plot_type_help').text(
+                    selectedPlotType() === 'multiple'
+                        ? 'Multiple mode me sirf grouped EMI bookings show hongi.'
+                        : 'Single mode me sirf one-plot EMI bookings show hongi.'
+                );
             });
 
             $('#plot_id').on('change', function() {
@@ -232,9 +339,11 @@
 
                     $('#customer_booking_id').val(res.booking_db_id);
                     $('#plot_sale_detail_id').val(res.plot_sale_id);
+                    renderPlotSaleInputs(res.plot_sale_ids || [res.plot_sale_id]);
                     $('#booking_id').val(res.booking_code);
                     $('#customer_id').val(res.customer_code);
                     $('#customer_name').val(res.customer_name);
+                    renderSelectedPlots(res.plots || []);
 
                     $('#total_cost').text(res.total_cost);
                     $('#booking_amount').text(res.booking_amount);
@@ -255,6 +364,7 @@
                         $.each(res.payment_history, function(index, payment) {
                             html += `<tr>
                                 <td>${payment.receipt_no ?? '-'}</td>
+                                <td>${payment.plot_no ?? '-'}</td>
                                 <td>${payment.date ?? '-'}</td>
                                 <td>&#8377;${payment.amount ?? '0'}</td>
                                 <td><span class="${statusBadgeClass(payment.payment_status)}">${payment.status ?? '-'}</span></td>
@@ -263,7 +373,7 @@
                         $('#payment_history_count').text(res.payment_history.length + ' Records');
                     } else {
                         html = `<tr>
-                            <td colspan="4" class="text-center text-muted py-3">No Payment Found</td>
+                            <td colspan="5" class="text-center text-muted py-3">No Payment Found</td>
                         </tr>`;
                         $('#payment_history_count').text('0 Records');
                     }

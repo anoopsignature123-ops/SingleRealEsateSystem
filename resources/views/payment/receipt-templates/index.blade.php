@@ -96,12 +96,12 @@
                             @endif
                         </div>
 
-                        <div class="receipt-template-meta">
+                        {{-- <div class="receipt-template-meta">
                             <span>View Path</span>
                             <strong>{{ $template->view_path }}</strong>
-                        </div>
+                        </div> --}}
 
-                        <div class="receipt-template-actions">
+                        <div class="receipt-template-actions mt-3">
                             <a href="{{ route('receipt-templates.preview', $template) }}" target="_blank"
                                 class="btn btn-outline-secondary">
                                 <i class="bi bi-eye me-1"></i> Preview PDF

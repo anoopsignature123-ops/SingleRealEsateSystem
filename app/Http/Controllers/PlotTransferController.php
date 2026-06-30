@@ -48,6 +48,8 @@ class PlotTransferController extends Controller
     {
         $data = $request->validate([
             'plot_sale_detail_id' => 'required|exists:plot_sale_details,id',
+            'plot_sale_detail_ids' => 'nullable|array|min:1',
+            'plot_sale_detail_ids.*' => 'integer|exists:plot_sale_details,id',
             'new_customer_booking_id' => 'required|exists:customer_bookings,id',
             'transfer_charge' => 'nullable|numeric|min:0',
             'transfer_date' => 'nullable|date',
@@ -55,7 +57,14 @@ class PlotTransferController extends Controller
             'remark' => 'nullable|string',
         ]);
 
-        $this->plotTransferService->store($data);
+        try {
+            $this->plotTransferService->store($data);
+        } catch (\Throwable $exception) {
+            return response()->json([
+                'status' => false,
+                'message' => $exception->getMessage() ?: 'Plot transfer failed.',
+            ], 422);
+        }
 
         return response()->json([
             'status' => true,

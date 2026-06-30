@@ -110,7 +110,44 @@ class DashboardController extends Controller
             }
         }
 
-        return $monthlyDues->sortByDesc('id')->values();
+        return $monthlyDues
+            ->groupBy(function ($due) {
+                $bookingCode = $due->plotSaleDetail?->booking_code
+                    ?: $due->customerBooking?->booking_code
+                    ?: 'booking-'.$due->customer_booking_id;
+
+                return implode('|', [
+                    $due->customer_booking_id,
+                    $bookingCode,
+                    Carbon::parse($due->emi_date)->format('Y-m-d'),
+                ]);
+            })
+            ->map(function ($group) {
+                $first = $group->first();
+                $plotSales = $group->pluck('plotSaleDetail')->filter();
+
+                $first->group_due_amount = round((float) $group->sum('due_amount'), 2);
+                $first->group_plot_count = $plotSales->count();
+                $first->group_projects = $plotSales
+                    ->map(fn ($sale) => $sale?->project?->name)
+                    ->filter()
+                    ->unique()
+                    ->implode(', ');
+                $first->group_blocks = $plotSales
+                    ->map(fn ($sale) => $sale?->block?->block)
+                    ->filter()
+                    ->unique()
+                    ->implode(', ');
+                $first->group_plot_numbers = $plotSales
+                    ->map(fn ($sale) => $sale?->plotDetail?->plot_number)
+                    ->filter()
+                    ->unique()
+                    ->implode(', ');
+
+                return $first;
+            })
+            ->sortByDesc('id')
+            ->values();
     }
 
     private function calculateOutstanding()

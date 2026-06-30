@@ -1,5 +1,10 @@
 @php
     $payment = $payment ?? null;
+    $selectedPlotSales = ($selectedPlotSales ?? collect())->values();
+    if ($selectedPlotSales->isEmpty() && isset($plotSale) && $plotSale) {
+        $selectedPlotSales = collect([$plotSale]);
+    }
+    $totalBookingPayable = (float) $selectedPlotSales->sum('total_plot_cost');
 @endphp
 
 <div class="card border-0 shadow-sm mb-4 rounded-4 overflow-hidden">
@@ -33,16 +38,62 @@
                 </div>
 
                 <div class="fs-5 fw-bold">
-                    ₹ {{ number_format($plotSale->total_plot_cost ?? 0, 2) }}
+                    ₹ {{ number_format($totalBookingPayable, 2) }}
                 </div>
             </div>
         </div>
 
+        @if ($selectedPlotSales->count() > 1)
+            <div class="card border-0 bg-light rounded-4 mb-4">
+                <div class="card-body p-3">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+                        <h6 class="fw-bold text-success mb-0">
+                            <i class="bi bi-houses me-1"></i>
+                            Multiple Plot Booking Summary
+                        </h6>
+                        <span class="badge bg-success-subtle text-success border rounded-pill px-3 py-2">
+                            {{ $selectedPlotSales->count() }} Plots
+                        </span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-sm align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Project / Block / Plot</th>
+                                    <th class="text-end">Area</th>
+                                    <th class="text-end">Plot Cost</th>
+                                    <th class="text-end">Total Payable</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($selectedPlotSales as $sale)
+                                    <tr>
+                                        <td>
+                                            <strong>{{ $sale->project?->name ?? '-' }}</strong>
+                                            <small class="text-muted d-block">
+                                                {{ $sale->block?->block ?? '-' }} / Plot {{ $sale->plotDetail?->plot_number ?? '-' }}
+                                            </small>
+                                        </td>
+                                        <td class="text-end">{{ number_format((float) $sale->plot_area, 2) }}</td>
+                                        <td class="text-end">₹{{ number_format((float) $sale->plot_cost, 2) }}</td>
+                                        <td class="text-end fw-bold text-success">₹{{ number_format((float) $sale->total_plot_cost, 2) }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        @endif
+
         <div class="row g-3">
 
-            <input type="hidden" id="totalPlotCost" value="{{ $plotSale->total_plot_cost ?? 0 }}">
+            <input type="hidden" id="totalPlotCost" value="{{ $totalBookingPayable }}">
+            @foreach ($selectedPlotSales as $sale)
+                <input type="hidden" name="plot_sale_detail_ids[]" value="{{ $sale->id }}">
+            @endforeach
             <input type="hidden" name="plot_sale_detail_id"
-                value="{{ old('plot_sale_detail_id', request('plot_sale_detail_id')) }}">
+                value="{{ old('plot_sale_detail_id', request('plot_sale_detail_id', $selectedPlotSales->first()?->id)) }}">
 
             <div class="col-md-6">
                 <label class="form-label fw-semibold">

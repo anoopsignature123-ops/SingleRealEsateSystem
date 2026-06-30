@@ -67,7 +67,14 @@ class PaymentTransferController extends Controller
             'remark' => 'nullable|string',
         ]);
 
-        $this->paymentTransferService->store($data);
+        try {
+            $this->paymentTransferService->store($data);
+        } catch (\Throwable $exception) {
+            return response()->json([
+                'status' => false,
+                'message' => $exception->getMessage() ?: 'Payment transfer failed.',
+            ], 422);
+        }
 
         return response()->json([
             'status' => true,

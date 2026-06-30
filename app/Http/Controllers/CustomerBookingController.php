@@ -60,9 +60,16 @@ class CustomerBookingController extends Controller
             ? $plotSales->firstWhere('id', $request->plot_sale_detail_id)
             : $customer->plotSaleDetail;
         $payment = $customer->payments->firstWhere('plot_sale_detail_id', $request->plot_sale_detail_id);
+        $selectedPlotSales = $step == 5
+            ? $plotSales->filter(fn ($sale) => ! $sale->payments->where('transaction_category', 'booking_fee')->count())
+            : collect();
+
+        if ($step == 5 && $selectedPlotSales->isEmpty()) {
+            $selectedPlotSales = $plotSales;
+        }
 
         return view('customer-booking.create',
-            compact('customer', 'step', 'associates', 'customers', 'projects', 'plotSale', 'payment', 'plotSales'));
+            compact('customer', 'step', 'associates', 'customers', 'projects', 'plotSale', 'payment', 'plotSales', 'selectedPlotSales'));
     }
 
     public function update(Request $request, $id)
@@ -93,11 +100,14 @@ class CustomerBookingController extends Controller
         if ($step == 4) {
             $validated = app(CustomerBookingStepFourRequest::class)->validated();
             $plotSale = $this->customerBookingService->storeStepFour($id, $validated);
+            $plotSaleId = $plotSale instanceof \Illuminate\Support\Collection
+                ? $plotSale->first()?->id
+                : $plotSale->id;
 
             return redirect()->route('customer-booking.edit', [
                 $id,
                 'step' => 5,
-                'plot_sale_detail_id' => $plotSale->id,
+                'plot_sale_detail_id' => $plotSaleId,
             ])->with('success', 'Plot details saved successfully.');
         }
         if ($step == 5) {

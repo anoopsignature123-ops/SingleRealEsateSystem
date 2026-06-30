@@ -181,9 +181,16 @@
 @php
     $booking = $payment->customerBooking;
     $plotSale = $payment->plotSaleDetail;
-    $paidAmount = (float) ($payment->paid_amount ?? $payment->booking_amount ?? 0);
-    $totalCost = (float) ($plotSale?->total_plot_cost ?? $plotSale?->final_payable ?? 0);
-    $dueAmount = (float) ($payment->due_amount ?? max(0, $totalCost - $paidAmount));
+    $receiptPayments = ($receiptPayments ?? collect([$payment]))->values();
+    $receiptTotals = $receiptTotals ?? [
+        'paid' => (float) ($payment->paid_amount ?? $payment->booking_amount ?? 0),
+        'due' => (float) ($payment->due_amount ?? 0),
+        'total_cost' => (float) ($plotSale?->total_plot_cost ?? $plotSale?->final_payable ?? 0),
+        'plot_count' => 1,
+    ];
+    $paidAmount = (float) $receiptTotals['paid'];
+    $totalCost = (float) $receiptTotals['total_cost'];
+    $dueAmount = (float) $receiptTotals['due'];
     $paymentAs = match ($payment->transaction_category) {
         'booking_fee' => 'Booking Amount',
         'emi_payment' => 'EMI Payment',
@@ -226,7 +233,7 @@
                 <td><span class="label">Customer ID</span><span class="value">{{ $booking?->customer_code ?? 'N/A' }}</span></td>
                 <td><span class="label">Customer Name</span><span class="value">{{ $booking?->primaryDetail?->name ?? $booking?->customer_name ?? 'N/A' }}</span></td>
                 <td><span class="label">Phone</span><span class="value">{{ $booking?->primaryDetail?->phone ?? $booking?->mobile ?? 'N/A' }}</span></td>
-                <td><span class="label">Status</span><span class="value">{{ ucfirst($payment->payment_status ?? 'N/A') }}</span></td>
+                <td><span class="label">Total Plots</span><span class="value">{{ $receiptTotals['plot_count'] ?? 1 }}</span></td>
             </tr>
             <tr>
                 <td colspan="4"><span class="label">Address</span><span class="value">{{ $booking?->primaryDetail?->permanent_address ?? 'N/A' }}</span></td>
@@ -237,27 +244,39 @@
         <table class="details">
             <thead>
                 <tr>
-                    <th width="34%">Description</th>
-                    <th width="15%" class="center">Area</th>
-                    <th width="15%" class="right">Rate</th>
-                    <th width="18%" class="right">Total Cost</th>
-                    <th width="18%" class="right">Paid</th>
+                    <th width="28%">Plot Detail</th>
+                    <th width="12%" class="center">Area</th>
+                    <th width="12%" class="right">Rate</th>
+                    <th width="14%" class="right">Plot Cost</th>
+                    <th width="10%" class="right">PLC</th>
+                    <th width="12%" class="right">Total</th>
+                    <th width="12%" class="right">Paid</th>
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>
-                        <strong>{{ $plotSale?->project?->name ?? 'Project N/A' }}</strong>
-                        <span class="muted">Booking: {{ $plotSale?->booking_code ?? $booking?->booking_code ?? 'N/A' }} | Block: {{ $plotSale?->block?->block ?? 'N/A' }} | Plot: {{ $plotSale?->plotDetail?->plot_number ?? 'N/A' }}</span>
-                    </td>
-                    <td class="center">{{ number_format((float) ($plotSale?->plot_area ?? 0), 2) }} Sq.Ft.</td>
-                    <td class="right">Rs. {{ number_format((float) ($plotSale?->plot_rate ?? 0), 2) }}</td>
-                    <td class="right">Rs. {{ number_format($totalCost, 2) }}</td>
-                    <td class="right">Rs. {{ number_format($paidAmount, 2) }}</td>
-                </tr>
+                @foreach ($receiptPayments as $rowPayment)
+                    @php
+                        $rowPlotSale = $rowPayment->plotSaleDetail;
+                        $rowPaid = (float) ($rowPayment->paid_amount ?? $rowPayment->booking_amount ?? 0);
+                    @endphp
+                    <tr>
+                        <td>
+                            <strong>{{ $rowPlotSale?->project?->name ?? 'Project N/A' }}</strong>
+                            <span class="muted">Booking: {{ $rowPlotSale?->booking_code ?? $booking?->booking_code ?? 'N/A' }} | Block: {{ $rowPlotSale?->block?->block ?? 'N/A' }} | Plot: {{ $rowPlotSale?->plotDetail?->plot_number ?? 'N/A' }}</span>
+                        </td>
+                        <td class="center">{{ number_format((float) ($rowPlotSale?->plot_area ?? 0), 2) }} Sq.Ft.</td>
+                        <td class="right">Rs. {{ number_format((float) ($rowPlotSale?->plot_rate ?? 0), 2) }}</td>
+                        <td class="right">Rs. {{ number_format((float) ($rowPlotSale?->plot_cost ?? 0), 2) }}</td>
+                        <td class="right">Rs. {{ number_format((float) ($rowPlotSale?->plc_amount ?? 0), 2) }}</td>
+                        <td class="right">Rs. {{ number_format((float) ($rowPlotSale?->total_plot_cost ?? 0), 2) }}</td>
+                        <td class="right">Rs. {{ number_format($rowPaid, 2) }}</td>
+                    </tr>
+                @endforeach
                 <tr>
                     <td><strong>{{ $paymentAs }}</strong><span class="muted">{{ $payment->plan_type === 'emi_plan' ? 'EMI Plan' : 'Full Payment' }}</span></td>
                     <td class="center">-</td>
+                    <td class="right">-</td>
+                    <td class="right">-</td>
                     <td class="right">-</td>
                     <td class="right">Due Amount</td>
                     <td class="right">Rs. {{ number_format($dueAmount, 2) }}</td>

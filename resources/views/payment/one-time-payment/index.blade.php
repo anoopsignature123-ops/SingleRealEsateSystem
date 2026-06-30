@@ -25,7 +25,7 @@
             @csrf
             <div class="row">
                 {{-- LEFT SIDE --}}
-                <div class="col-lg-8">
+                <div class="col-lg-7">
                     <div class="card border-0 shadow-sm one-time-payment-card">
                         <div class="card-body p-4">
                             {{-- Hidden Fields --}}
@@ -33,9 +33,34 @@
                                 value="{{ old('customer_booking_id') }}">
                             <input type="hidden" name="plot_sale_detail_id" id="plot_sale_detail_id"
                                 value="{{ old('plot_sale_detail_id') }}">
+                            <div id="plot_sale_detail_ids_container"></div>
                             <input type="hidden" id="max_due_amount" value="0">
 
                             <div class="row">
+                                <div class="col-12 mb-3">
+                                    <label class="form-label fw-semibold d-block">Payment For *</label>
+                                    <div class="d-flex flex-wrap gap-4 border rounded-3 bg-white px-3 py-2">
+                                        <div class="form-check">
+                                            <input type="radio" class="form-check-input" name="payment_plot_type"
+                                                id="payment_plot_type_single" value="single" autocomplete="off" checked>
+                                            <label class="form-check-label fw-semibold" for="payment_plot_type_single">
+                                                Single Plot
+                                            </label>
+                                        </div>
+
+                                        <div class="form-check">
+                                            <input type="radio" class="form-check-input" name="payment_plot_type"
+                                                id="payment_plot_type_multiple" value="multiple" autocomplete="off">
+                                            <label class="form-check-label fw-semibold" for="payment_plot_type_multiple">
+                                                Multiple Plot
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <small class="text-muted d-block mt-2" id="payment_plot_type_help">
+                                        Select single plot payment or grouped multiple plot payment first.
+                                    </small>
+                                </div>
+
                                 {{-- Project --}}
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label fw-semibold">Project *</label>
@@ -57,10 +82,48 @@
 
                                 {{-- Plot --}}
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label fw-semibold">Plot *</label>
-                                    <select id="plot_id" class="form-select" required>
-                                        <option value="">Select Plot</option>
+                                    <label class="form-label fw-semibold">Booking / Plot Group *</label>
+                                    <select id="plot_id" class="form-select">
+                                        <option value="">Select booking group</option>
                                     </select>
+                                    <small class="text-muted d-block mt-1" id="plot_group_hint">
+                                        Select project and block to load booking groups.
+                                    </small>
+                                </div>
+
+                                <div class="col-12">
+                                    <div class="border rounded-3 p-3 mb-3 bg-white d-none" id="form_selected_plots_box">
+                                        <div class="d-flex align-items-start justify-content-between gap-2 mb-2">
+                                            <div>
+                                                <h6 class="fw-bold mb-1">Plot Payment Details</h6>
+                                                <small class="text-muted" id="form_selected_plot_mode">
+                                                    Verify plot details before entering payment amount.
+                                                </small>
+                                            </div>
+                                            <span class="badge bg-success-subtle text-success border"
+                                                id="form_selected_plot_count">0 Plots</span>
+                                        </div>
+                                        <div class="table-responsive">
+                                            <table class="table table-sm table-bordered table-hover align-middle mb-0 one-time-detail-table">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th>Plot</th>
+                                                        <th>Area</th>
+                                                        <th>Rate</th>
+                                                        <th>PLC</th>
+                                                        <th class="text-end">Total</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="form_selected_plots">
+                                                    <tr>
+                                                        <td colspan="5" class="text-center text-muted py-3">
+                                                            Select booking group to view plot details.
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 {{-- Payment Type --}}

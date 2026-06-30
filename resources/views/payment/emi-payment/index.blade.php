@@ -24,15 +24,39 @@
         <form method="POST" action="{{ route('emi-payment.store') }}" id="emiPaymentForm">
             @csrf
             <div class="row">
-                <div class="col-lg-8">
+                <div class="col-lg-7">
                     <div class="card border-0 shadow-sm emi-payment-card">
                         <div class="card-body p-4">
                             <input type="hidden" name="customer_booking_id" id="customer_booking_id">
                             <input type="hidden" name="plot_sale_detail_id" id="plot_sale_detail_id">
+                            <div id="plot_sale_detail_ids_container"></div>
                             <input type="hidden" id="monthly_emi_value">
                             <input type="hidden" id="max_due_amount" value="0">
 
                             <div class="row">
+                                <div class="col-12 mb-3">
+                                    <label class="form-label fw-semibold d-block">Payment For <span class="text-danger">*</span></label>
+                                    <div class="d-flex flex-wrap gap-4 border rounded-3 bg-white px-3 py-2">
+                                        <div class="form-check">
+                                            <input type="radio" class="form-check-input" name="payment_plot_type"
+                                                id="emi_plot_type_single" value="single" autocomplete="off" checked>
+                                            <label class="form-check-label fw-semibold" for="emi_plot_type_single">
+                                                Single Plot
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input type="radio" class="form-check-input" name="payment_plot_type"
+                                                id="emi_plot_type_multiple" value="multiple" autocomplete="off">
+                                            <label class="form-check-label fw-semibold" for="emi_plot_type_multiple">
+                                                Multiple Plot
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <small class="text-muted d-block mt-2" id="payment_plot_type_help">
+                                        Select single EMI or grouped multiple plot EMI first.
+                                    </small>
+                                </div>
+
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label fw-semibold">Project <span class="text-danger">*</span></label>
                                     <select id="project_id" class="form-select">
@@ -51,10 +75,48 @@
                                 </div>
 
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label fw-semibold">Plot <span class="text-danger">*</span></label>
+                                    <label class="form-label fw-semibold">Booking / Plot Group <span class="text-danger">*</span></label>
                                     <select id="plot_id" class="form-select">
-                                        <option value="">Select Plot</option>
+                                        <option value="">Select booking group</option>
                                     </select>
+                                    <small class="text-muted d-block mt-1" id="plot_group_hint">
+                                        Select project and block to load EMI groups.
+                                    </small>
+                                </div>
+
+                                <div class="col-12">
+                                    <div class="border rounded-3 p-3 mb-3 bg-white d-none" id="form_selected_plots_box">
+                                        <div class="d-flex align-items-start justify-content-between gap-2 mb-2">
+                                            <div>
+                                                <h6 class="fw-bold mb-1">EMI Plot Details</h6>
+                                                <small class="text-muted" id="form_selected_plot_mode">
+                                                    Verify EMI plot details before entering amount.
+                                                </small>
+                                            </div>
+                                            <span class="badge bg-success-subtle text-success border"
+                                                id="form_selected_plot_count">0 Plots</span>
+                                        </div>
+                                        <div class="table-responsive">
+                                            <table class="table table-sm table-bordered table-hover align-middle mb-0 emi-detail-table">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th>Plot</th>
+                                                        <th>Area</th>
+                                                        <th>Total Cost</th>
+                                                        <th>Monthly EMI</th>
+                                                        <th class="text-end">Due</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="form_selected_plots">
+                                                    <tr>
+                                                        <td colspan="5" class="text-center text-muted py-3">
+                                                            Select booking group to view EMI details.
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div class="col-md-6 mb-3">

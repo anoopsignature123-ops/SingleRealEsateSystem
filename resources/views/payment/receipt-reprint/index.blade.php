@@ -10,7 +10,7 @@
                 <div>
                     <span class="text-success fw-bold text-uppercase small">Receipt Center</span>
                     <h3 class="fw-bold mb-1 text-dark">Find Receipt & Reprint</h3>
-                    <p class="text-muted mb-0 small">Search payment receipts by plot and customer, then download PDF.</p>
+                    <p class="text-muted mb-0 small">Select customer first, then choose booking or receipt group to download PDF.</p>
                 </div>
             </div>
         </div>
@@ -28,30 +28,30 @@
 
                 <div class="row g-3 align-items-end">
                     <div class="col-md-5">
-                        <label class="form-label fw-semibold">Plot No <span class="text-danger">*</span></label>
-                        <select name="plot_id" id="plot_select"
-                            class="form-select @error('plot_id') is-invalid @enderror">
-                            <option value="">Select Plot</option>
-                            @foreach ($plots as $plot)
-                                <option value="{{ $plot->id }}"
-                                    {{ (old('plot_id') ?? ($plot_id ?? '')) == $plot->id ? 'selected' : '' }}>
-                                    {{ $plot->plot_number }}
+                        <label class="form-label fw-semibold">Customer <span class="text-danger">*</span></label>
+                        <select name="customer_booking_id" id="customer_booking_id"
+                            class="form-select @error('customer_booking_id') is-invalid @enderror">
+                            <option value="">Select Customer</option>
+                            @foreach ($customers as $customer)
+                                <option value="{{ $customer->id }}"
+                                    {{ (old('customer_booking_id') ?? ($customer_booking_id ?? '')) == $customer->id ? 'selected' : '' }}>
+                                    {{ $customer->customer_code }} / {{ $customer->primaryDetail?->name ?? $customer->customer_name ?? 'N/A' }}
                                 </option>
                             @endforeach
                         </select>
-                        @error('plot_id')
+                        @error('customer_booking_id')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
 
                     <div class="col-md-5">
-                        <label class="form-label fw-semibold">Customer <span class="text-danger">*</span></label>
-                        <select name="customer_booking_id" id="customer_booking_id"
-                            class="form-select @error('customer_booking_id') is-invalid @enderror"
-                            data-selected="{{ old('customer_booking_id') ?? ($customer_booking_id ?? '') }}">
-                            <option value="">Select Customer</option>
+                        <label class="form-label fw-semibold">Booking / Plot / Receipt</label>
+                        <select name="receipt_group" id="receipt_group"
+                            class="form-select @error('receipt_group') is-invalid @enderror"
+                            data-selected="{{ old('receipt_group') ?? ($receipt_group ?? '') }}">
+                            <option value="">All Receipts</option>
                         </select>
-                        @error('customer_booking_id')
+                        @error('receipt_group')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
@@ -152,15 +152,19 @@
                                         <small class="text-muted">{{ $booking?->customer_code ?? 'N/A' }}</small>
                                     </td>
                                     <td>
-                                        <strong>{{ $plotSale?->booking_code ?? $booking?->booking_code ?? 'N/A' }}</strong>
+                                        <strong>{{ $receipt->group_booking_label ?? ($plotSale?->booking_code ?? $booking?->booking_code ?? 'N/A') }}</strong>
                                         <br>
                                         <small class="text-muted">
                                             {{ $plotSale?->project?->name ?? '-' }} /
-                                            {{ $plotSale?->block?->block ?? '-' }} /
-                                            {{ $plotSale?->plotDetail?->plot_number ?? '-' }}
+                                            {{ $receipt->group_plot_label ?? (($plotSale?->block?->block ?? '-') . ' / ' . ($plotSale?->plotDetail?->plot_number ?? '-')) }}
+                                            @if (($receipt->group_plot_count ?? 1) > 1)
+                                                <span class="badge bg-success-subtle text-success border ms-1">
+                                                    {{ $receipt->group_plot_count }} Plots
+                                                </span>
+                                            @endif
                                         </small>
                                     </td>
-                                    <td class="fw-bold text-success">&#8377;{{ number_format($amount, 2) }}</td>
+                                    <td class="fw-bold text-success">&#8377;{{ number_format((float) ($receipt->group_amount ?? $amount), 2) }}</td>
                                     <td>
                                         <span class="badge bg-info-subtle text-info border">
                                             {{ strtoupper(str_replace('_', ' / ', $receipt->payment_mode ?? 'N/A')) }}
@@ -207,54 +211,54 @@
                 button.find('.btn-loader').toggleClass('d-none', !isLoading);
             }
 
-            function loadCustomers(plotId) {
-                const customerSelect = $('#customer_booking_id');
-                const selectedCustomerId = customerSelect.data('selected') || '';
+            function loadReceiptGroups(customerId) {
+                const groupSelect = $('#receipt_group');
+                const selectedGroup = groupSelect.data('selected') || '';
 
-                customerSelect.html('<option value="">Loading customers...</option>').prop('disabled', true);
+                groupSelect.html('<option value="">Loading receipts...</option>').prop('disabled', true);
 
-                if (!plotId) {
-                    customerSelect.html('<option value="">Select Customer</option>').prop('disabled', false);
+                if (!customerId) {
+                    groupSelect.html('<option value="">All Receipts</option>').prop('disabled', false);
                     return;
                 }
 
-                const url = "{{ route('receipt-reprint.customers', ':id') }}".replace(':id', plotId);
+                const url = "{{ route('receipt-reprint.groups', ':id') }}".replace(':id', customerId);
 
                 $.get(url, function(res) {
-                    customerSelect.html('<option value="">Select Customer</option>');
+                    groupSelect.html('<option value="">All Receipts</option>');
 
                     if (!res.length) {
-                        customerSelect.append('<option value="">No customer found</option>');
+                        groupSelect.append('<option value="">No receipt found</option>');
                         return;
                     }
 
-                    $.each(res, function(index, customer) {
-                        const selected = String(selectedCustomerId) === String(customer.id) ? 'selected' : '';
-                        customerSelect.append(`
-                            <option value="${customer.id}" ${selected}>
-                                ${customer.text}
+                    $.each(res, function(index, group) {
+                        const selected = String(selectedGroup) === String(group.id) ? 'selected' : '';
+                        groupSelect.append(`
+                            <option value="${group.id}" ${selected}>
+                                ${group.text}
                             </option>
                         `);
                     });
                 }).fail(function() {
-                    customerSelect.html('<option value="">Unable to load customers</option>');
+                    groupSelect.html('<option value="">Unable to load receipts</option>');
                 }).always(function() {
-                    customerSelect.prop('disabled', false);
+                    groupSelect.prop('disabled', false);
                 });
             }
 
-            $('#plot_select').on('change', function() {
-                $('#customer_booking_id').data('selected', '');
-                loadCustomers($(this).val());
+            $('#customer_booking_id').on('change', function() {
+                $('#receipt_group').data('selected', '');
+                loadReceiptGroups($(this).val());
             });
 
             $('#receiptSearchForm').on('submit', function(event) {
-                if (!$('#plot_select').val() || !$('#customer_booking_id').val()) {
+                if (!$('#customer_booking_id').val()) {
                     event.preventDefault();
                     Swal.fire({
                         icon: 'warning',
                         title: 'Select Details',
-                        text: 'Please select plot and customer first.'
+                        text: 'Please select customer first.'
                     });
                     return;
                 }
@@ -262,8 +266,8 @@
                 setSearchLoading(true);
             });
 
-            if ($('#plot_select').val()) {
-                loadCustomers($('#plot_select').val());
+            if ($('#customer_booking_id').val()) {
+                loadReceiptGroups($('#customer_booking_id').val());
             }
         });
     </script>

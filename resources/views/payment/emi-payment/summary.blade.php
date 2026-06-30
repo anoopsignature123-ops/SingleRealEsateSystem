@@ -1,4 +1,4 @@
-<div class="col-lg-4">
+<div class="col-lg-5">
     <div class="emi-summary-card sticky-top">
         <div class="emi-summary-loader d-none" id="emi_summary_loader">
             <div class="emi-loader-box">
@@ -72,10 +72,11 @@
                 <span class="badge bg-light text-dark border" id="payment_history_count">0 Records</span>
             </div>
             <div class="table-responsive">
-                <table class="table table-sm align-middle mb-0">
+                <table class="table table-sm table-hover align-middle mb-0 emi-history-table">
                     <thead class="table-light">
                         <tr>
                             <th>Receipt</th>
+                            <th>Plot</th>
                             <th>Date</th>
                             <th>Paid</th>
                             <th>Status</th>
@@ -83,7 +84,7 @@
                     </thead>
                     <tbody id="payment_history">
                         <tr>
-                            <td colspan="4" class="text-center text-muted py-3">No Payment Found</td>
+                            <td colspan="5" class="text-center text-muted py-3">No Payment Found</td>
                         </tr>
                     </tbody>
                 </table>

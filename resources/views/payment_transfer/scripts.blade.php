@@ -1,5 +1,10 @@
 @push('scripts')
 <script>
+let sourcePaymentTransfer = {
+    customerBookingId: null,
+    plotSaleIds: []
+};
+
 $(document).ready(function () {
 
     $('#projectId').on('change', function () {
@@ -45,7 +50,7 @@ $(document).ready(function () {
                 Swal.fire({
                     icon: 'warning',
                     title: 'No Plot Found',
-                    text: 'Is block me payment transfer ke liye koi plot payment nahi mila.'
+                    text: 'No plot payments were found in this block for payment transfer.'
                 });
             }
 
@@ -80,7 +85,12 @@ $(document).ready(function () {
             $('#sourceCustomerName').val(res.customer_name);
             $('#sourceProject').val(res.project_name);
             $('#sourceBlock').val(res.block_name);
-            $('#sourcePlot').val(res.plot_number);
+            $('#sourcePlot').val(`${res.plot_number}${res.plot_count > 1 ? ' (' + res.plot_count + ' Plots)' : ''}`);
+            sourcePaymentTransfer.customerBookingId = String(res.customer_booking_id || '');
+            sourcePaymentTransfer.plotSaleIds = (res.plot_sale_ids || [res.plot_sale_id])
+                .map(function (id) {
+                    return String(id);
+                });
 
             $('#sourceDetailsCard').removeClass('d-none');
             $('#paymentListCard').removeClass('d-none');
@@ -93,6 +103,15 @@ $(document).ready(function () {
 
     $('#selectAllPayments').on('change', function () {
         $('.payment-checkbox').prop('checked', $(this).is(':checked'));
+        updatePaymentSelectionSummary();
+    });
+
+    $(document).on('change', '.payment-checkbox', function () {
+        updatePaymentSelectionSummary();
+
+        const total = $('.payment-checkbox').length;
+        const checked = $('.payment-checkbox:checked').length;
+        $('#selectAllPayments').prop('checked', total > 0 && total === checked);
     });
 
     $('#newCustomerBookingId').on('change', function () {
@@ -107,16 +126,19 @@ $(document).ready(function () {
 
         $.get(`/payment-transfer/customer-plots/${customerBookingId}`, function (plots) {
             let options = '<option value="">Select Plot Booking</option>';
+            const filteredPlots = plots.filter(function (plot) {
+                return !isSameSourceTarget(customerBookingId, plot.id);
+            });
 
-            if (plots.length === 0) {
+            if (filteredPlots.length === 0) {
                 Swal.fire({
                     icon: 'warning',
                     title: 'No Plot Booking',
-                    text: 'Selected customer ke paas koi plot booking nahi hai.'
+                    text: 'The selected customer does not have another plot booking available for transfer.'
                 });
             }
 
-            $.each(plots, function (index, plot) {
+            $.each(filteredPlots, function (index, plot) {
                 options += `<option value="${plot.id}">${plot.name}</option>`;
             });
 
@@ -149,9 +171,14 @@ $(document).ready(function () {
             return;
         }
 
+        if (isSameSourceTarget(newCustomerBookingId, newPlotSaleDetailId)) {
+            Swal.fire('Error', 'Payment cannot be transferred to the same customer and same plot.', 'error');
+            return;
+        }
+
         Swal.fire({
             title: 'Transfer Payments?',
-            text: 'Selected payment entries will be moved to selected plot booking.',
+            text: `${paymentIds.length} selected payment entries will be moved to selected plot booking.`,
             icon: 'warning',
             showCancelButton: true,
             confirmButtonText: 'Yes Transfer',
@@ -205,7 +232,7 @@ function renderPayments(payments)
     if (!payments || payments.length === 0) {
         html = `
             <tr>
-                <td colspan="9" class="text-center text-muted py-4">
+                <td colspan="10" class="text-center text-muted py-4">
                     No payment found.
                 </td>
             </tr>
@@ -217,9 +244,17 @@ function renderPayments(payments)
                     <td>
                         <input type="checkbox"
                             class="form-check-input payment-checkbox"
-                            value="${payment.id}">
+                            value="${payment.id}"
+                            data-amount="${payment.paid_amount_raw || 0}">
                     </td>
-                    <td>${payment.receipt_number}</td>
+                    <td>
+                        <strong>${payment.receipt_number}</strong>
+                    </td>
+                    <td>
+                        <span class="badge bg-success-subtle text-success border border-success-subtle">
+                            ${payment.plot_no || '-'}
+                        </span>
+                    </td>
                     <td>${payment.date}</td>
                     <td>${payment.plan_type}</td>
                     <td>${payment.transaction_category}</td>
@@ -234,13 +269,14 @@ function renderPayments(payments)
                             ${payment.payment_status}
                         </span>
                     </td>
-                    <td class="fw-bold text-success">Rs. ${payment.paid_amount}</td>
+                    <td class="fw-bold text-success text-end">Rs. ${payment.paid_amount}</td>
                 </tr>
             `;
         });
     }
 
     $('#paymentListBody').html(html);
+    updatePaymentSelectionSummary();
 }
 
 function loadCustomers()
@@ -278,7 +314,7 @@ function clearPaymentSection()
     $('#selectAllPayments').prop('checked', false);
     $('#paymentListBody').html(`
         <tr>
-            <td colspan="9" class="text-center text-muted py-4">
+            <td colspan="10" class="text-center text-muted py-4">
                 No payment found.
             </td>
         </tr>
@@ -292,6 +328,11 @@ function clearPaymentSection()
     $('#sourceDetailsCard').addClass('d-none');
     $('#paymentListCard').addClass('d-none');
     $('#transferCard').addClass('d-none');
+    sourcePaymentTransfer = {
+        customerBookingId: null,
+        plotSaleIds: []
+    };
+    updatePaymentSelectionSummary();
 }
 
 function setPaymentTransferLoading(isLoading)
@@ -300,6 +341,33 @@ function setPaymentTransferLoading(isLoading)
     button.prop('disabled', isLoading);
     button.find('.btn-label').toggleClass('d-none', isLoading);
     button.find('.btn-loader').toggleClass('d-none', !isLoading);
+}
+
+function updatePaymentSelectionSummary()
+{
+    let selectedAmount = 0;
+    const selected = $('.payment-checkbox:checked');
+
+    selected.each(function () {
+        selectedAmount += parseFloat($(this).data('amount')) || 0;
+    });
+
+    $('#selectedPaymentCount').text(selected.length);
+    $('#selectedPaymentAmount').text(formatAmount(selectedAmount));
+}
+
+function formatAmount(value)
+{
+    return Number(value || 0).toLocaleString('en-IN', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
+}
+
+function isSameSourceTarget(customerBookingId, plotSaleId)
+{
+    return String(customerBookingId || '') === String(sourcePaymentTransfer.customerBookingId || '')
+        && sourcePaymentTransfer.plotSaleIds.includes(String(plotSaleId || ''));
 }
 </script>
 @endpush

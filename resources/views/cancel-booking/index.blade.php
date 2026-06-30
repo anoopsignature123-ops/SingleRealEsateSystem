@@ -44,6 +44,7 @@
 
                     <input type="hidden" name="customer_booking_id" id="customerBookingId">
                     <input type="hidden" name="plot_sale_detail_id" id="plotSaleDetailId">
+                    <div id="plotSaleDetailIdsContainer"></div>
 
                     <div class="transaction-section-title">
                         <div class="d-flex align-items-center gap-3">
@@ -76,10 +77,35 @@
                         </div>
 
                         <div class="col-md-4">
-                            <label class="form-label fw-semibold">Plot No</label>
+                            <label class="form-label fw-semibold">Booking / Plot Group</label>
                             <select id="plotSaleId" class="form-select">
-                                <option value="">Select Plot</option>
+                                <option value="">Select Booking / Plot</option>
                             </select>
+                        </div>
+                    </div>
+
+                    <div class="transaction-summary-box mb-4 d-none" id="cancelPlotSelectionCard">
+                        <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+                            <div>
+                                <h6 class="fw-bold mb-1">Plots Selected For Cancellation</h6>
+                                <small class="text-muted">Uncheck any plot that should remain active in this booking.</small>
+                            </div>
+                            <span class="badge bg-success-subtle text-success border border-success-subtle" id="selectedCancelPlotBadge">0 Plots</span>
+                        </div>
+
+                        <div class="table-responsive transaction-mini-table">
+                            <table class="table table-hover align-middle mb-0 transaction-table">
+                                <thead>
+                                    <tr>
+                                        <th width="54" class="text-center">Pick</th>
+                                        <th>Plot</th>
+                                        <th>Area</th>
+                                        <th>Total Cost</th>
+                                        <th>Paid</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="cancelPlotSelectionBody"></tbody>
+                            </table>
                         </div>
                     </div>
 
@@ -386,6 +412,9 @@
                 'block_name' => $sale->block?->block,
                 'plot_detail_id' => $sale->plot_detail_id,
                 'plot_number' => $sale->plotDetail?->plot_number,
+                'plot_area' => $sale->plot_area,
+                'plot_rate' => $sale->plot_rate,
+                'total_plot_cost' => $sale->total_plot_cost,
 
                 'customer_booking_id' => $sale->customer_booking_id,
                 'booking_code' => $sale->booking_code ?? $sale->customerBooking?->booking_code,
@@ -422,6 +451,7 @@
             });
         }
         const plotSales = @json($plotSalesForJs);
+        let selectedGroup = [];
 
         function updateBlockOptions(projectId) {
             const blocks = plotSales
@@ -444,26 +474,54 @@
             });
 
             $('#blockId').html(blockHtml);
-            $('#plotSaleId').html('<option value="">Select Plot</option>');
+            $('#plotSaleId').html('<option value="">Select Booking / Plot</option>');
         }
 
         function updatePlotOptions(projectId, blockId) {
             const plots = plotSales.filter(
                 sale => sale.project_id == projectId && sale.block_id == blockId
             );
+            const groups = groupPlotSales(plots);
 
-            let plotHtml = '<option value="">Select Plot</option>';
+            let plotHtml = '<option value="">Select Booking / Plot</option>';
 
-            plots.forEach(plot => {
-                plotHtml += `<option value="${plot.id}">${plot.plot_number}</option>`;
+            groups.forEach(group => {
+                const plotText = group.plots.map(plot => plot.plot_number).join(', ');
+                const typeText = group.plots.length > 1 ? `Multiple - ${group.plots.length} Plots` : 'Single';
+                plotHtml += `<option value="${group.key}">${plotText} (${typeText}) | ${group.booking_code} | ${group.customer_name}</option>`;
             });
 
             $('#plotSaleId').html(plotHtml);
         }
 
+        function groupPlotSales(sales) {
+            const grouped = {};
+
+            sales.forEach(sale => {
+                const key = `${sale.customer_booking_id || 'booking'}-${sale.booking_code || sale.id}`;
+
+                if (!grouped[key]) {
+                    grouped[key] = {
+                        key,
+                        booking_code: sale.booking_code || '-',
+                        customer_booking_id: sale.customer_booking_id,
+                        customer_code: sale.customer_code || '',
+                        customer_name: sale.customer_name || '',
+                        plots: []
+                    };
+                }
+
+                grouped[key].plots.push(sale);
+            });
+
+            return Object.values(grouped);
+        }
+
         function clearSelection() {
+            selectedGroup = [];
             $('#customerBookingId').val('');
             $('#plotSaleDetailId').val('');
+            $('#plotSaleDetailIdsContainer').empty();
 
             $('#bookingCode').val('');
             $('#customerCode').val('');
@@ -475,42 +533,88 @@
             $('#deductionAmount').val('');
             $('#deductionPercentage').val('');
             $('#refundAmount').val('');
+            $('#cancelPlotSelectionCard').addClass('d-none');
+            $('#cancelPlotSelectionBody').empty();
+            $('#selectedCancelPlotBadge').text('0 Plots');
 
             $('#paymentHistoryBody').html(`
         <tr>
             <td colspan="6" class="text-center text-muted py-4">
-                Select a plot to view payment history.
+                Select a booking to view payment history.
             </td>
         </tr>
     `);
         }
 
-        function loadPlotDetails(plotId) {
-            const sale = plotSales.find(item => item.id == plotId);
+        function loadPlotDetails(groupKey) {
+            const group = groupPlotSales(plotSales).find(item => item.key == groupKey);
 
-            if (!sale) {
+            if (!group) {
                 clearSelection();
                 return;
             }
 
-            $('#customerBookingId').val(sale.customer_booking_id);
-            $('#plotSaleDetailId').val(sale.id);
+            selectedGroup = group.plots || [];
+            $('#customerBookingId').val(group.customer_booking_id);
+            $('#plotSaleDetailId').val(selectedGroup[0]?.id || '');
 
-            $('#bookingCode').val(sale.booking_code || '');
-            $('#customerCode').val(sale.customer_code || '');
-            $('#customerName').val(sale.customer_name || '');
+            $('#bookingCode').val(group.booking_code || '');
+            $('#customerCode').val(group.customer_code || '');
+            $('#customerName').val(group.customer_name || '');
 
-            const payments = sale.payments || [];
+            renderCancelPlotSelection();
+            updateSelectedCancelSummary();
+        }
 
-            if (payments.length === 0) {
+        function renderCancelPlotSelection() {
+            let rows = '';
+
+            selectedGroup.forEach(plot => {
+                rows += `
+                    <tr>
+                        <td class="text-center">
+                            <input type="checkbox" class="form-check-input cancel-plot-checkbox"
+                                value="${plot.id}" checked data-paid="${getPlotPaidAmount(plot)}">
+                        </td>
+                        <td>
+                            <strong>${plot.plot_number || '-'}</strong>
+                            <small class="text-muted d-block">${plot.project_name || '-'} / Block ${plot.block_name || '-'}</small>
+                        </td>
+                        <td>${formatAmount(plot.plot_area)} Sq.Ft.</td>
+                        <td class="fw-semibold">Rs. ${formatAmount(plot.total_plot_cost)}</td>
+                        <td class="fw-bold text-success">Rs. ${formatAmount(getPlotPaidAmount(plot))}</td>
+                    </tr>
+                `;
+            });
+
+            $('#cancelPlotSelectionBody').html(rows);
+            $('#cancelPlotSelectionCard').toggleClass('d-none', selectedGroup.length === 0);
+        }
+
+        function updateSelectedCancelSummary() {
+            const selectedIds = getSelectedPlotSaleIds();
+            const selectedPlots = selectedGroup.filter(plot => selectedIds.includes(String(plot.id)));
+
+            $('#plotSaleDetailIdsContainer').empty();
+            selectedIds.forEach(id => {
+                $('#plotSaleDetailIdsContainer').append(
+                    `<input type="hidden" name="plot_sale_detail_ids[]" value="${id}">`
+                );
+            });
+
+            $('#plotSaleDetailId').val(selectedIds[0] || '');
+            $('#selectedCancelPlotBadge').text(`${selectedIds.length} Plot${selectedIds.length === 1 ? '' : 's'}`);
+
+            if (selectedPlots.length === 0) {
                 $('#paidAmount').val('0.00');
                 $('#paymentDate').val('');
                 $('#paymentMode').val('');
+                $('#refundAmount').val('0.00');
 
                 $('#paymentHistoryBody').html(`
             <tr>
                 <td colspan="6" class="text-center text-muted py-4">
-                    No payments found for this plot.
+                    Please select at least one plot.
                 </td>
             </tr>
         `);
@@ -519,37 +623,69 @@
             }
 
             let paidAmount = 0;
+            let payments = [];
 
-            payments.forEach(payment => {
-                paidAmount += parseFloat(payment.paid_amount || payment.booking_amount || 0);
+            selectedPlots.forEach(plot => {
+                paidAmount += getPlotPaidAmount(plot);
+                (plot.payments || []).forEach(payment => {
+                    payments.push({
+                        ...payment,
+                        plot_number: plot.plot_number
+                    });
+                });
             });
 
-            const latestPayment = payments[payments.length - 1];
+            const latestPayment = payments[payments.length - 1] || {};
 
             $('#paidAmount').val(paidAmount.toFixed(2));
             $('#paymentDate').val(latestPayment.created_at || '');
             $('#paymentMode').val((latestPayment.payment_mode || '').toUpperCase());
 
-            $('#refundAmount').val(paidAmount.toFixed(2));
+            calculateRefund();
 
             let rows = '';
 
-            payments.forEach(payment => {
-                rows += `
+            if (payments.length === 0) {
+                rows = `
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-4">
+                            No payments found for selected plot.
+                        </td>
+                    </tr>
+                `;
+            } else {
+                payments.forEach(payment => {
+                    rows += `
             <tr>
-                <td>${payment.receipt_number || 'N/A'}</td>
+                <td>
+                    ${payment.receipt_number || 'N/A'}
+                    <small class="text-muted d-block">Plot: ${payment.plot_number || '-'}</small>
+                </td>
                 <td>${(payment.payment_mode || 'N/A').toUpperCase()}</td>
                 <td class="fw-semibold text-success">
-                    Rs. ${parseFloat(payment.paid_amount || payment.booking_amount || 0).toFixed(2)}
+                    Rs. ${formatAmount(payment.paid_amount || payment.booking_amount || 0)}
                 </td>
                 <td>${payment.payment_status || 'N/A'}</td>
                 <td>${payment.transaction_number || 'N/A'}</td>
                 <td>${payment.created_at || 'N/A'}</td>
             </tr>
         `;
-            });
+                });
+            }
 
             $('#paymentHistoryBody').html(rows);
+        }
+
+        function getSelectedPlotSaleIds() {
+            return $('.cancel-plot-checkbox:checked').map(function() {
+                return String($(this).val());
+            }).get();
+        }
+
+        function getPlotPaidAmount(plot) {
+            return (plot.payments || []).reduce((total, payment) => {
+                return total + parseAmount(payment.paid_amount || payment.booking_amount || 0);
+            }, 0);
         }
 
         function calculateRefund() {
@@ -569,6 +705,17 @@
             }
 
             $('#refundAmount').val(refundAmount.toFixed(2));
+        }
+
+        function parseAmount(value) {
+            return parseFloat(String(value || '0').replace(/,/g, '')) || 0;
+        }
+
+        function formatAmount(value) {
+            return Number(parseAmount(value)).toLocaleString('en-IN', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
         }
 
         function togglePayFields() {
@@ -592,7 +739,7 @@
 
                 if (!projectId) {
                     $('#blockId').html('<option value="">Select Block</option>');
-                    $('#plotSaleId').html('<option value="">Select Plot</option>');
+                    $('#plotSaleId').html('<option value="">Select Booking / Plot</option>');
                     clearSelection();
                     return;
                 }
@@ -606,7 +753,7 @@
                 const blockId = $(this).val();
 
                 if (!blockId) {
-                    $('#plotSaleId').html('<option value="">Select Plot</option>');
+                    $('#plotSaleId').html('<option value="">Select Booking / Plot</option>');
                     clearSelection();
                     return;
                 }
@@ -616,9 +763,13 @@
             });
 
             $('#plotSaleId').on('change', function() {
-                const plotId = $(this).val();
+                const groupKey = $(this).val();
 
-                loadPlotDetails(plotId);
+                loadPlotDetails(groupKey);
+            });
+
+            $(document).on('change', '.cancel-plot-checkbox', function() {
+                updateSelectedCancelSummary();
             });
 
             $('#deductionAmount, #deductionPercentage').on('keyup change', function() {
@@ -629,7 +780,13 @@
                 togglePayFields();
             });
 
-            $('#cancelBookingForm').on('submit', function() {
+            $('#cancelBookingForm').on('submit', function(e) {
+                if (getSelectedPlotSaleIds().length === 0) {
+                    e.preventDefault();
+                    alert('Please select at least one plot for cancellation.');
+                    return;
+                }
+
                 const button = $('#cancelBookingBtn');
                 button.prop('disabled', true);
                 button.find('.btn-label').addClass('d-none');

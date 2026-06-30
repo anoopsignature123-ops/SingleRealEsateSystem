@@ -23,6 +23,8 @@ class CancelBookingController extends Controller
         $data = $request->validate([
             'customer_booking_id' => 'required|exists:customer_bookings,id',
             'plot_sale_detail_id' => 'required|exists:plot_sale_details,id',
+            'plot_sale_detail_ids' => 'nullable|array|min:1',
+            'plot_sale_detail_ids.*' => 'integer|exists:plot_sale_details,id',
 
             'deduction_amount' => 'nullable|numeric|min:0',
             'deduction_percentage' => 'nullable|numeric|min:0|max:100',
@@ -37,7 +39,13 @@ class CancelBookingController extends Controller
             'cheque_date' => 'nullable|date',
         ]);
 
-        $this->cancelBookingService->store($data);
+        try {
+            $this->cancelBookingService->store($data);
+        } catch (\Throwable $e) {
+            return back()
+                ->withInput()
+                ->withErrors(['cancel_booking' => $e->getMessage()]);
+        }
 
         return redirect()
             ->route('cancel-booking.index')

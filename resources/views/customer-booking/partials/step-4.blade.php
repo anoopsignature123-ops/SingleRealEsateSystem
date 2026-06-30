@@ -1,4 +1,21 @@
 @if ($step == 4)
+    @php
+        $existingPlotSalesForJs = ($plotSales ?? collect())
+            ->mapWithKeys(function ($sale) {
+                return [
+                    $sale->plot_detail_id => [
+                        'id' => $sale->plot_detail_id,
+                        'number' => $sale->plotDetail?->plot_number,
+                        'rate' => (float) $sale->plot_rate,
+                        'area' => (float) $sale->plot_area,
+                        'plc' => (float) $sale->plc_amount,
+                        'plotCost' => (float) $sale->plot_cost,
+                    ],
+                ];
+            })
+            ->toArray();
+    @endphp
+
     <form method="POST" action="{{ route('customer-booking.update', $customer->id) }}">
         @csrf
         @method('PUT')
@@ -25,10 +42,25 @@
                 let selectedProjectId = "{{ old('project_id', $plotSale?->project_id) }}";
                 let selectedBlockId = "{{ old('block_id', $plotSale?->block_id) }}";
                 let customerId = "{{ $customer->id ?? '' }}";
+                let selectedPlots = {};
+                let existingPlotSales = @json($existingPlotSalesForJs);
+
+                if ($('#bookingMode').val() === 'multiple') {
+                    selectedPlots = existingPlotSales || {};
+                }
 
                 function calculateFinalAmount() {
-                    let plotCost = parseFloat($('#plotCost').val()) || 0;
-                    let plcAmount = parseFloat($('#plcAmount').val()) || 0;
+                    let plotCost = 0;
+                    let plcAmount = 0;
+                    if ($('#bookingMode').val() === 'multiple') {
+                        Object.values(selectedPlots).forEach(function(plot) {
+                            plotCost += parseFloat(plot.plotCost) || 0;
+                            plcAmount += parseFloat(plot.plc) || 0;
+                        });
+                    } else {
+                        plotCost = parseFloat($('#plotCost').val()) || 0;
+                        plcAmount = parseFloat($('#plcAmount').val()) || 0;
+                    }
                     let otherCharges = parseFloat($('#otherCharges').val()) || 0;
                     let couponDiscount = parseFloat($('#couponDiscount').val()) || 0;
 
@@ -40,6 +72,51 @@
 
                     $('#finalPayable').val(finalAmount.toFixed(2));
                     $('#totalPlotCost').val(finalAmount.toFixed(2));
+                }
+
+                function renderSelectedPlots() {
+                    let plots = Object.values(selectedPlots);
+                    let hiddenHtml = '';
+                    let numbers = [];
+                    let rateTotal = 0;
+                    let areaTotal = 0;
+                    let costTotal = 0;
+                    let plcTotal = 0;
+
+                    plots.forEach(function(plot) {
+                        numbers.push(plot.number);
+                        rateTotal += parseFloat(plot.rate) || 0;
+                        areaTotal += parseFloat(plot.area) || 0;
+                        costTotal += parseFloat(plot.plotCost) || 0;
+                        plcTotal += parseFloat(plot.plc) || 0;
+                        hiddenHtml += `
+                            <input type="hidden" name="plot_detail_ids[]" value="${plot.id}">
+                            <input type="hidden" name="plot_details[${plot.id}][plot_number]" value="${plot.number}">
+                            <input type="hidden" name="plot_details[${plot.id}][plot_rate]" value="${plot.rate}">
+                            <input type="hidden" name="plot_details[${plot.id}][plot_area]" value="${plot.area}">
+                            <input type="hidden" name="plot_details[${plot.id}][plot_cost]" value="${plot.plotCost}">
+                            <input type="hidden" name="plot_details[${plot.id}][plc_amount]" value="${plot.plc}">
+                        `;
+                    });
+
+                    $('#selectedPlotHiddenFields').html(hiddenHtml);
+
+                    if ($('#bookingMode').val() === 'multiple') {
+                        $('#plotId').val(plots[0]?.id || '');
+                        $('#plotNumber').val(numbers.join(', '));
+                        $('#plotRate').val(plots.length ? (rateTotal / plots.length).toFixed(2) : '');
+                        $('#plotArea').val(plots.length ? areaTotal.toFixed(2) : '');
+                        $('#plotCost').val(plots.length ? costTotal.toFixed(2) : '');
+                        $('#plcAmount').val(plots.length ? plcTotal.toFixed(2) : '');
+                    }
+
+                    $('.plot-card').each(function() {
+                        let id = String($(this).data('id'));
+                        $(this).toggleClass('border-success shadow', !!selectedPlots[id]);
+                        $(this).find('.plot-select-badge').toggleClass('d-none', !selectedPlots[id]);
+                    });
+
+                    calculateFinalAmount();
                 }
 
                 function loadBlocks(projectId, selectedBlock = '') {
@@ -87,6 +164,8 @@
                     $('#plotArea').val('');
                     $('#plotCost').val('');
                     $('#plcAmount').val('');
+                    selectedPlots = {};
+                    renderSelectedPlots();
                     calculateFinalAmount();
 
                     loadBlocks(projectId);
@@ -102,6 +181,8 @@
                     $('#plotArea').val('');
                     $('#plotCost').val('');
                     $('#plcAmount').val('');
+                    selectedPlots = {};
+                    renderSelectedPlots();
                     calculateFinalAmount();
 
                     if (blockId) {
@@ -211,6 +292,9 @@
                                                     <span class="badge bg-success rounded-pill mb-2">
                                                         Available
                                                     </span>
+                                                    <span class="badge bg-primary rounded-pill mb-2 plot-select-badge ${selectedPlots[String(plot.id)] ? '' : 'd-none'}">
+                                                        Selected
+                                                    </span>
 
                                                     <h5 class="fw-bold text-dark mb-0">
                                                         Plot ${plot.plot_number}
@@ -258,19 +342,40 @@
                         `;
 
                         $('#plotListSection').html(html);
+                        renderSelectedPlots();
                     });
                 });
 
                 $(document).on('click', '.plot-card', function() {
-                    $('.plot-card').removeClass('border-success shadow');
-                    $(this).addClass('border-success shadow');
-
                     let id = $(this).data('id');
                     let number = $(this).data('number');
                     let rate = parseFloat($(this).data('rate')) || 0;
                     let area = parseFloat($(this).data('area')) || 0;
                     let plc = parseFloat($(this).data('plc')) || 0;
                     let plotCost = rate * area;
+
+                    if ($('#bookingMode').val() === 'multiple') {
+                        let key = String(id);
+                        if (selectedPlots[key]) {
+                            delete selectedPlots[key];
+                        } else {
+                            selectedPlots[key] = {
+                                id,
+                                number,
+                                rate: rate.toFixed(2),
+                                area: area.toFixed(2),
+                                plc: plc.toFixed(2),
+                                plotCost: plotCost.toFixed(2),
+                            };
+                        }
+
+                        renderSelectedPlots();
+                        return;
+                    }
+
+                    selectedPlots = {};
+                    $('.plot-card').removeClass('border-success shadow');
+                    $(this).addClass('border-success shadow');
 
                     $('#plotId').val(id);
                     $('#plotNumber').val(number);
@@ -294,6 +399,30 @@
                     calculateFinalAmount();
                 });
 
+                $('#bookingMode').on('change', function() {
+                    selectedPlots = {};
+                    $('#plotId').val('');
+                    $('#plotNumber').val('');
+                    $('#plotRate').val('');
+                    $('#plotArea').val('');
+                    $('#plotCost').val('');
+                    $('#plcAmount').val('');
+                    renderSelectedPlots();
+                    $('#plotListSection').html('');
+                });
+
+                $('form').on('submit', function(event) {
+                    if ($('#bookingMode').val() === 'multiple' && Object.keys(selectedPlots).length === 0) {
+                        event.preventDefault();
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Plot Required',
+                            text: 'Please select at least one plot for multiple booking.'
+                        });
+                    }
+                });
+
+                renderSelectedPlots();
                 calculateFinalAmount();
             });
         </script>

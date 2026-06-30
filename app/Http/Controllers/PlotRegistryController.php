@@ -41,7 +41,14 @@ class PlotRegistryController extends Controller
 
     public function store(PlotRegistryRequest $request)
     {
-        $this->plotRegistryService->create($request->validated());
+        try {
+            $this->plotRegistryService->create($request->validated());
+        } catch (\Throwable $exception) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->withErrors(['plot_detail_id' => $exception->getMessage() ?: 'Plot registry failed.']);
+        }
 
         return redirect()
             ->back()

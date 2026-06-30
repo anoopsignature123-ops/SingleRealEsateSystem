@@ -28,7 +28,13 @@
 @php
     $booking = $payment->customerBooking;
     $plotSale = $payment->plotSaleDetail;
-    $paidAmount = (float) ($payment->paid_amount ?? $payment->booking_amount ?? 0);
+    $receiptPayments = ($receiptPayments ?? collect([$payment]))->values();
+    $receiptTotals = $receiptTotals ?? [
+        'paid' => (float) ($payment->paid_amount ?? $payment->booking_amount ?? 0),
+        'due' => (float) ($payment->due_amount ?? 0),
+        'plot_count' => 1,
+    ];
+    $paidAmount = (float) $receiptTotals['paid'];
     $paymentAs = match ($payment->transaction_category) {
         'booking_fee' => 'Booking Amount',
         'emi_payment' => 'EMI Payment',
@@ -58,20 +64,37 @@
             <tr>
                 <td><span class="label">Receipt No</span><span class="value">{{ $payment->receipt_number ?? 'N/A' }}</span></td>
                 <td><span class="label">Receipt Date</span><span class="value">{{ $payment->created_at?->format('d/m/Y') ?? 'N/A' }}</span></td>
-                <td><span class="label">Customer ID</span><span class="value">{{ $booking?->customer_code ?? 'N/A' }}</span></td>
+                <td><span class="label">Total Plots</span><span class="value">{{ $receiptTotals['plot_count'] ?? 1 }}</span></td>
                 <td class="amount"><span class="label">Paid Amount</span><span class="value">Rs. {{ number_format($paidAmount, 2) }}</span></td>
             </tr>
             <tr>
                 <td><span class="label">Customer</span><span class="value">{{ $booking?->primaryDetail?->name ?? $booking?->customer_name ?? 'N/A' }}</span></td>
                 <td><span class="label">Booking ID</span><span class="value">{{ $plotSale?->booking_code ?? $booking?->booking_code ?? 'N/A' }}</span></td>
                 <td><span class="label">Project</span><span class="value">{{ $plotSale?->project?->name ?? 'N/A' }}</span></td>
-                <td><span class="label">Plot</span><span class="value">{{ $plotSale?->block?->block ?? 'N/A' }} / {{ $plotSale?->plotDetail?->plot_number ?? 'N/A' }}</span></td>
+                <td><span class="label">Customer ID</span><span class="value">{{ $booking?->customer_code ?? 'N/A' }}</span></td>
             </tr>
+            @foreach ($receiptPayments as $rowPayment)
+                @php
+                    $rowPlotSale = $rowPayment->plotSaleDetail;
+                    $rowPaid = (float) ($rowPayment->paid_amount ?? $rowPayment->booking_amount ?? 0);
+                @endphp
+                <tr>
+                    <td colspan="2"><span class="label">Plot Detail</span><span class="value">{{ $rowPlotSale?->project?->name ?? 'N/A' }} / {{ $rowPlotSale?->block?->block ?? 'N/A' }} / Plot {{ $rowPlotSale?->plotDetail?->plot_number ?? 'N/A' }}</span></td>
+                    <td><span class="label">Area / Rate</span><span class="value">{{ number_format((float) ($rowPlotSale?->plot_area ?? 0), 2) }} Sq.Ft. / Rs. {{ number_format((float) ($rowPlotSale?->plot_rate ?? 0), 2) }}</span></td>
+                    <td><span class="label">Total / Paid</span><span class="value">Rs. {{ number_format((float) ($rowPlotSale?->total_plot_cost ?? 0), 2) }} / Rs. {{ number_format($rowPaid, 2) }}</span></td>
+                </tr>
+                <tr>
+                    <td><span class="label">Plot Cost</span><span class="value">Rs. {{ number_format((float) ($rowPlotSale?->plot_cost ?? 0), 2) }}</span></td>
+                    <td><span class="label">PLC Amount</span><span class="value">Rs. {{ number_format((float) ($rowPlotSale?->plc_amount ?? 0), 2) }}</span></td>
+                    <td><span class="label">Other Charges</span><span class="value">Rs. {{ number_format((float) ($rowPlotSale?->other_charges ?? 0), 2) }}</span></td>
+                    <td><span class="label">Discount</span><span class="value">Rs. {{ number_format((float) ($rowPlotSale?->coupon_discount ?? 0), 2) }}</span></td>
+                </tr>
+            @endforeach
             <tr>
                 <td><span class="label">Payment Mode</span><span class="value">{{ strtoupper(str_replace('_', ' / ', $payment->payment_mode ?? 'N/A')) }}</span></td>
                 <td><span class="label">Payment As</span><span class="value">{{ $paymentAs }}</span></td>
                 <td><span class="label">Status</span><span class="value">{{ ucfirst($payment->payment_status ?? 'N/A') }}</span></td>
-                <td><span class="label">Due Amount</span><span class="value">Rs. {{ number_format((float) ($payment->due_amount ?? 0), 2) }}</span></td>
+                <td><span class="label">Due Amount</span><span class="value">Rs. {{ number_format((float) ($receiptTotals['due'] ?? $payment->due_amount ?? 0), 2) }}</span></td>
             </tr>
             <tr>
                 <td colspan="2"><span class="label">Amount In Words</span><span class="value">{{ amountInWords($paidAmount) }} Only</span></td>

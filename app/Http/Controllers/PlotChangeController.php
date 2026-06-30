@@ -65,7 +65,14 @@ class PlotChangeController extends Controller
             'remark' => 'nullable|string',
         ]);
 
-        $this->plotChangeService->store($data);
+        try {
+            $this->plotChangeService->store($data);
+        } catch (\Throwable $exception) {
+            return response()->json([
+                'status' => false,
+                'message' => $exception->getMessage() ?: 'Plot change failed.',
+            ], 422);
+        }
 
         return response()->json([
             'status' => true,

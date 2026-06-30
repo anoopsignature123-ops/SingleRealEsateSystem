@@ -159,7 +159,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/receipt-reprint/search', 'index');
         Route::post('/receipt-reprint/search', 'search')->name('receipt-reprint.search');
         Route::get('/receipt-reprint/download/{payment}', 'download')->name('receipt-reprint.download');
-        Route::get('/receipt-reprint/customers/{plot}', 'getCustomersByPlot')->name('receipt-reprint.customers');
+        Route::get('/receipt-reprint/groups/{customerBooking}', 'getReceiptGroupsByCustomer')->name('receipt-reprint.groups');
     });
     Route::controller(ReceiptTemplateController::class)->group(function () {
         Route::get('/receipt-templates', 'index')->name('receipt-templates.index');

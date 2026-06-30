@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\CustomerBooking;
 use App\Models\CustomerPayment;
 use App\Models\PlotDetail;
 
@@ -29,25 +30,49 @@ class ChequeClearanceService
                 'cheque_date' => $data['cheque_date'],
             ]);
 
+            if ($isCleared) {
+                CustomerBooking::where('id', $payment->customer_booking_id)
+                    ->update([
+                        'current_step' => 5,
+                        'status' => 'completed',
+                    ]);
+            } else {
+                CustomerBooking::where('id', $payment->customer_booking_id)
+                    ->update([
+                        'current_step' => 5,
+                        'status' => 'pending',
+                    ]);
+            }
+
             if ($isCleared && $payment->plotSaleDetail?->plot_detail_id) {
                 PlotDetail::where('id', $payment->plotSaleDetail->plot_detail_id)
                     ->update([
                         'status' => 'booked',
                     ]);
 
-                $totalPlotCost = (float) ($payment->plotSaleDetail->total_plot_cost ?? 0);
-                $confirmedPaid = (float) CustomerPayment::where('customer_booking_id', $payment->customer_booking_id)
-                    ->where('plot_sale_detail_id', $payment->plot_sale_detail_id)
-                    ->where('booking_status', 'booked')
-                    ->sum('paid_amount');
-
-                if ($totalPlotCost > 0 && $confirmedPaid >= $totalPlotCost) {
+                if ($payment->plan_type === 'emi_plan' && (float) $payment->due_amount <= 0) {
                     CustomerPayment::where('customer_booking_id', $payment->customer_booking_id)
                         ->where('plot_sale_detail_id', $payment->plot_sale_detail_id)
                         ->where('plan_type', $payment->plan_type)
                         ->where('booking_status', 'booked')
                         ->whereIn('payment_status', ['pending', 'paid'])
                         ->update(['payment_status' => 'cleared']);
+                } elseif ($payment->plan_type === 'full_payment') {
+                    $totalPlotCost = (float) ($payment->plotSaleDetail->total_plot_cost ?? 0);
+                    $confirmedPaid = (float) CustomerPayment::where('customer_booking_id', $payment->customer_booking_id)
+                        ->where('plot_sale_detail_id', $payment->plot_sale_detail_id)
+                        ->where('plan_type', $payment->plan_type)
+                        ->where('booking_status', 'booked')
+                        ->sum('paid_amount');
+
+                    if ($totalPlotCost > 0 && $confirmedPaid >= $totalPlotCost) {
+                        CustomerPayment::where('customer_booking_id', $payment->customer_booking_id)
+                            ->where('plot_sale_detail_id', $payment->plot_sale_detail_id)
+                            ->where('plan_type', $payment->plan_type)
+                            ->where('booking_status', 'booked')
+                            ->whereIn('payment_status', ['pending', 'paid'])
+                            ->update(['payment_status' => 'cleared']);
+                    }
                 }
             }
         }

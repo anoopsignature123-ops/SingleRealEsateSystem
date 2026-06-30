@@ -37,7 +37,7 @@
                     let options = '<option value="">Select Plot</option>';
 
                     if (plots.length === 0) {
-                        Swal.fire('No Plot Found', 'Is block me koi booked plot nahi mila.',
+                        Swal.fire('No Plot Found', 'No booked plot was found in this block.',
                             'warning');
                     }
 
@@ -117,7 +117,7 @@
                     let options = '<option value="">Select Available Plot</option>';
 
                     if (plots.length === 0) {
-                        Swal.fire('No Plot Found', 'Is block me koi available plot nahi mila.',
+                        Swal.fire('No Plot Found', 'No available plot was found in this block.',
                             'warning');
                     }
 
@@ -186,7 +186,7 @@
 
                 Swal.fire({
                     title: 'Change Plot?',
-                    text: 'Old plot will become available and new plot will be booked.',
+                    text: 'The current plot will become available and the selected new plot will be booked.',
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonText: 'Yes Change',

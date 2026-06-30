@@ -95,61 +95,61 @@
                     <tbody>
                         @forelse($payments as $payment)
                             @php
-                                $plotSale = $payment->plotSaleDetail;
-                                $customer = $payment->customerBooking;
-                                $status = $payment->cheque_status ?: 'pending';
+                                $status = $payment['status'] ?: 'pending';
                                 $statusClass = match ($status) {
                                     'cleared' => 'success',
                                     'cancelled' => 'danger',
                                     'bounced' => 'dark',
+                                    'mixed' => 'secondary',
                                     default => 'warning',
                                 };
-                                $amount = (float) ($payment->paid_amount ?? $payment->booking_amount ?? 0);
+                                $amount = (float) ($payment['amount'] ?? 0);
                             @endphp
 
                             <tr>
                                 <td class="text-center">
                                     <input type="checkbox" class="form-check-input payment_checkbox"
-                                        value="{{ $payment->id }}" data-amount="{{ $amount }}">
+                                        value="{{ $payment['payment_ids'] }}" data-amount="{{ $amount }}">
                                 </td>
                                 <td>
-                                    <strong>{{ $payment->receipt_number ?? '-' }}</strong>
-                                    <br>
-                                    <small class="text-muted">{{ $payment->created_at?->format('d-m-Y') ?? '-' }}</small>
-                                </td>
-                                <td>
-                                    <strong>{{ $customer?->primaryDetail?->name ?? ($customer?->customer_name ?? '-') }}</strong>
-                                    <br>
-                                    <small class="text-muted">{{ $customer?->customer_code ?? '-' }}</small>
-                                </td>
-                                <td>
-                                    <strong>{{ $plotSale?->project?->name ?? '-' }}</strong>
+                                    <strong>{{ $payment['receipt_number'] ?? '-' }}</strong>
                                     <br>
                                     <small class="text-muted">
-                                        Block {{ $plotSale?->block?->block ?? '-' }} |
-                                        Plot {{ $plotSale?->plotDetail?->plot_number ?? '-' }}
-                                    </small>
-                                </td>
-                                <td>{{ $plotSale?->booking_code ?? '-' }}</td>
-                                <td class="fw-bold text-success">&#8377;{{ number_format($amount, 2) }}</td>
-                                <td>
-                                    <strong>{{ $payment->bank_name ?? '-' }}</strong>
-                                    <br>
-                                    <small class="text-muted">
-                                        @if ($payment->payment_mode === 'dd')
-                                            DD: {{ $payment->dd_number ?? '-' }}
-                                        @else
-                                            Cheque: {{ $payment->cheque_number ?? '-' }}
+                                        {{ $payment['created_at']?->format('d-m-Y') ?? '-' }}
+                                        @if (($payment['record_count'] ?? 1) > 1)
+                                            | {{ $payment['record_count'] }} rows
                                         @endif
                                     </small>
                                 </td>
                                 <td>
+                                    <strong>{{ $payment['customer_name'] ?? '-' }}</strong>
+                                    <br>
+                                    <small class="text-muted">{{ $payment['customer_code'] ?? '-' }}</small>
+                                </td>
+                                <td>
+                                    <strong>{{ $payment['projects'] ?? '-' }}</strong>
+                                    <br>
+                                    <small class="text-muted">
+                                        Block {{ $payment['blocks'] ?? '-' }} |
+                                        Plot {{ $payment['plots'] ?? '-' }}
+                                    </small>
+                                </td>
+                                <td>{{ $payment['booking_codes'] ?? '-' }}</td>
+                                <td class="fw-bold text-success">&#8377;{{ number_format($amount, 2) }}</td>
+                                <td>
+                                    <strong>{{ $payment['bank_name'] ?? '-' }}</strong>
+                                    <br>
+                                    <small class="text-muted">
+                                        {{ $payment['reference'] ?? '-' }}
+                                    </small>
+                                </td>
+                                <td>
                                     <span class="badge bg-info-subtle text-info border">
-                                        {{ strtoupper($payment->payment_mode ?? '-') }}
+                                        {{ strtoupper($payment['payment_mode'] ?? '-') }}
                                     </span>
                                     <br>
                                     <small class="text-muted">
-                                        {{ $payment->cheque_date ? $payment->cheque_date->format('d-m-Y') : '-' }}
+                                        {{ $payment['cheque_date'] ? $payment['cheque_date']->format('d-m-Y') : '-' }}
                                     </small>
                                 </td>
                                 <td>

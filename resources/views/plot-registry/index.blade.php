@@ -14,6 +14,20 @@
                 </div>
             </div>
         </div>
+        @if (session('success'))
+            <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm">
+                {{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        @endif
+
+        @if ($errors->any())
+            <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm">
+                <strong>Please check:</strong> {{ $errors->first() }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        @endif
+
         <div class="transaction-card mb-4">
             <div class="transaction-card-body">
                 <form method="POST" action="{{ route('plot-registry.store') }}" id="registryForm">
@@ -323,7 +337,7 @@
                         Swal.fire({
                             icon: 'warning',
                             title: 'No Plot Found',
-                            text: 'Is block me registry ke liye koi booked plot nahi mila.'
+                            text: 'No fully paid booked plot was found in this block for registry.'
                         });
                     }
 
@@ -402,6 +416,11 @@
             }
 
             $('#registryForm').on('submit', function() {
+                if (!$('#customer_booking_db_id').val()) {
+                    Swal.fire('Booking Required', 'Please select a valid booked plot before saving registry.', 'warning');
+                    return false;
+                }
+
                 const button = $('#saveRegistryBtn');
                 button.prop('disabled', true);
                 button.find('.btn-label').addClass('d-none');

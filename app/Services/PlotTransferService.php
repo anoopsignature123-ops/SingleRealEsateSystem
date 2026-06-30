@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Models\Block;
 use App\Models\CustomerBooking;
 use App\Models\CustomerPayment;
-use App\Models\PlotDetail;
 use App\Models\PlotSaleDetail;
 use App\Models\PlotTransferHistory;
 use App\Models\Project;
@@ -29,7 +28,44 @@ class PlotTransferService
             'createdBy',
         ])
             ->latest()
-            ->get();
+            ->get()
+            ->groupBy(function ($history) {
+                $bookingCode = $history->plotSaleDetail?->booking_code ?: 'history-'.$history->id;
+
+                return implode('|', [
+                    $history->old_booking_id,
+                    $history->new_booking_id,
+                    $bookingCode,
+                    optional($history->transfer_date)->format('Y-m-d'),
+                    $history->created_by ?: 'system',
+                    $history->created_at?->format('Y-m-d H:i:s') ?: $history->id,
+                ]);
+            })
+            ->map(function ($group) {
+                $first = $group->first();
+                $plotSales = $group->pluck('plotSaleDetail')->filter();
+
+                $first->group_plot_count = $plotSales->count();
+                $first->group_projects = $plotSales
+                    ->map(fn ($sale) => $sale?->project?->name)
+                    ->filter()
+                    ->unique()
+                    ->implode(', ');
+                $first->group_blocks = $plotSales
+                    ->map(fn ($sale) => $sale?->block?->block)
+                    ->filter()
+                    ->unique()
+                    ->implode(', ');
+                $first->group_plot_numbers = $plotSales
+                    ->map(fn ($sale) => $sale?->plotDetail?->plot_number)
+                    ->filter()
+                    ->unique()
+                    ->implode(', ');
+                $first->group_transfer_charge = round((float) $group->sum('transfer_charge'), 2);
+
+                return $first;
+            })
+            ->values();
 
         return compact('projects', 'histories');
     }
@@ -44,14 +80,48 @@ class PlotTransferService
 
     public function getPlots($blockId)
     {
-        return PlotDetail::where('block_id', $blockId)
-            ->where('status', 'booked')
-            ->whereHas('plotSaleDetail.customerBooking', function ($query) {
+        return PlotSaleDetail::with([
+            'plotDetail',
+            'customerBooking.primaryDetail',
+            'customerBooking.plotSaleDetails.plotDetail',
+            'customerBooking.plotSaleDetails.block',
+        ])
+            ->where('block_id', $blockId)
+            ->whereHas('plotDetail', function ($query) {
+                $query->where('status', 'booked');
+            })
+            ->whereHas('customerBooking', function ($query) {
                 $query->where('status', '!=', 'cancelled');
             })
-            ->select('id', 'plot_number')
-            ->orderBy('plot_number')
-            ->get();
+            ->get()
+            ->groupBy(function ($sale) {
+                return $sale->customer_booking_id.'|'.($sale->booking_code ?: 'plot-'.$sale->id);
+            })
+            ->map(function ($sales) {
+                $representativeSale = $sales->first();
+                $booking = $representativeSale->customerBooking;
+                $bookingPlots = $representativeSale->booking_code && $booking
+                    ? $booking->plotSaleDetails->where('booking_code', $representativeSale->booking_code)->values()
+                    : $sales->values();
+                $plotNumbers = $bookingPlots
+                    ->map(fn ($sale) => $sale->plotDetail?->plot_number)
+                    ->filter()
+                    ->unique()
+                    ->values();
+                $plotLabel = $plotNumbers->implode(', ');
+
+                return [
+                    'id' => $representativeSale->plot_detail_id,
+                    'plot_number' => $plotNumbers->count() > 1
+                        ? $plotLabel.' (Multiple - '.$plotNumbers->count().' Plots)'
+                        : ($plotLabel ?: 'Plot #'.$representativeSale->plot_detail_id),
+                    'booking_code' => $representativeSale->booking_code,
+                    'customer_name' => $booking?->primaryDetail?->name ?? $booking?->customer_name,
+                    'is_multiple' => $plotNumbers->count() > 1,
+                ];
+            })
+            ->sortBy('plot_number')
+            ->values();
     }
 
     public function getTransferCustomers($bookingId)
@@ -93,7 +163,21 @@ class PlotTransferService
             return null;
         }
 
-        $payments = $plotSale->payments;
+        $booking = $plotSale->customerBooking;
+        $groupPlotSales = $plotSale->booking_code && $booking
+            ? $booking->plotSaleDetails()
+                ->with(['project', 'block', 'plotDetail', 'payments'])
+                ->where('booking_code', $plotSale->booking_code)
+                ->get()
+            : collect([$plotSale]);
+
+        if ($groupPlotSales->isEmpty()) {
+            $groupPlotSales = collect([$plotSale]);
+        }
+
+        $payments = CustomerPayment::where('customer_booking_id', $plotSale->customer_booking_id)
+            ->whereIn('plot_sale_detail_id', $groupPlotSales->pluck('id'))
+            ->get();
 
         $latestPayment = $payments
             ->sortByDesc('id')
@@ -104,7 +188,7 @@ class PlotTransferService
             ->sortBy('id')
             ->first();
 
-        $totalPlotCost = (float) ($plotSale->total_plot_cost ?? 0);
+        $totalPlotCost = (float) $groupPlotSales->sum(fn ($sale) => (float) ($sale->total_plot_cost ?? 0));
 
         $totalPaid = (float) $payments
             ->whereIn('payment_status', ['paid', 'cleared'])
@@ -112,7 +196,8 @@ class PlotTransferService
 
         $remainingAmount = max(0, $totalPlotCost - $totalPaid);
 
-        $planType = $latestPayment->plan_type ?? 'full_payment';
+        $planTypes = $payments->pluck('plan_type')->filter()->unique()->values();
+        $planType = $planTypes->count() === 1 ? $planTypes->first() : 'mixed';
 
         $emiMonths = 0;
         $paidEmis = 0;
@@ -140,12 +225,22 @@ class PlotTransferService
             'plot_sale_id' => $plotSale->id,
             'customer_booking_id' => $plotSale->customer_booking_id,
 
-            'project_name' => $plotSale->project->name ?? '',
-            'block_name' => $plotSale->block->block ?? '',
-            'plot_number' => $plotSale->plotDetail->plot_number ?? '',
-            'plot_area' => $plotSale->plot_area ?? 0,
-            'plot_rate' => $plotSale->plot_rate ?? 0,
+            'project_name' => $groupPlotSales->map(fn ($sale) => $sale->project?->name)->filter()->unique()->implode(', '),
+            'block_name' => $groupPlotSales->map(fn ($sale) => $sale->block?->block)->filter()->unique()->implode(', '),
+            'plot_number' => $groupPlotSales->map(fn ($sale) => $sale->plotDetail?->plot_number)->filter()->unique()->implode(', '),
+            'plot_area' => number_format((float) $groupPlotSales->sum(fn ($sale) => (float) ($sale->plot_area ?? 0)), 2),
+            'plot_rate' => $groupPlotSales->count() > 1 ? 'Multiple' : ($plotSale->plot_rate ?? 0),
             'total_plot_cost' => number_format($totalPlotCost, 2),
+            'plot_count' => $groupPlotSales->count(),
+            'plots' => $groupPlotSales->map(fn ($sale) => [
+                'plot_sale_id' => $sale->id,
+                'project' => $sale->project?->name ?? '-',
+                'block' => $sale->block?->block ?? '-',
+                'plot_number' => $sale->plotDetail?->plot_number ?? '-',
+                'area' => number_format((float) ($sale->plot_area ?? 0), 2),
+                'rate' => number_format((float) ($sale->plot_rate ?? 0), 2),
+                'total_cost' => number_format((float) ($sale->total_plot_cost ?? 0), 2),
+            ])->values(),
 
             'plan_type' => $planType,
             'booking_amount' => number_format((float) ($bookingPayment->booking_amount ?? 0), 2),
@@ -176,36 +271,84 @@ class PlotTransferService
                 ->findOrFail($data['new_customer_booking_id']);
 
             if ($oldBooking->id == $newBooking->id) {
-                throw new \Exception('Same customer ko plot transfer nahi kar sakte.');
+                throw new \Exception('Plot cannot be transferred to the same customer.');
             }
 
-            PlotTransferHistory::create([
-                'plot_sale_detail_id' => $plotSale->id,
+            $groupPlotSales = $plotSale->booking_code
+                ? PlotSaleDetail::where('customer_booking_id', $oldBooking->id)
+                    ->where('booking_code', $plotSale->booking_code)
+                    ->get()
+                : collect([$plotSale]);
 
-                'old_booking_id' => $oldBooking->id,
-                'new_booking_id' => $newBooking->id,
+            if ($groupPlotSales->isEmpty()) {
+                $groupPlotSales = collect([$plotSale]);
+            }
 
-                'old_customer_code' => $oldBooking->customer_code,
-                'new_customer_code' => $newBooking->customer_code,
+            $selectedPlotSaleIds = collect($data['plot_sale_detail_ids'] ?? [])
+                ->map(fn ($id) => (int) $id)
+                ->filter()
+                ->unique()
+                ->values();
 
-                'old_customer_name' => $oldBooking->primaryDetail->name ?? $oldBooking->customer_name,
-                'new_customer_name' => $newBooking->primaryDetail->name ?? $newBooking->customer_name,
+            if ($selectedPlotSaleIds->isNotEmpty()) {
+                $allowedIds = $groupPlotSales->pluck('id')->map(fn ($id) => (int) $id);
+                $invalidIds = $selectedPlotSaleIds->diff($allowedIds);
 
-                'transfer_charge' => $data['transfer_charge'] ?? 0,
-                'transfer_date' => $data['transfer_date'] ?? now()->toDateString(),
-                'transfer_reason' => $data['transfer_reason'] ?? null,
-                'remark' => $data['remark'] ?? null,
+                if ($invalidIds->isNotEmpty()) {
+                    throw new \Exception('Selected plot does not belong to this booking group.');
+                }
 
-                'created_by' => Auth::id(),
-            ]);
+                $groupPlotSales = $groupPlotSales
+                    ->whereIn('id', $selectedPlotSaleIds->all())
+                    ->values();
+            }
+
+            if ($groupPlotSales->isEmpty()) {
+                throw new \Exception('Please select at least one plot for transfer.');
+            }
+
+            $transferCharge = round((float) ($data['transfer_charge'] ?? 0), 2);
+            $perPlotTransferCharge = $groupPlotSales->count() > 0
+                ? round($transferCharge / $groupPlotSales->count(), 2)
+                : $transferCharge;
+            $allocatedTransferCharge = 0.0;
+            $lastPlotIndex = $groupPlotSales->count() - 1;
+
+            foreach ($groupPlotSales as $index => $sale) {
+                $plotTransferCharge = $index === $lastPlotIndex
+                    ? round($transferCharge - $allocatedTransferCharge, 2)
+                    : $perPlotTransferCharge;
+                $allocatedTransferCharge = round($allocatedTransferCharge + $plotTransferCharge, 2);
+
+                PlotTransferHistory::create([
+                    'plot_sale_detail_id' => $sale->id,
+
+                    'old_booking_id' => $oldBooking->id,
+                    'new_booking_id' => $newBooking->id,
+
+                    'old_customer_code' => $oldBooking->customer_code,
+                    'new_customer_code' => $newBooking->customer_code,
+
+                    'old_customer_name' => $oldBooking->primaryDetail->name ?? $oldBooking->customer_name,
+                    'new_customer_name' => $newBooking->primaryDetail->name ?? $newBooking->customer_name,
+
+                    'transfer_charge' => $plotTransferCharge,
+                    'transfer_date' => $data['transfer_date'] ?? now()->toDateString(),
+                    'transfer_reason' => $data['transfer_reason'] ?? null,
+                    'remark' => $data['remark'] ?? null,
+
+                    'created_by' => Auth::id(),
+                ]);
+            }
 
             // Existing plot owner update
-            $plotSale->update([
-                'customer_booking_id' => $newBooking->id,
-            ]);
+            PlotSaleDetail::whereIn('id', $groupPlotSales->pluck('id'))
+                ->update([
+                    'customer_booking_id' => $newBooking->id,
+                ]);
 
             // Existing payments owner update
-            CustomerPayment::where('plot_sale_detail_id', $plotSale->id)
+            CustomerPayment::whereIn('plot_sale_detail_id', $groupPlotSales->pluck('id'))
                 ->update([
                     'customer_booking_id' => $newBooking->id,
                 ]);

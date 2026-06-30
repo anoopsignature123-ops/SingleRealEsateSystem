@@ -20,6 +20,16 @@ class OneTimePaymentRequest extends FormRequest
                 'booking_amount' => $amount,
             ]);
         }
+
+        if ($this->has('plot_sale_detail_ids')) {
+            $this->merge([
+                'plot_sale_detail_ids' => collect((array) $this->input('plot_sale_detail_ids'))
+                    ->filter()
+                    ->unique()
+                    ->values()
+                    ->all(),
+            ]);
+        }
     }
 
     public function rules(): array
@@ -29,7 +39,9 @@ class OneTimePaymentRequest extends FormRequest
             // Main required fields
             'customer_booking_id' => 'required|exists:customer_bookings,id',
 
-            'plot_sale_detail_id' => 'required|exists:plot_sale_details,id',
+            'plot_sale_detail_id' => 'nullable|required_without:plot_sale_detail_ids|exists:plot_sale_details,id',
+            'plot_sale_detail_ids' => 'nullable|array',
+            'plot_sale_detail_ids.*' => 'exists:plot_sale_details,id',
 
             'booking_amount' => 'required|numeric|min:1',
 
@@ -68,7 +80,7 @@ class OneTimePaymentRequest extends FormRequest
 
             'customer_booking_id.required' => 'Please select booking.',
 
-            'plot_sale_detail_id.required' => 'Plot details missing.',
+            'plot_sale_detail_id.required_without' => 'Plot details missing.',
 
             'booking_amount.required' => 'Please enter payment amount.',
 

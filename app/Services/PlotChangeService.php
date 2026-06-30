@@ -46,14 +46,32 @@ class PlotChangeService
 
     public function getBookedPlots($blockId)
     {
-        return PlotDetail::where('block_id', $blockId)
-            ->where('status', 'booked')
-            ->whereHas('plotSaleDetail.customerBooking', function ($query) {
+        return PlotSaleDetail::with([
+            'plotDetail',
+            'customerBooking.primaryDetail',
+        ])
+            ->where('block_id', $blockId)
+            ->whereHas('plotDetail', function ($query) {
+                $query->where('status', 'booked');
+            })
+            ->whereHas('customerBooking', function ($query) {
                 $query->where('status', '!=', 'cancelled');
             })
-            ->select('id', 'plot_number')
-            ->orderBy('plot_number')
-            ->get();
+            ->get()
+            ->map(function ($sale) {
+                $customerName = $sale->customerBooking?->primaryDetail?->name
+                    ?? $sale->customerBooking?->customer_name
+                    ?? 'N/A';
+
+                return [
+                    'id' => $sale->plot_detail_id,
+                    'plot_number' => ($sale->plotDetail?->plot_number ?? 'N/A')
+                        .' | '.($sale->booking_code ?? 'N/A')
+                        .' | '.$customerName,
+                ];
+            })
+            ->sortBy('plot_number')
+            ->values();
     }
 
     public function getAvailablePlots($blockId)
@@ -68,7 +86,19 @@ class PlotChangeService
                 'plc_rate',
             ])
             ->orderBy('plot_number')
-            ->get();
+            ->get()
+            ->map(function ($plot) {
+                return [
+                    'id' => $plot->id,
+                    'plot_number' => ($plot->plot_number ?? 'N/A')
+                        .' | Area '.number_format((float) ($plot->plot_area ?? 0), 2)
+                        .' | Rate '.number_format((float) ($plot->plot_rate ?? 0), 2),
+                    'plot_area' => $plot->plot_area,
+                    'plot_rate' => $plot->plot_rate,
+                    'plc_rate' => $plot->plc_rate,
+                ];
+            })
+            ->values();
     }
 
     public function getBookingData($plotId)
@@ -189,7 +219,11 @@ class PlotChangeService
                 ->firstOrFail();
 
             if ($oldPlotId == $newPlot->id) {
-                throw new \Exception('Same plot change nahi kar sakte.');
+                throw new \Exception('The selected new plot is the same as the current plot.');
+            }
+
+            if ((int) $newPlot->project_id !== (int) $data['new_project_id'] || (int) $newPlot->block_id !== (int) $data['new_block_id']) {
+                throw new \Exception('Selected new plot does not belong to the selected project and block.');
             }
 
             $payments = $plotSale->payments;
@@ -203,7 +237,7 @@ class PlotChangeService
 
             $newPlotArea = (float) ($newPlot->plot_area ?? 0);
             $newPlotRate = (float) ($newPlot->plot_rate ?? 0);
-            $newPlcAmount = (float) ($newPlot->plc_amount ?? 0);
+            $newPlcAmount = (float) ($newPlot->plc_rate ?? 0);
 
             $newPlotCost = $newPlotArea * $newPlotRate;
             $newTotalCost = $newPlotCost + $newPlcAmount;

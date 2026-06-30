@@ -49,7 +49,12 @@ class CustomerBookingService
             'plotSaleDetail.project',
             'plotSaleDetail.block',
             'plotSaleDetail.plotDetail',
+            'plotSaleDetails.project',
+            'plotSaleDetails.block',
+            'plotSaleDetails.plotDetail',
+            'plotSaleDetails.payments',
             'payment',
+            'payments',
         ])->findOrFail($id);
     }
 
@@ -219,6 +224,77 @@ class CustomerBookingService
 
     public function storeStepFour($customerId, array $data)
     {
+        $plotIds = collect($data['plot_detail_ids'] ?? [])
+            ->filter()
+            ->unique()
+            ->values();
+
+        if ($plotIds->isNotEmpty()) {
+            $plotDetails = collect($data['plot_details'] ?? []);
+            $baseTotal = $plotIds->sum(function ($plotId) use ($plotDetails) {
+                $detail = $plotDetails->get((string) $plotId, $plotDetails->get($plotId, []));
+
+                return (float) ($detail['plot_cost'] ?? 0) + (float) ($detail['plc_amount'] ?? 0);
+            });
+            $developmentCharge = (float) ($data['total_development_charge'] ?? 0);
+            $otherCharges = (float) ($data['other_charges'] ?? 0);
+            $couponDiscount = (float) ($data['coupon_discount'] ?? 0);
+
+            PlotSaleDetail::where('customer_booking_id', $customerId)
+                ->whereNotIn('plot_detail_id', $plotIds->all())
+                ->whereDoesntHave('payments')
+                ->delete();
+
+            $savedPlotSales = collect();
+
+            foreach ($plotIds as $index => $plotId) {
+                $detail = $plotDetails->get((string) $plotId, $plotDetails->get($plotId, []));
+                $plotCost = (float) ($detail['plot_cost'] ?? 0);
+                $plcAmount = (float) ($detail['plc_amount'] ?? 0);
+                $baseAmount = $plotCost + $plcAmount;
+                $ratio = $baseTotal > 0 ? $baseAmount / $baseTotal : (1 / max($plotIds->count(), 1));
+                $allocatedDevelopment = round($developmentCharge * $ratio, 2);
+                $allocatedOther = round($otherCharges * $ratio, 2);
+                $allocatedDiscount = round($couponDiscount * $ratio, 2);
+                $finalPayable = max(0, $plotCost + $plcAmount + $allocatedDevelopment + $allocatedOther);
+                $totalPlotCost = max(0, $finalPayable - $allocatedDiscount);
+
+                if ($index === $plotIds->count() - 1) {
+                    $savedBaseTotal = $savedPlotSales->sum('total_plot_cost');
+                    $expectedTotal = max(0, $baseTotal + $developmentCharge + $otherCharges - $couponDiscount);
+                    $totalPlotCost = round($expectedTotal - $savedBaseTotal, 2);
+                    $finalPayable = round($totalPlotCost + $allocatedDiscount, 2);
+                }
+
+                $savedPlotSales->push(PlotSaleDetail::updateOrCreate(
+                    [
+                        'customer_booking_id' => $customerId,
+                        'plot_detail_id' => $plotId,
+                    ],
+                    [
+                        'project_id' => $data['project_id'] ?? null,
+                        'block_id' => $data['block_id'] ?? null,
+                        'total_development_charge' => $allocatedDevelopment,
+                        'development_rate' => $data['development_rate'] ?? null,
+                        'plot_rate' => $detail['plot_rate'] ?? null,
+                        'plot_area' => $detail['plot_area'] ?? null,
+                        'plot_cost' => $plotCost,
+                        'plc_amount' => $plcAmount,
+                        'remark' => $data['remark'] ?? null,
+                        'other_charges' => $allocatedOther,
+                        'final_payable' => $finalPayable,
+                        'coupon_discount' => $allocatedDiscount,
+                        'total_plot_cost' => $totalPlotCost,
+                        'booking_date' => $data['booking_date'] ?? null,
+                    ]
+                ));
+            }
+
+            CustomerBooking::where('id', $customerId)->update(['current_step' => 5]);
+
+            return $savedPlotSales;
+        }
+
         $oldPlotSale = PlotSaleDetail::where('customer_booking_id', $customerId)
             ->latest()
             ->first();
@@ -259,65 +335,89 @@ class CustomerBookingService
     {
         $paymentMode = $data['payment_mode'] ?? null;
         $planType = $data['plan_type'] ?? null;
-        $plotSaleId = $data['plot_sale_detail_id'];
+        $plotSaleIds = collect($data['plot_sale_detail_ids'] ?? [$data['plot_sale_detail_id'] ?? null])
+            ->filter()
+            ->unique()
+            ->values();
         $transactionNumber = $data['transaction_number'] ?? strtoupper($paymentMode ?: 'PAY') . '-' . time();
         $receiptNumber = $data['receipt_number'] ?? 'REC-' . Str::upper(Str::random(8));
         $isInstantPayment = in_array($paymentMode, ['cash', 'card', 'neft_rtgs'], true);
         $bookingStatus = $isInstantPayment ? 'booked' : 'hold';
-        $dueAmount = round((float) ($data['due_amount'] ?? 0), 2);
-        $paymentStatus = $bookingStatus === 'hold'
-            ? 'hold'
-            : ($dueAmount <= 0 ? 'cleared' : 'paid');
-        $oldPayment = CustomerPayment::where('customer_booking_id', $customerId)
-            ->where('plot_sale_detail_id', $plotSaleId)
-            ->first();
-
-        if (!$oldPayment) {
-            CustomerPayment::create([
-                'plan_type' => $planType,
-                'booking_amount' => $data['booking_amount'] ?? 0,
-                'paid_amount' => $data['booking_amount'] ?? 0,
-                'due_amount' => $dueAmount,
-                'net_payable_amount' => $data['net_payable_amount'] ?? 0,
-                'emi_months' => $data['emi_months'] ?? null,
-                'emi_date' => now(),
-                'after_booking_payable_amount' => $data['after_booking_payable_amount'] ?? null,
-                'remark' => $data['remark'] ?? null,
-                'payment_mode' => $paymentMode,
-                'account_number' => $data['account_number'] ?? null,
-                'bank_name' => $data['bank_name'] ?? null,
-                'branch_name' => $data['branch_name'] ?? null,
-                'cheque_number' => $data['cheque_number'] ?? null,
-                'cheque_date' => $data['cheque_date'] ?? null,
-                'dd_number' => $data['dd_number'] ?? null,
-                'transaction_number' => $transactionNumber,
-                'booking_status' => $bookingStatus,
-                'payment_status' => $paymentStatus,
-                'receipt_number' => $receiptNumber,
-                'customer_booking_id' => $customerId,
-                'plot_sale_detail_id' => $plotSaleId,
-                'transaction_category' => 'booking_fee',
-            ]);
-        }
-        $plotSale = PlotSaleDetail::find($plotSaleId);
-        if ($plotSale && $plotSale->plot_detail_id) {
-            $newStatus = $isInstantPayment ? 'booked' : 'hold';
-            PlotDetail::where('id', $plotSale->plot_detail_id)->update(['status' => $newStatus]);
-        }
         $booking = CustomerBooking::find($customerId);
         if ($booking && !$booking->booking_code) {
             $booking->update([
                 'booking_code' => 'BK-' . str_pad($booking->id, 6, '0', STR_PAD_LEFT),
             ]);
         }
-        if (!$plotSale->booking_code) {
 
-            $plotSale->update([
-                'booking_code' => 'BK-' . str_pad($plotSale->id, 6, '0', STR_PAD_LEFT),
-            ]);
+        $plotSales = PlotSaleDetail::where('customer_booking_id', $customerId)
+            ->whereIn('id', $plotSaleIds)
+            ->get();
+        $totalPayable = round((float) $plotSales->sum('total_plot_cost'), 2);
+        $paidTotal = min(round((float) ($data['booking_amount'] ?? 0), 2), $totalPayable);
+        $remainingPaid = $paidTotal;
+
+        foreach ($plotSales as $index => $plotSale) {
+            $plotPayable = round((float) ($plotSale->total_plot_cost ?? 0), 2);
+            $allocatedPaid = $index === $plotSales->count() - 1
+                ? $remainingPaid
+                : round($totalPayable > 0 ? ($paidTotal * $plotPayable / $totalPayable) : 0, 2);
+            $allocatedPaid = min($allocatedPaid, $plotPayable);
+            $remainingPaid = round($remainingPaid - $allocatedPaid, 2);
+            $dueAmount = max(0, round($plotPayable - $allocatedPaid, 2));
+            $paymentStatus = $bookingStatus === 'hold'
+                ? 'hold'
+                : ($dueAmount <= 0 ? 'cleared' : 'paid');
+
+            $oldPayment = CustomerPayment::where('customer_booking_id', $customerId)
+                ->where('plot_sale_detail_id', $plotSale->id)
+                ->where('transaction_category', 'booking_fee')
+                ->first();
+
+            if (!$oldPayment) {
+                CustomerPayment::create([
+                    'plan_type' => $planType,
+                    'booking_amount' => $allocatedPaid,
+                    'paid_amount' => $allocatedPaid,
+                    'due_amount' => $dueAmount,
+                    'net_payable_amount' => $plotPayable,
+                    'emi_months' => $data['emi_months'] ?? null,
+                    'emi_date' => now(),
+                    'after_booking_payable_amount' => $planType === 'emi_plan' && !empty($data['emi_months'])
+                        ? round($dueAmount / max((int) $data['emi_months'], 1), 2)
+                        : null,
+                    'remark' => $data['remark'] ?? null,
+                    'payment_mode' => $paymentMode,
+                    'account_number' => $data['account_number'] ?? null,
+                    'bank_name' => $data['bank_name'] ?? null,
+                    'branch_name' => $data['branch_name'] ?? null,
+                    'cheque_number' => $data['cheque_number'] ?? null,
+                    'cheque_date' => $data['cheque_date'] ?? null,
+                    'dd_number' => $data['dd_number'] ?? null,
+                    'transaction_number' => $transactionNumber,
+                    'booking_status' => $bookingStatus,
+                    'payment_status' => $paymentStatus,
+                    'receipt_number' => $receiptNumber,
+                    'customer_booking_id' => $customerId,
+                    'plot_sale_detail_id' => $plotSale->id,
+                    'transaction_category' => 'booking_fee',
+                ]);
+            }
+
+            if ($plotSale->plot_detail_id) {
+                $newStatus = $isInstantPayment ? 'booked' : 'hold';
+                PlotDetail::where('id', $plotSale->plot_detail_id)->update(['status' => $newStatus]);
+            }
+
+            if (!$plotSale->booking_code || $plotSale->booking_code !== $booking->booking_code) {
+                $plotSale->update([
+                    'booking_code' => $booking->booking_code,
+                ]);
+            }
         }
+
         $booking->update([
-            'current_step' => 6,
+            'current_step' => 5,
             'status' => $isInstantPayment ? 'completed' : 'pending',
         ]);
     }

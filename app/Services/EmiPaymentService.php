@@ -3,6 +3,9 @@
 namespace App\Services;
 
 use App\Models\CustomerPayment;
+use App\Models\PlotSaleDetail;
+use Exception;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class EmiPaymentService
@@ -11,38 +14,45 @@ class EmiPaymentService
     public function store(array $data)
     {
         return DB::transaction(function () use ($data) {
-
             $lastId = (CustomerPayment::max('id') ?? 0) + 1;
+            $receiptNumber = 'RCP-'.date('Ymd').'-'.str_pad($lastId, 4, '0', STR_PAD_LEFT);
+            $plotSaleIds = collect($data['plot_sale_detail_ids'] ?? [])
+                ->push($data['plot_sale_detail_id'] ?? null)
+                ->filter()
+                ->unique()
+                ->values();
 
-            $data['receipt_number'] = 'RCP-'.date('Ymd').'-'.str_pad($lastId, 4, '0', STR_PAD_LEFT);
+            if ($plotSaleIds->isEmpty()) {
+                throw new Exception('Plot details missing.');
+            }
 
-            $oldPayment = CustomerPayment::where('customer_booking_id', $data['customer_booking_id'])
-                ->where('plot_sale_detail_id', $data['plot_sale_detail_id'])
-                ->latest()
-                ->first();
+            $plotSales = PlotSaleDetail::whereIn('id', $plotSaleIds)
+                ->where('customer_booking_id', $data['customer_booking_id'])
+                ->orderBy('id')
+                ->get();
 
-            $oldDueAmount = round((float) ($oldPayment->due_amount ?? 0), 2);
+            if ($plotSales->count() !== $plotSaleIds->count()) {
+                throw new Exception('Plot sale details not found.');
+            }
+
+            $dues = $this->calculateDues((int) $data['customer_booking_id'], $plotSales);
+            $totalDue = round((float) $dues->sum('due'), 2);
             $paidAmount = round((float) ($data['booking_amount'] ?? 0), 2);
 
-            $newDueAmount = round(max(0, $oldDueAmount - $paidAmount), 2);
+            if ($totalDue <= 0) {
+                throw new Exception('This EMI booking is already fully paid.');
+            }
 
-            $fixedMonthlyEmi = round((float) ($oldPayment->after_booking_payable_amount ?? 0), 2);
+            if (($paidAmount - $totalDue) > 0.01) {
+                throw new Exception('EMI amount cannot be greater than due amount.');
+            }
 
-            // Remaining EMI Months
-            $remainingEmiMonths = $fixedMonthlyEmi > 0
-                ? ceil($newDueAmount / $fixedMonthlyEmi)
-                : 0;
-            $data['plan_type'] = 'emi_plan';
-            $data['emi_months'] = $remainingEmiMonths;
-            $data['paid_amount'] = $paidAmount;
-            $data['due_amount'] = $newDueAmount;
-            $data['after_booking_payable_amount'] = $fixedMonthlyEmi;
-            $data['net_payable_amount'] = $newDueAmount;
-            $data['transaction_category'] = 'emi_payment';
-            $data['emi_date'] = now();
+            if ($paidAmount > $totalDue) {
+                $paidAmount = $totalDue;
+            }
+
             $isHoldPayment = in_array($data['payment_mode'], ['cheque', 'dd']);
-            $data['booking_status'] = $isHoldPayment ? 'hold' : 'booked';
-            $data['payment_status'] = $isHoldPayment ? 'hold' : 'paid';
+            $allocations = $this->allocateEmiPaymentAmount($dues, $paidAmount, $totalDue);
             $fields = [
                 'bank_name',
                 'account_number',
@@ -56,16 +66,146 @@ class EmiPaymentService
             foreach ($fields as $field) {
                 $data[$field] = $data[$field] ?? null;
             }
-            // Due Amount 0 => EMI plan is fully completed.
-            if (!$isHoldPayment && $newDueAmount <= 0) {
-                CustomerPayment::where('customer_booking_id', $data['customer_booking_id'])
-                    ->where('plot_sale_detail_id', $data['plot_sale_detail_id'])
-                    ->where('plan_type', 'emi_plan')
-                    ->where('booking_status', 'booked')
-                    ->whereIn('payment_status', ['pending', 'paid'])
-                    ->update(['payment_status' => 'cleared']);
+
+            $createdPayments = collect();
+
+            foreach ($dues as $dueInfo) {
+                $plotPaidAmount = round((float) ($allocations[$dueInfo['plot_sale_id']] ?? 0), 2);
+
+                if ($plotPaidAmount <= 0) {
+                    continue;
+                }
+
+                $newDueAmount = round(max(0, $dueInfo['due'] - $plotPaidAmount), 2);
+                $fixedMonthlyEmi = round((float) $dueInfo['monthly_emi'], 2);
+                $remainingEmiMonths = $fixedMonthlyEmi > 0
+                    ? (int) ceil($newDueAmount / $fixedMonthlyEmi)
+                    : 0;
+                $paymentStatus = $isHoldPayment ? 'hold' : ($newDueAmount <= 0 ? 'cleared' : 'paid');
+
+                if (!$isHoldPayment && $newDueAmount <= 0) {
+                    CustomerPayment::where('customer_booking_id', $data['customer_booking_id'])
+                        ->where('plot_sale_detail_id', $dueInfo['plot_sale_id'])
+                        ->where('plan_type', 'emi_plan')
+                        ->where('booking_status', 'booked')
+                        ->whereIn('payment_status', ['pending', 'paid'])
+                        ->update(['payment_status' => 'cleared']);
+                }
+
+                $createdPayments->push(CustomerPayment::create(array_merge($data, [
+                    'plot_sale_detail_id' => $dueInfo['plot_sale_id'],
+                    'receipt_number' => $receiptNumber,
+                    'plan_type' => 'emi_plan',
+                    'emi_months' => $remainingEmiMonths,
+                    'paid_amount' => $plotPaidAmount,
+                    'booking_amount' => $plotPaidAmount,
+                    'due_amount' => $newDueAmount,
+                    'after_booking_payable_amount' => $fixedMonthlyEmi,
+                    'net_payable_amount' => $newDueAmount,
+                    'transaction_category' => 'emi_payment',
+                    'emi_date' => now(),
+                    'booking_status' => $isHoldPayment ? 'hold' : 'booked',
+                    'payment_status' => $paymentStatus,
+                ])));
             }
-            return CustomerPayment::create($data);
+
+            return $createdPayments;
         });
+    }
+
+    public function calculateDues(int $bookingId, Collection $plotSales): Collection
+    {
+        return $plotSales->map(function (PlotSaleDetail $plotSale) use ($bookingId) {
+            $latestPayment = CustomerPayment::where('customer_booking_id', $bookingId)
+                ->where('plot_sale_detail_id', $plotSale->id)
+                ->where('plan_type', 'emi_plan')
+                ->latest()
+                ->first();
+
+            return [
+                'plot_sale_id' => $plotSale->id,
+                'total_cost' => round((float) ($plotSale->total_plot_cost ?? 0), 2),
+                'due' => round((float) ($latestPayment->due_amount ?? 0), 2),
+                'monthly_emi' => round((float) ($latestPayment->after_booking_payable_amount ?? 0), 2),
+                'booking_amount' => round((float) ($latestPayment->booking_amount ?? 0), 2),
+                'emi_months' => (int) ($latestPayment->emi_months ?? 0),
+                'latest_payment' => $latestPayment,
+            ];
+        });
+    }
+
+    public function allocatePaymentAmount(Collection $dues, float $payingAmount, float $remainingDue): array
+    {
+        $payableDues = $dues->filter(fn ($dueInfo) => $dueInfo['due'] > 0)->values();
+
+        if ($payableDues->isEmpty()) {
+            return [];
+        }
+
+        if (abs($payingAmount - $remainingDue) <= 0.01) {
+            return $payableDues
+                ->mapWithKeys(fn ($dueInfo) => [$dueInfo['plot_sale_id'] => round($dueInfo['due'], 2)])
+                ->all();
+        }
+
+        $allocations = [];
+        $allocatedAmount = 0.0;
+        $lastIndex = $payableDues->count() - 1;
+
+        foreach ($payableDues as $index => $dueInfo) {
+            if ($index === $lastIndex) {
+                $plotAmount = round($payingAmount - $allocatedAmount, 2);
+            } else {
+                $plotAmount = round($payingAmount * ($dueInfo['due'] / $remainingDue), 2);
+                $allocatedAmount = round($allocatedAmount + $plotAmount, 2);
+            }
+
+            $allocations[$dueInfo['plot_sale_id']] = max(0, min($plotAmount, $dueInfo['due']));
+        }
+
+        return $allocations;
+    }
+
+    public function allocateEmiPaymentAmount(Collection $dues, float $payingAmount, float $remainingDue): array
+    {
+        $payableDues = $dues->filter(fn ($dueInfo) => $dueInfo['due'] > 0)->values();
+
+        if ($payableDues->isEmpty()) {
+            return [];
+        }
+
+        if (abs($payingAmount - $remainingDue) <= 0.01) {
+            return $payableDues
+                ->mapWithKeys(fn ($dueInfo) => [$dueInfo['plot_sale_id'] => round($dueInfo['due'], 2)])
+                ->all();
+        }
+
+        $monthlyWeightTotal = round((float) $payableDues->sum(function ($dueInfo) {
+            $monthlyEmi = (float) ($dueInfo['monthly_emi'] ?? 0);
+
+            return min((float) $dueInfo['due'], max(0, $monthlyEmi));
+        }), 2);
+
+        if ($monthlyWeightTotal <= 0) {
+            return $this->allocatePaymentAmount($dues, $payingAmount, $remainingDue);
+        }
+
+        $allocations = [];
+        $allocatedAmount = 0.0;
+        $lastIndex = $payableDues->count() - 1;
+
+        foreach ($payableDues as $index => $dueInfo) {
+            if ($index === $lastIndex) {
+                $plotAmount = round($payingAmount - $allocatedAmount, 2);
+            } else {
+                $monthlyWeight = min((float) $dueInfo['due'], max(0, (float) ($dueInfo['monthly_emi'] ?? 0)));
+                $plotAmount = round($payingAmount * ($monthlyWeight / $monthlyWeightTotal), 2);
+                $allocatedAmount = round($allocatedAmount + $plotAmount, 2);
+            }
+
+            $allocations[$dueInfo['plot_sale_id']] = max(0, min($plotAmount, $dueInfo['due']));
+        }
+
+        return $allocations;
     }
 }
