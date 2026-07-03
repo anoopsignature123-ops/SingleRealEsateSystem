@@ -87,25 +87,16 @@
                 $('#fill_due_amount').toggleClass('d-none', !(hasBooking && dueAmount > 0));
             }
 
-            function selectedPlotType() {
-                return $('input[name="payment_plot_type"]:checked').val() || 'multiple';
-            }
-
             function resetPlotGroups() {
-                $('#plot_group_hint').text('Select project and block to load booking groups.');
+                $('#plot_group_hint').text('Select project and block to load pending payment booking groups.');
             }
 
             function renderPlotGroups(plots) {
                 resetPlotGroups();
                 $('#plot_id').html('<option value="">Select booking group</option>');
 
-                const mode = selectedPlotType();
-                const filteredPlots = (Array.isArray(plots) ? plots : []).filter(function(plot) {
-                    return mode === 'multiple' ? Boolean(plot.is_multiple) : !Boolean(plot.is_multiple);
-                });
-                const emptyText = mode === 'multiple'
-                    ? 'No multiple plot booking found for this block.'
-                    : 'No single plot booking found for this block.';
+                const filteredPlots = Array.isArray(plots) ? plots : [];
+                const emptyText = 'No pending full payment booking found for this block.';
 
                 if (filteredPlots.length === 0) {
                     $('#plot_group_hint').text(emptyText);
@@ -160,8 +151,8 @@
                 $('#form_selected_plot_count').text(plots.length + (plots.length > 1 ? ' Plots' : ' Plot'));
                 $('#form_selected_plot_mode').text(
                     plots.length > 1
-                        ? 'Multiple plot group selected. One payment receipt will cover these plots.'
-                        : 'Single plot selected. Payment will apply only to this plot.'
+                        ? 'Grouped booking selected. One payment receipt will cover all listed plots.'
+                        : 'Booking selected. Payment will apply to this plot.'
                 );
                 $('#form_selected_plots_box').removeClass('d-none');
             }
@@ -255,16 +246,6 @@
                     allPlotGroups = Array.isArray(res) ? res : [];
                     renderPlotGroups(allPlotGroups);
                 });
-            });
-
-            $('input[name="payment_plot_type"]').on('change', function() {
-                resetSummary();
-                renderPlotGroups(allPlotGroups);
-                $('#payment_plot_type_help').text(
-                    selectedPlotType() === 'multiple'
-                        ? 'Multiple mode me sirf grouped plot bookings show hongi.'
-                        : 'Single mode me sirf one-plot bookings show hongi.'
-                );
             });
 
             $('#plot_id').change(function() {

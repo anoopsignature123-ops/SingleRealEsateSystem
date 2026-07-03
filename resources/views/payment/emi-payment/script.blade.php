@@ -34,10 +34,6 @@
                 return value;
             }
 
-            function selectedPlotType() {
-                return $('input[name="payment_plot_type"]:checked').val() || 'multiple';
-            }
-
             function setSummaryLoading(isLoading) {
                 $('#emi_summary_loader').toggleClass('d-none', !isLoading);
                 $('#project_id, #block_id, #plot_id, #booking_amount_input, #payment_mode, #submitEmiPaymentBtn')
@@ -108,7 +104,7 @@
             }
 
             function resetPlotGroups() {
-                $('#plot_group_hint').text('Select project and block to load EMI groups.');
+                $('#plot_group_hint').text('Select project and block to load pending EMI booking groups.');
             }
 
             function renderEmiOverview(overview) {
@@ -147,17 +143,10 @@
                 resetPlotGroups();
                 $('#plot_id').html('<option value="">Select booking group</option>');
 
-                const mode = selectedPlotType();
-                const filteredPlots = (Array.isArray(plots) ? plots : []).filter(function(plot) {
-                    return mode === 'multiple' ? Boolean(plot.is_multiple) : !Boolean(plot.is_multiple);
-                });
+                const filteredPlots = Array.isArray(plots) ? plots : [];
 
                 if (filteredPlots.length === 0) {
-                    $('#plot_group_hint').text(
-                        mode === 'multiple'
-                            ? 'No multiple plot EMI booking found for this block.'
-                            : 'No single plot EMI booking found for this block.'
-                    );
+                    $('#plot_group_hint').text('No pending EMI booking found for this block.');
                     refreshSelect($('#plot_id'));
                     return;
                 }
@@ -187,7 +176,7 @@
                 });
             }
 
-            function renderSelectedPlots(plots, overview = null, isMultiple = false) {
+            function renderSelectedPlots(plots) {
                 if (!Array.isArray(plots) || plots.length === 0) {
                     $('#form_selected_plots_box').addClass('d-none');
                     return;
@@ -195,13 +184,11 @@
 
                 let html = '';
                 $.each(plots, function(index, plot) {
-                    const progressData = isMultiple && overview ? overview : plot;
-                    const paidInstallments = progressData.paid_installments ?? 0;
-                    const holdInstallments = progressData.hold_installments ?? 0;
-                    const remainingInstallments = progressData.remaining_installments ?? 0;
-                    const totalInstallments = progressData.total_installments ?? 0;
-                    const progressPercent = progressData.progress_percent ?? 0;
-                    const progressLabel = isMultiple ? 'group EMI paid' : 'EMI paid';
+                    const paidInstallments = plot.paid_installments ?? 0;
+                    const holdInstallments = plot.hold_installments ?? 0;
+                    const remainingInstallments = plot.remaining_installments ?? 0;
+                    const totalInstallments = plot.total_installments ?? 0;
+                    const progressPercent = plot.progress_percent ?? 0;
 
                     html += `<tr>
                         <td>
@@ -221,7 +208,7 @@
                                 aria-valuenow="${progressPercent}" aria-valuemin="0" aria-valuemax="100">
                                 <div class="progress-bar bg-success" style="width: ${progressPercent}%"></div>
                             </div>
-                            <small class="text-muted">${paidInstallments}/${totalInstallments} ${progressLabel}</small>
+                            <small class="text-muted">${paidInstallments}/${totalInstallments} EMI paid</small>
                         </td>
                         <td class="text-end text-nowrap fw-semibold">&#8377;${plot.due_amount ?? '0.00'}</td>
                     </tr>`;
@@ -231,8 +218,8 @@
                 $('#form_selected_plot_count').text(plots.length + (plots.length > 1 ? ' Plots' : ' Plot'));
                 $('#form_selected_plot_mode').text(
                     plots.length > 1
-                        ? 'Multiple EMI group selected. One receipt will cover these plots.'
-                        : 'Single EMI plot selected.'
+                        ? 'Grouped EMI booking selected. One receipt will cover all listed plots.'
+                        : 'EMI booking selected.'
                 );
                 $('#form_selected_plots_box').removeClass('d-none');
             }
@@ -359,16 +346,6 @@
                 });
             });
 
-            $('input[name="payment_plot_type"]').on('change', function() {
-                clearBookingData();
-                renderPlotGroups(allPlotGroups);
-                $('#payment_plot_type_help').text(
-                    selectedPlotType() === 'multiple'
-                        ? 'Multiple mode shows only grouped EMI bookings.'
-                        : 'Single mode shows only one-plot EMI bookings.'
-                );
-            });
-
             $('#plot_id').on('change', function() {
                 const plotId = $(this).val();
                 clearBookingData();
@@ -404,7 +381,7 @@
                     $('#due_amount').text(res.due_amount);
                     $('#emi_start_date').text(res.emi_start_date);
                     renderEmiOverview(res.emi_overview);
-                    renderSelectedPlots(res.plots || [], res.emi_overview, Boolean(res.is_multiple));
+                    renderSelectedPlots(res.plots || []);
                     const overview = res.emi_overview || {};
                     $('#emi_months').text(
                         (overview.paid_installments ?? res.months_passed) + ' / ' +

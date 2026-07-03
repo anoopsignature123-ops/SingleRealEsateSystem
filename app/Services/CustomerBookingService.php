@@ -247,7 +247,17 @@ class CustomerBookingService
                 ->exists();
 
             if ($groupHasPayment) {
-                throw new \Exception('This booking group already has payment and cannot be edited.');
+                $existingPlotIds = PlotSaleDetail::where('customer_booking_id', $customerId)
+                    ->where('booking_code', $bookingCode)
+                    ->pluck('plot_detail_id')
+                    ->filter()
+                    ->sort()
+                    ->values();
+                $selectedPlotIds = $plotIds->sort()->values();
+
+                if ($existingPlotIds->toArray() !== $selectedPlotIds->toArray()) {
+                    throw new \Exception('Payment is already done for this booking group. Plot selection cannot be changed.');
+                }
             }
 
             $alreadyUsedPlots = PlotSaleDetail::where('customer_booking_id', $customerId)
@@ -347,7 +357,7 @@ class CustomerBookingService
             ->latest()
             ->first();
 
-        // Same plot already selected → new record mat banao
+        // Avoid creating a duplicate record when the same plot is already selected.
         if ($oldPlotSale && $oldPlotSale->plot_detail_id == ($data['plot_detail_id'] ?? null)) {
             CustomerBooking::where('id', $customerId)->update(['current_step' => 5]);
 

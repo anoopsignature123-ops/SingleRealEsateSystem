@@ -22,7 +22,11 @@
                         'couponDiscount' => (float) $sale->coupon_discount,
                         'finalPayable' => (float) $sale->final_payable,
                         'totalPlotCost' => (float) $sale->total_plot_cost,
-                        'bookingDate' => $sale->booking_date ? (is_string($sale->booking_date) ? \Carbon\Carbon::parse($sale->booking_date)->format('Y-m-d') : $sale->booking_date->format('Y-m-d')) : '',
+                        'bookingDate' => $sale->booking_date
+                            ? (is_string($sale->booking_date)
+                                ? \Carbon\Carbon::parse($sale->booking_date)->format('Y-m-d')
+                                : $sale->booking_date->format('Y-m-d'))
+                            : '',
                         'remark' => $sale->remark ?? '',
                     ],
                 ];
@@ -32,32 +36,38 @@
         $bookingGroupsForJs = ($plotSales ?? collect())
             ->groupBy('booking_code')
             ->map(function ($group) {
-                return $group->mapWithKeys(function ($sale) {
-                    return [
-                        $sale->plot_detail_id => [
-                            'id' => $sale->plot_detail_id,
-                            'saleId' => $sale->id,
-                            'bookingCode' => $sale->booking_code,
-                            'projectId' => $sale->project_id,
-                            'projectName' => $sale->project?->name,
-                            'blockId' => $sale->block_id,
-                            'blockName' => $sale->block?->block,
-                            'number' => $sale->plotDetail?->plot_number,
-                            'rate' => (float) $sale->plot_rate,
-                            'area' => (float) $sale->plot_area,
-                            'plc' => (float) $sale->plc_amount,
-                            'plotCost' => (float) $sale->plot_cost,
-                            'totalDevelopmentCharge' => (float) $sale->total_development_charge,
-                            'developmentRate' => (float) $sale->development_rate,
-                            'otherCharges' => (float) $sale->other_charges,
-                            'couponDiscount' => (float) $sale->coupon_discount,
-                            'finalPayable' => (float) $sale->final_payable,
-                            'totalPlotCost' => (float) $sale->total_plot_cost,
-                            'bookingDate' => $sale->booking_date ? (is_string($sale->booking_date) ? \Carbon\Carbon::parse($sale->booking_date)->format('Y-m-d') : $sale->booking_date->format('Y-m-d')) : '',
-                            'remark' => $sale->remark ?? '',
-                        ],
-                    ];
-                })->toArray();
+                return $group
+                    ->mapWithKeys(function ($sale) {
+                        return [
+                            $sale->plot_detail_id => [
+                                'id' => $sale->plot_detail_id,
+                                'saleId' => $sale->id,
+                                'bookingCode' => $sale->booking_code,
+                                'projectId' => $sale->project_id,
+                                'projectName' => $sale->project?->name,
+                                'blockId' => $sale->block_id,
+                                'blockName' => $sale->block?->block,
+                                'number' => $sale->plotDetail?->plot_number,
+                                'rate' => (float) $sale->plot_rate,
+                                'area' => (float) $sale->plot_area,
+                                'plc' => (float) $sale->plc_amount,
+                                'plotCost' => (float) $sale->plot_cost,
+                                'totalDevelopmentCharge' => (float) $sale->total_development_charge,
+                                'developmentRate' => (float) $sale->development_rate,
+                                'otherCharges' => (float) $sale->other_charges,
+                                'couponDiscount' => (float) $sale->coupon_discount,
+                                'finalPayable' => (float) $sale->final_payable,
+                                'totalPlotCost' => (float) $sale->total_plot_cost,
+                                'bookingDate' => $sale->booking_date
+                                    ? (is_string($sale->booking_date)
+                                        ? \Carbon\Carbon::parse($sale->booking_date)->format('Y-m-d')
+                                        : $sale->booking_date->format('Y-m-d'))
+                                    : '',
+                                'remark' => $sale->remark ?? '',
+                            ],
+                        ];
+                    })
+                    ->toArray();
             })
             ->toArray();
     @endphp
@@ -70,8 +80,8 @@
 
         @include('customer-booking.partials.plot-sale-form')
 
-        
-        
+
+
     </form>
 
     @push('scripts')
@@ -159,22 +169,28 @@
                         `;
 
                         if (plot.totalDevelopmentCharge !== undefined) {
-                            hiddenHtml += `<input type="hidden" name="plot_details[${plot.id}][total_development_charge]" value="${plot.totalDevelopmentCharge}">`;
+                            hiddenHtml +=
+                                `<input type="hidden" name="plot_details[${plot.id}][total_development_charge]" value="${plot.totalDevelopmentCharge}">`;
                         }
                         if (plot.developmentRate !== undefined) {
-                            hiddenHtml += `<input type="hidden" name="plot_details[${plot.id}][development_rate]" value="${plot.developmentRate}">`;
+                            hiddenHtml +=
+                                `<input type="hidden" name="plot_details[${plot.id}][development_rate]" value="${plot.developmentRate}">`;
                         }
                         if (plot.otherCharges !== undefined) {
-                            hiddenHtml += `<input type="hidden" name="plot_details[${plot.id}][other_charges]" value="${plot.otherCharges}">`;
+                            hiddenHtml +=
+                                `<input type="hidden" name="plot_details[${plot.id}][other_charges]" value="${plot.otherCharges}">`;
                         }
                         if (plot.couponDiscount !== undefined) {
-                            hiddenHtml += `<input type="hidden" name="plot_details[${plot.id}][coupon_discount]" value="${plot.couponDiscount}">`;
+                            hiddenHtml +=
+                                `<input type="hidden" name="plot_details[${plot.id}][coupon_discount]" value="${plot.couponDiscount}">`;
                         }
                         if (plot.finalPayable !== undefined) {
-                            hiddenHtml += `<input type="hidden" name="plot_details[${plot.id}][final_payable]" value="${plot.finalPayable}">`;
+                            hiddenHtml +=
+                                `<input type="hidden" name="plot_details[${plot.id}][final_payable]" value="${plot.finalPayable}">`;
                         }
                         if (plot.totalPlotCost !== undefined) {
-                            hiddenHtml += `<input type="hidden" name="plot_details[${plot.id}][total_plot_cost]" value="${plot.totalPlotCost}">`;
+                            hiddenHtml +=
+                                `<input type="hidden" name="plot_details[${plot.id}][total_plot_cost]" value="${plot.totalPlotCost}">`;
                         }
                     });
 
@@ -355,7 +371,8 @@
                                 plotType = plot.plot_type.plot_type_name;
                             }
 
-                            let selectedClass = selectedPlots[String(plot.id)] ? 'border-success shadow' : '';
+                            let selectedClass = selectedPlots[String(plot.id)] ?
+                                'border-success shadow' : '';
 
                             html += `
                                 <div class="col-xl-3 col-lg-4 col-md-6">
@@ -506,14 +523,24 @@
                     });
 
                     $('#viewGroupBookingCode').text(bookingCode);
-                    $('#viewGroupBookingDate').text(bookingDate ? `Booking date: ${bookingDate}` : 'Booking date not set');
+                    $('#viewGroupBookingDate').text(bookingDate ? `Booking date: ${bookingDate}` :
+                        'Booking date not set');
                     $('#viewGroupBookingTableBody').html(rows || `
                         <tr>
                             <td colspan="7" class="text-center text-muted py-4">No plot details found for this booking group.</td>
                         </tr>
                     `);
                     $('#viewGroupBookingTotal').text(`₹${total.toFixed(2)}`);
-                    $('#viewBookingGroupModal').modal('show');
+                    let viewModal = $('#viewBookingGroupModal');
+
+                    viewModal.appendTo('body');
+                    viewModal.modal({
+                        backdrop: true,
+                        keyboard: true,
+                        focus: true
+                    });
+
+                    viewModal.modal('show');
                 });
 
                 $(document).on('click', '.plot-edit-btn', function() {
@@ -545,7 +572,16 @@
                     $('#modalTotalPlotCost').val($(this).data('total-plot-cost') ?? 0);
                     $('#modalBookingDate').val($(this).data('booking-date') ?? '');
                     $('#modalRemark').val($(this).data('remark') ?? '');
-                    $('#plotEditModal').modal('show');
+                    let editModal = $('#plotEditModal');
+
+                    editModal.appendTo('body');
+                    editModal.modal({
+                        backdrop: true,
+                        keyboard: true,
+                        focus: true
+                    });
+
+                    editModal.modal('show');
                 });
 
                 function calculateModalTotals() {
@@ -562,7 +598,8 @@
                     $('#modalTotalPlotCost').val(totalPlotCost.toFixed(2));
                 }
 
-                $('#modalPlcAmount, #modalTotalDevelopmentCharge, #modalOtherCharges, #modalCouponDiscount').on('keyup change', calculateModalTotals);
+                $('#modalPlcAmount, #modalTotalDevelopmentCharge, #modalOtherCharges, #modalCouponDiscount').on(
+                    'keyup change', calculateModalTotals);
 
                 $('#applyPlotEdit').click(function() {
                     if (!currentEditPlotDetailId) {

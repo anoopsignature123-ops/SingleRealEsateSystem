@@ -5,6 +5,7 @@
         $selectedPlotSales = collect([$plotSale]);
     }
     $totalBookingPayable = (float) $selectedPlotSales->sum('total_plot_cost');
+    $totalBookingArea = (float) $selectedPlotSales->sum('plot_area');
     $selectedBookingCode = $selectedPlotSales->first()?->booking_code ?? '-';
 @endphp
 
@@ -42,15 +43,23 @@
                     </div>
                 </div>
 
-                <div class="fs-5 fw-bold">
-                    &#8377; {{ number_format($totalBookingPayable, 2) }}
+                <div class="d-flex align-items-center flex-wrap gap-2">
+                    @if ($selectedPlotSales->count() > 0)
+                        <button type="button" class="btn btn-sm btn-outline-success rounded-pill px-3"
+                            data-bs-toggle="modal" data-bs-target="#viewPaymentGroupModal">
+                            <i class="bi bi-eye me-1"></i>View Group Details
+                        </button>
+                    @endif
+                    <div class="fs-5 fw-bold">
+                        &#8377; {{ number_format($totalBookingPayable, 2) }}
+                    </div>
                 </div>
             </div>
         </div>
 
         @if ($selectedPlotSales->count() > 0)
-            <div class="card border-0 bg-light rounded-4 mb-4">
-                <div class="card-body p-3">
+            <div class="card border rounded-4 mb-4 overflow-hidden">
+                <div class="card-body p-3 bg-light">
                     <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
                         <h6 class="fw-bold text-success mb-0">
                             <i class="bi bi-houses me-1"></i>
@@ -59,6 +68,26 @@
                         <span class="badge bg-success-subtle text-success border rounded-pill px-3 py-2">
                             {{ $selectedPlotSales->count() }} Plots
                         </span>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-4">
+                            <div class="border rounded-3 bg-white p-3 h-100">
+                                <small class="text-muted fw-semibold">Booking Group</small>
+                                <div class="fw-bold">{{ $selectedBookingCode }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="border rounded-3 bg-white p-3 h-100">
+                                <small class="text-muted fw-semibold">Total Area</small>
+                                <div class="fw-bold">{{ number_format($totalBookingArea, 2) }} Sq.Ft.</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="border rounded-3 bg-white p-3 h-100">
+                                <small class="text-muted fw-semibold">Total Payable</small>
+                                <div class="fw-bold text-success">&#8377; {{ number_format($totalBookingPayable, 2) }}</div>
+                            </div>
+                        </div>
                     </div>
                     <div class="table-responsive">
                         <table class="table table-sm align-middle mb-0">

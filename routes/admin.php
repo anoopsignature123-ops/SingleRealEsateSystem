@@ -4,6 +4,7 @@ use App\Http\Controllers\AgentDetailReportController;
 use App\Http\Controllers\AgentSummaryDetailsReportController;
 use App\Http\Controllers\AssociateAdvanceController;
 use App\Http\Controllers\AssociateAdvanceReportController;
+use App\Http\Controllers\AssociateBusinessReportController;
 use App\Http\Controllers\AssociateChainReportController;
 use App\Http\Controllers\AssociateController;
 use App\Http\Controllers\AssociateDirectReportController;
@@ -288,10 +289,10 @@ Route::middleware(['auth', 'module.permission'])->group(function () {
 
     Route::controller(CustomerLedgerReportController::class)->group(function () {
         Route::get('/customer-ledger-report', 'index')->name('customer-ledger-report.index');
-        Route::get('/ledger-project-blocks/{projectId}', 'getBlocks');
-        Route::get('/ledger-block-customers/{projectId}/{blockId}', 'getCustomers');
-        Route::get('/ledger-customer-plots/{customerId}', 'getPlots');
-        Route::get('/ledger-plot-booking/{plotId}/{customerId}', 'getBooking');
+        Route::get('/ledger-project-blocks/{projectId}', 'getBlocks')->name('ledger.project.blocks');
+        Route::get('/ledger-block-customers/{projectId}/{blockId}', 'getCustomers')->name('ledger.block.customers');
+        Route::get('/ledger-customer-plots/{customerId}', 'getPlots')->name('ledger.customer.plots');
+        Route::get('/ledger-plot-booking/{plotId}/{customerId}', 'getBooking')->name('ledger.plot.booking');
         Route::get('/customer-ledger-report/export', 'export')->name('customer-ledger-report.export');
     });
 
@@ -341,6 +342,11 @@ Route::middleware(['auth', 'module.permission'])->group(function () {
             ->name('associate-team-new-booking-details-report.index');
         Route::get('/associate-team-new-booking-details-report/export', 'export')
             ->name('associate-team-new-booking-details-report.export');
+    });
+
+    Route::controller(AssociateBusinessReportController::class)->group(function () {
+        Route::get('/associate-business-report', 'index')->name('associate-business-report.index');
+        Route::get('/associate-business-report/export', 'export')->name('associate-business-report.export');
     });
 
     Route::controller(BouncedChequeDetailsReportController::class)->group(function () {

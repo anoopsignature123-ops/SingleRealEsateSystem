@@ -53,6 +53,13 @@ class CheckModulePermission
             'get.cities' => 'farmers-list',
             'customer-booking.get-blocks' => 'customer-booking-list',
             'customer-booking.get-plots' => 'customer-booking-list',
+            // Customer Ledger Report
+            'ledger.project.blocks' => 'customer-ledger-report-list',
+            'ledger.block.customers' => 'customer-ledger-report-list',
+            'ledger.customer.plots' => 'customer-ledger-report-list',
+            'ledger.plot.booking' => 'customer-ledger-report-list',
+            'customer-ledger-report.export' => 'customer-ledger-report-list',
+
         ];
 
         if (isset($extraRouteMap[$routeName])) {

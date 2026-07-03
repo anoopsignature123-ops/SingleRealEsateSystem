@@ -13,7 +13,7 @@
                 <div>
                     <span class="text-success fw-bold text-uppercase small">EMI Collection</span>
                     <h3 class="fw-bold mb-1 text-dark">EMI Payment</h3>
-                    <p class="text-muted mb-0 small">Select project, block and plot to collect pending EMI.</p>
+                    <p class="text-muted mb-0 small">Select project, block and booking group to collect pending EMI.</p>
                 </div>
             </div>
         </div>
@@ -37,31 +37,6 @@
                             <input type="hidden" id="max_due_amount" value="0">
 
                             <div class="row">
-                                 <input type="hidden" class="form-check-input" name="payment_plot_type"
-                                                id="emi_plot_type_multiple" value="multiple" autocomplete="off">
-                                {{-- <div class="col-12 mb-3">
-                                    <label class="form-label fw-semibold d-block">Payment For <span class="text-danger">*</span></label>
-                                    <div class="d-flex flex-wrap gap-4 border rounded-3 bg-white px-3 py-2">
-                                        <div class="form-check">
-                                            <input type="radio" class="form-check-input" name="payment_plot_type"
-                                                id="emi_plot_type_single" value="single" autocomplete="off" checked>
-                                            <label class="form-check-label fw-semibold" for="emi_plot_type_single">
-                                                Single Plot
-                                            </label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input type="radio" class="form-check-input" name="payment_plot_type"
-                                                id="emi_plot_type_multiple" value="multiple" autocomplete="off">
-                                            <label class="form-check-label fw-semibold" for="emi_plot_type_multiple">
-                                                Multiple Plot
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <small class="text-muted d-block mt-2" id="payment_plot_type_help">
-                                        Select single EMI or grouped multiple plot EMI first.
-                                    </small>
-                                </div> --}}
-
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label fw-semibold">Project <span class="text-danger">*</span></label>
                                     <select id="project_id" class="form-select">
@@ -80,12 +55,12 @@
                                 </div>
 
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label fw-semibold">Booking / Plot Group <span class="text-danger">*</span></label>
+                                    <label class="form-label fw-semibold">Booking Group <span class="text-danger">*</span></label>
                                     <select id="plot_id" class="form-select">
                                         <option value="">Select booking group</option>
                                     </select>
                                     <small class="text-muted d-block mt-1" id="plot_group_hint">
-                                        Select project and block to load EMI groups.
+                                        Select project and block to load pending EMI booking groups.
                                     </small>
                                 </div>
 

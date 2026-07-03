@@ -7,6 +7,7 @@ use App\Models\CustomerPayment;
 use App\Services\ExcelExportService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 
 class DuesInstallmentReportController extends Controller
 {
@@ -19,54 +20,42 @@ class DuesInstallmentReportController extends Controller
 
     public function index(Request $request)
     {
-        $customerIds = CustomerBooking::select('id', 'customer_code')->get();
-        $query = CustomerPayment::with([
-            'customerBooking.primaryDetail',
-            'customerBooking.associate',
-            'plotSaleDetail.plotDetail',
-        ]);
-        if ($request->filled('date')) {
-            $query->whereDate('created_at', Carbon::parse($request->date));
-        }
-        if ($request->filled('customer_id')) {
-            $query->whereHas('customerBooking',
-                function ($q) use ($request) {
-                    $q->where('id', $request->customer_id);
-                }
-            );
-        }
-        $reports = $query->latest()->get();
+        $customerIds = CustomerBooking::with('primaryDetail')
+            ->select('id', 'customer_code')
+            ->get();
 
-        return view('reports.dues-installment-report.index', compact('customerIds', 'reports')
+        $payments = $this->buildQuery($request)->latest()->get();
+        $reports = $this->buildReports($payments);
+
+        $summary = [
+            'total_records' => $reports->count(),
+            'total_due_installments' => $reports->sum('due_installment'),
+            'total_amount' => $reports->sum('total_amount'),
+            'paid_amount' => $reports->sum('paid_amount'),
+            'balance_amount' => $reports->sum('balance_amount'),
+        ];
+
+        return view(
+            'reports.dues-installment-report.index',
+            compact('customerIds', 'reports', 'summary')
         );
     }
 
     public function export(Request $request)
     {
-        $query = CustomerPayment::with([
-            'customerBooking.primaryDetail',
-            'customerBooking.associate',
-            'plotSaleDetail.plotDetail',
-        ]);
-        if ($request->filled('date')) {
-            $query->whereDate('created_at', Carbon::parse($request->date));
-        }
-        if ($request->filled('customer_id')) {
-            $query->whereHas('customerBooking',
-                function ($q) use ($request) {
-                    $q->where('id', $request->customer_id);
-                }
-            );
-        }
-        $reports = $query->latest()->get();
+        $payments = $this->buildQuery($request)->latest()->get();
+        $reports = $this->buildReports($payments);
 
-        return $this->excelExportService->export($reports, 'dues-installment-report',
+        return $this->excelExportService->export(
+            $reports,
+            'dues-installment-report',
             [
                 'Agent ID',
                 'Customer ID',
                 'Customer Name',
                 'Booking ID',
                 'Booking Date',
+                'Plot No',
                 'Installment Amt',
                 'Total Ins Amt',
                 'Paid Ins Amt',
@@ -74,34 +63,106 @@ class DuesInstallmentReportController extends Controller
                 'No Of Due Ins',
             ],
             function ($report) {
-                $totalAmount = $report->net_payable_amount ?? 0;
-                $paidAmount = $report->customerBooking?->payments
-                    ?->whereIn('payment_status', ['paid', 'cleared'])
-                    ->sum('paid_amount') ?? 0;
-                $balance = $totalAmount - $paidAmount;
-                $emiMonths = $report->emi_months ?? 1;
-                $installment = 0;
-                if ($emiMonths > 0) {
-                    $installment = $totalAmount / $emiMonths;
-                }
-                $dueInstallment = 0;
-                if ($installment > 0) {
-                    $dueInstallment = floor($balance / $installment);
-                }
-
                 return [
-                    $report->customerBooking?->associate?->associate_code ?? 'N/A',
-                    $report->customerBooking?->customer_code ?? 'N/A',
-                    $report->customerBooking?->primaryDetail?->name ?? 'N/A',
-                    $report->customerBooking?->booking_code ?? 'N/A',
-                    $report->customerBooking?->created_at?->format('d-m-Y') ?? 'N/A',
-                    number_format($installment, 2, '.', ''),
-                    number_format($totalAmount, 2, '.', ''),
-                    number_format($paidAmount, 2, '.', ''),
-                    number_format($balance, 2, '.', ''),
-                    $dueInstallment,
+                    $report['agent_code'],
+                    $report['customer_code'],
+                    $report['customer_name'],
+                    $report['booking_code'],
+                    $report['booking_date'],
+                    $report['plots'],
+                    number_format($report['installment_amount'], 2, '.', ''),
+                    number_format($report['total_amount'], 2, '.', ''),
+                    number_format($report['paid_amount'], 2, '.', ''),
+                    number_format($report['balance_amount'], 2, '.', ''),
+                    $report['due_installment'],
                 ];
             }
         );
+    }
+
+    private function buildQuery(Request $request)
+    {
+        $query = CustomerPayment::with([
+            'customerBooking.primaryDetail',
+            'customerBooking.associate',
+            'customerBooking.payments',
+            'plotSaleDetail.project',
+            'plotSaleDetail.block',
+            'plotSaleDetail.plotDetail',
+        ])
+            ->where('plan_type', 'emi_plan')
+            ->where('transaction_category', 'booking_fee')
+            ->whereNotNull('plot_sale_detail_id');
+
+        if ($request->filled('date')) {
+            $query->whereDate('created_at', Carbon::parse($request->date));
+        }
+
+        if ($request->filled('customer_id')) {
+            $query->whereHas('customerBooking', function ($q) use ($request) {
+                $q->where('id', $request->customer_id);
+            });
+        }
+
+        return $query;
+    }
+
+    private function buildReports(Collection $payments): Collection
+    {
+        return $payments
+            ->groupBy(function ($payment) {
+                $bookingCode = $payment->plotSaleDetail?->booking_code
+                    ?: $payment->customerBooking?->booking_code
+                    ?: 'booking-' . $payment->customer_booking_id;
+
+                return $payment->customer_booking_id . '|' . $bookingCode;
+            })
+            ->map(function ($group) {
+                $first = $group->first();
+                $booking = $first->customerBooking;
+
+                $plotSaleIds = $group->pluck('plot_sale_detail_id')->filter()->unique()->values();
+
+                $bookingPayments = $booking?->payments
+                        ?->whereIn('plot_sale_detail_id', $plotSaleIds) ?? collect();
+
+                if ($bookingPayments->isEmpty()) {
+                    $bookingPayments = $booking?->payments ?? collect();
+                }
+
+                $totalAmount = $group->sum(fn($payment) => (float) ($payment->net_payable_amount ?? 0));
+
+                if ($totalAmount <= 0) {
+                    $totalAmount = $group->sum(fn($payment) => (float) ($payment->plotSaleDetail?->total_plot_cost ?? 0));
+                }
+
+                $paidAmount = $bookingPayments
+                    ->whereIn('payment_status', ['paid', 'cleared'])
+                    ->sum('paid_amount');
+
+                $balanceAmount = max(0, $totalAmount - $paidAmount);
+
+                $emiMonths = (int) ($group->max('emi_months') ?: 0);
+                $installmentAmount = $emiMonths > 0 ? ($totalAmount / $emiMonths) : 0;
+                $dueInstallment = $installmentAmount > 0 ? (int) ceil($balanceAmount / $installmentAmount) : 0;
+
+                return [
+                    'agent_code' => $booking?->associate?->associate_code ?? $booking?->associate_code ?? 'N/A',
+                    'customer_code' => $booking?->customer_code ?? 'N/A',
+                    'customer_name' => $booking?->primaryDetail?->name ?? 'N/A',
+                    'booking_code' => $first->plotSaleDetail?->booking_code ?? $booking?->booking_code ?? 'N/A',
+                    'booking_date' => $booking?->created_at?->format('d-m-Y') ?? 'N/A',
+                    'project' => $group->map(fn($payment) => $payment->plotSaleDetail?->project?->name)->filter()->unique()->implode(', ') ?: 'N/A',
+                    'block' => $group->map(fn($payment) => $payment->plotSaleDetail?->block?->block)->filter()->unique()->implode(', ') ?: 'N/A',
+                    'plots' => $group->map(fn($payment) => $payment->plotSaleDetail?->plotDetail?->plot_number)->filter()->unique()->implode(', ') ?: 'N/A',
+                    'plot_count' => $plotSaleIds->count(),
+                    'installment_amount' => $installmentAmount,
+                    'total_amount' => $totalAmount,
+                    'paid_amount' => $paidAmount,
+                    'balance_amount' => $balanceAmount,
+                    'due_installment' => $dueInstallment,
+                ];
+            })
+            ->values();
     }
 }

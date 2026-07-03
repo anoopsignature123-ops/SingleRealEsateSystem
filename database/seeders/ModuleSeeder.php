@@ -434,7 +434,7 @@ class ModuleSeeder extends Seeder
                 'icon' => 'bi bi-people',
             ],
             [
-                'name' => 'EMI Due Status',
+                'name' => 'Due EMI Report',
                 'slug' => 'emi-due-status-report',
                 'parent_slug' => 'report',
                 'route_name' => 'emi-due-status-report.index',
@@ -442,24 +442,31 @@ class ModuleSeeder extends Seeder
                 'icon' => 'bi bi-calendar-x',
             ],
 
-            [
-                'name' => 'EMI Payment Dues',
-                'slug' => 'emi-payment-dues-report',
-                'parent_slug' => 'report',
-                'route_name' => 'emi-due-date-report.index',
-                'active_routes' => 'emi-due-date-report*',
-                'icon' => 'bi bi-cash-stack',
-            ],
+            // [
+            //     'name' => 'EMI Payment Dues',
+            //     'slug' => 'emi-payment-dues-report',
+            //     'parent_slug' => 'report',
+            //     'route_name' => 'emi-due-date-report.index',
+            //     'active_routes' => 'emi-due-date-report*',
+            //     'icon' => 'bi bi-cash-stack',
+            // ],
 
             [
-                'name' => 'One Time Payment Dues',
+                'name' => 'Full Payement & OneTime Payment Reprot',
                 'slug' => 'one-time-payment-dues-report',
                 'parent_slug' => 'report',
                 'route_name' => 'one-time-payment-dues-report.index',
                 'active_routes' => 'one-time-payment-dues-report*',
                 'icon' => 'bi bi-wallet2',
             ],
-
+            // [
+            //     'name' => 'EMI Payment Details',
+            //     'slug' => 'emi-payment-details-report',
+            //     'parent_slug' => 'report',
+            //     'route_name' => 'emi-payment-details-report.index',
+            //     'active_routes' => 'emi-payment-details-report*',
+            //     'icon' => 'bi bi-calendar-check',
+            // ],
             [
                 'name' => 'Plot Booking Details',
                 'slug' => 'plot-booking-details-report',
@@ -469,59 +476,58 @@ class ModuleSeeder extends Seeder
                 'icon' => 'bi bi-house-check',
             ],
 
-            [
-                'name' => 'EMI Payment Details',
-                'slug' => 'emi-payment-details-report',
-                'parent_slug' => 'report',
-                'route_name' => 'emi-payment-details-report.index',
-                'active_routes' => 'emi-payment-details-report*',
-                'icon' => 'bi bi-calendar-check',
-            ],
+            // [
+            //     'name' => 'Full Payment Details',
+            //     'slug' => 'full-payment-details-report',
+            //     'parent_slug' => 'report',
+            //     'route_name' => 'full-payment-details-report.index',
+            //     'active_routes' => 'full-payment-details-report*',
+            //     'icon' => 'bi bi-credit-card',
+            // ],
 
             [
-                'name' => 'Full Payment Details',
-                'slug' => 'full-payment-details-report',
-                'parent_slug' => 'report',
-                'route_name' => 'full-payment-details-report.index',
-                'active_routes' => 'full-payment-details-report*',
-                'icon' => 'bi bi-credit-card',
-            ],
-
-            [
-                'name' => 'Registerd Plot Details',
+                'name' => 'Registerd Plot Report',
                 'slug' => 'registered-plot-details-report',
                 'parent_slug' => 'report',
                 'route_name' => 'registered-plot-details-report.index',
                 'active_routes' => 'registered-plot-details-report*',
                 'icon' => 'bi bi-file-earmark-check',
             ],
-
             [
-                'name' => 'Without Registerd Plot Report',
-                'slug' => 'without-registered-plot-report',
+                'name' => 'Cancel Plot Booking Report',
+                'slug' => 'cancel-plot-booking-report',
                 'parent_slug' => 'report',
-                'route_name' => 'without-registered-plot-report.index',
-                'active_routes' => 'without-registered-plot-report*',
-                'icon' => 'bi bi-file-earmark-x',
+                'route_name' => 'cancel-plot-booking-report.index',
+                'active_routes' => 'cancel-plot-booking-report*',
+                'icon' => 'bi bi-x-circle',
             ],
 
-            [
-                'name' => 'Associate Direct Report',
-                'slug' => 'associate-direct-report',
-                'parent_slug' => 'report',
-                'route_name' => 'associate-direct-report.index',
-                'active_routes' => 'associate-direct-report*',
-                'icon' => 'bi bi-diagram-2',
-            ],
+            // [
+            //     'name' => 'Without Registerd Plot Report',
+            //     'slug' => 'without-registered-plot-report',
+            //     'parent_slug' => 'report',
+            //     'route_name' => 'without-registered-plot-report.index',
+            //     'active_routes' => 'without-registered-plot-report*',
+            //     'icon' => 'bi bi-file-earmark-x',
+            // ],
 
-            [
-                'name' => 'Associate Chain Report',
-                'slug' => 'associate-chain-report',
-                'parent_slug' => 'report',
-                'route_name' => 'associate-chain-report.index',
-                'active_routes' => 'associate-chain-report*',
-                'icon' => 'bi bi-diagram-3',
-            ],
+            // [
+            //     'name' => 'Associate Direct Report',
+            //     'slug' => 'associate-direct-report',
+            //     'parent_slug' => 'report',
+            //     'route_name' => 'associate-direct-report.index',
+            //     'active_routes' => 'associate-direct-report*',
+            //     'icon' => 'bi bi-diagram-2',
+            // ],
+
+            // [
+            //     'name' => 'Associate Chain Report',
+            //     'slug' => 'associate-chain-report',
+            //     'parent_slug' => 'report',
+            //     'route_name' => 'associate-chain-report.index',
+            //     'active_routes' => 'associate-chain-report*',
+            //     'icon' => 'bi bi-diagram-3',
+            // ],
 
             [
                 'name' => 'Associate Business Report',
@@ -530,15 +536,6 @@ class ModuleSeeder extends Seeder
                 'route_name' => 'associate-business-report.index',
                 'active_routes' => 'associate-business-report*',
                 'icon' => 'bi bi-graph-up',
-            ],
-
-            [
-                'name' => 'Cancel Plot Booking Report',
-                'slug' => 'cancel-plot-booking-report',
-                'parent_slug' => 'report',
-                'route_name' => 'cancel-plot-booking-report.index',
-                'active_routes' => 'cancel-plot-booking-report*',
-                'icon' => 'bi bi-x-circle',
             ],
 
             [
@@ -568,7 +565,7 @@ class ModuleSeeder extends Seeder
             ],
 
             [
-                'name' => 'Cheque Details',
+                'name' => 'Cheque & Bounced Cheque Report',
                 'slug' => 'cheque-details-report',
                 'parent_slug' => 'report',
                 'route_name' => 'cheque-details-report.index',
@@ -576,17 +573,17 @@ class ModuleSeeder extends Seeder
                 'icon' => 'bi bi-bank',
             ],
 
-            [
-                'name' => 'EMI Dues Summary',
-                'slug' => 'emi-dues-summary-report',
-                'parent_slug' => 'report',
-                'route_name' => 'emi-dues-summary-report.index',
-                'active_routes' => 'emi-dues-summary-report*',
-                'icon' => 'bi bi-wallet2',
-            ],
+            // [
+            //     'name' => 'EMI Dues Summary',
+            //     'slug' => 'emi-dues-summary-report',
+            //     'parent_slug' => 'report',
+            //     'route_name' => 'emi-dues-summary-report.index',
+            //     'active_routes' => 'emi-dues-summary-report*',
+            //     'icon' => 'bi bi-wallet2',
+            // ],
 
             [
-                'name' => 'Daily Collection Report',
+                'name' => 'Daily & Due Collection Report',
                 'slug' => 'daily-collection-report',
                 'parent_slug' => 'report',
                 'route_name' => 'daily-collection-report.index',
@@ -594,17 +591,17 @@ class ModuleSeeder extends Seeder
                 'icon' => 'bi bi-calendar-day',
             ],
 
-            [
-                'name' => 'Daily Dues Report',
-                'slug' => 'daily-dues-report',
-                'parent_slug' => 'report',
-                'route_name' => 'daily-dues-report.index',
-                'active_routes' => 'daily-dues-report*',
-                'icon' => 'bi bi-calendar-x',
-            ],
+            // [
+            //     'name' => 'Daily Dues Report',
+            //     'slug' => 'daily-dues-report',
+            //     'parent_slug' => 'report',
+            //     'route_name' => 'daily-dues-report.index',
+            //     'active_routes' => 'daily-dues-report*',
+            //     'icon' => 'bi bi-calendar-x',
+            // ],
 
             [
-                'name' => 'Agent Summary Details',
+                'name' => 'Agent Summary Report',
                 'slug' => 'agent-summary-details-report',
                 'parent_slug' => 'report',
                 'route_name' => 'agent-summary-details-report.index',
@@ -612,14 +609,14 @@ class ModuleSeeder extends Seeder
                 'icon' => 'bi bi-person-lines-fill',
             ],
 
-            [
-                'name' => 'New Booking Payment Details',
-                'slug' => 'new-booking-payment-details-report',
-                'parent_slug' => 'report',
-                'route_name' => 'new-booking-payment-details-report.index',
-                'active_routes' => 'new-booking-payment-details-report*',
-                'icon' => 'bi bi-house-add',
-            ],
+            // [
+            //     'name' => 'New Booking Payment Details',
+            //     'slug' => 'new-booking-payment-details-report',
+            //     'parent_slug' => 'report',
+            //     'route_name' => 'new-booking-payment-details-report.index',
+            //     'active_routes' => 'new-booking-payment-details-report*',
+            //     'icon' => 'bi bi-house-add',
+            // ],
 
             [
                 'name' => 'Associate Team New Booking Details',
@@ -630,23 +627,23 @@ class ModuleSeeder extends Seeder
                 'icon' => 'bi bi-people-fill',
             ],
 
-            [
-                'name' => 'Bounced Cheque Details',
-                'slug' => 'bounced-cheque-details-report',
-                'parent_slug' => 'report',
-                'route_name' => 'bounced-cheque-details-report.index',
-                'active_routes' => 'bounced-cheque-details-report*',
-                'icon' => 'bi bi-x-circle',
-            ],
+            // [
+            //     'name' => 'Bounced Cheque Details',
+            //     'slug' => 'bounced-cheque-details-report',
+            //     'parent_slug' => 'report',
+            //     'route_name' => 'bounced-cheque-details-report.index',
+            //     'active_routes' => 'bounced-cheque-details-report*',
+            //     'icon' => 'bi bi-x-circle',
+            // ],
 
-            [
-                'name' => 'Associate Advance Report',
-                'slug' => 'associate-advance-report',
-                'parent_slug' => 'report',
-                'route_name' => 'associate-advance-report.index',
-                'active_routes' => 'associate-advance-report*',
-                'icon' => 'bi bi-currency-rupee',
-            ],
+            // [
+            //     'name' => 'Associate Advance Report',
+            //     'slug' => 'associate-advance-report',
+            //     'parent_slug' => 'report',
+            //     'route_name' => 'associate-advance-report.index',
+            //     'active_routes' => 'associate-advance-report*',
+            //     'icon' => 'bi bi-currency-rupee',
+            // ],
 
             // [
             //     'name' => 'Cancel Plot Report',

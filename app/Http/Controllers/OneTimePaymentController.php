@@ -65,10 +65,9 @@ class OneTimePaymentController extends Controller
             $plotLabel = $plotNumbers->implode(', ');
 
             return [
-                'id' => $representativeSale->plot_detail_id,
-                'plot_number' => $plotNumbers->count() > 1
-                    ? $plotLabel.' (Multiple - '.$plotNumbers->count().' Plots)'
-                    : ($plotLabel ?: 'Plot #'.$representativeSale->plot_detail_id),
+                'id' => $representativeSale->id,
+                'plot_number' => ($plotLabel ?: 'Plot #'.$representativeSale->plot_detail_id)
+                    .' ('.$plotNumbers->count().' '.($plotNumbers->count() === 1 ? 'Plot' : 'Plots').')',
                 'booking_code' => $representativeSale->booking_code,
                 'customer_name' => $booking?->primaryDetail?->name,
                 'is_multiple' => $plotNumbers->count() > 1,
@@ -81,43 +80,31 @@ class OneTimePaymentController extends Controller
         return response()->json($plots);
     }
 
-    public function getBookingDetails($plotId)
+    public function getBookingDetails($plotSaleDetailId)
     {
-        $booking = CustomerBooking::with([
-            'primaryDetail',
-            'plotSaleDetails.project',
-            'plotSaleDetails.block',
-            'plotSaleDetails.plotDetail',
-            'plotSaleDetails.payments',
+        $plotSale = PlotSaleDetail::with([
             'payments',
+            'customerBooking.primaryDetail',
+            'customerBooking.plotSaleDetails.project',
+            'customerBooking.plotSaleDetails.block',
+            'customerBooking.plotSaleDetails.plotDetail',
+            'customerBooking.plotSaleDetails.payments',
+            'customerBooking.payments',
         ])
-            ->whereHas('plotSaleDetails', function ($query) use ($plotId) {
-                $query->where('plot_detail_id', $plotId);
-            })
+            ->where('id', $plotSaleDetailId)
             ->whereHas('payments', function ($query) {
                 $query->where('plan_type', 'full_payment');
             })
             ->first();
 
-        if (!$booking) {
+        if (!$plotSale || !$plotSale->customerBooking) {
             return response()->json([
                 'status' => false,
                 'message' => 'Booking not found',
             ]);
         }
 
-        $plotSale = $booking->plotSaleDetails()
-            ->where('plot_detail_id', $plotId)
-            ->first();
-
-        if (!$plotSale) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Plot sale details not found',
-            ]);
-        }
-
-        $plotSale->load('payments');
+        $booking = $plotSale->customerBooking;
 
         if (!$plotSale->payments->contains('plan_type', 'full_payment')) {
             return response()->json([

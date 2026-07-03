@@ -17,31 +17,32 @@ class ChequeDetailsReportController extends Controller
 
     public function index(Request $request)
     {
-        $query = CustomerPayment::with(['customerBooking.primaryDetail'])->where('payment_mode', 'cheque')
-            ->where('cheque_status', 'cleared');
-        if ($request->filled('criteria')) {
-            $query->where('plan_type', $request->criteria);
-        }
-        $reports = $query->latest()->get();
+        $reports = $this->buildQuery($request)->latest()->get();
 
-        return view('reports.cheque-details-report.index', compact('reports'));
+        $summary = [
+            'total_records' => $reports->count(),
+            'cleared_records' => $reports->where('cheque_status', 'cleared')->count(),
+            'bounced_records' => $reports->where('cheque_status', 'bounced')->count(),
+            'total_amount' => $reports->sum(fn($item) => (float) ($item->paid_amount ?? $item->booking_amount ?? 0)),
+        ];
+
+        return view('reports.cheque-details-report.index', compact('reports', 'summary'));
     }
 
     public function export(Request $request)
     {
-        $query = CustomerPayment::with(['customerBooking.primaryDetail'])->where('payment_mode', 'cheque')
-            ->where('cheque_status', 'cleared');
-        if ($request->filled('criteria')) {
-            $query->where('plan_type', $request->criteria);
-        }
-        $reports = $query->latest()->get();
+        $reports = $this->buildQuery($request)->latest()->get();
 
-        return $this->excelExportService->export($reports, 'cheque-details-report',
+        return $this->excelExportService->export(
+            $reports,
+            'cheque-details-report',
             [
                 'Customer ID',
                 'Customer Name',
+                'Booking ID',
                 'Payment Type',
                 'Pay Mode',
+                'Amount',
                 'Bank Account No',
                 'Cheque No',
                 'Bank Name',
@@ -53,8 +54,10 @@ class ChequeDetailsReportController extends Controller
                 return [
                     $report->customerBooking?->customer_code ?? 'N/A',
                     $report->customerBooking?->primaryDetail?->name ?? 'N/A',
-                    ucfirst(str_replace('_', ' ', $report->plan_type)),
+                    $report->customerBooking?->booking_code ?? 'N/A',
+                    ucfirst(str_replace('_', ' ', $report->plan_type ?? 'N/A')),
                     strtoupper($report->payment_mode ?? 'N/A'),
+                    number_format($report->paid_amount ?? $report->booking_amount ?? 0, 2, '.', ''),
                     $report->account_number ?? 'N/A',
                     $report->cheque_number ?? 'N/A',
                     $report->bank_name ?? 'N/A',
@@ -64,5 +67,24 @@ class ChequeDetailsReportController extends Controller
                 ];
             }
         );
+    }
+
+    private function buildQuery(Request $request)
+    {
+        $query = CustomerPayment::with([
+            'customerBooking.primaryDetail',
+        ])
+            ->where('payment_mode', 'cheque')
+            ->whereIn('cheque_status', ['cleared', 'bounced']);
+
+        if ($request->filled('criteria')) {
+            $query->where('plan_type', $request->criteria);
+        }
+
+        if ($request->filled('cheque_status')) {
+            $query->where('cheque_status', $request->cheque_status);
+        }
+
+        return $query;
     }
 }

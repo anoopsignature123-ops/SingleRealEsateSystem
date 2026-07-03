@@ -71,10 +71,9 @@ class EmiPaymentController extends Controller
             $plotLabel = $plotNumbers->implode(', ');
 
             return [
-                'id' => $representativeSale->plot_detail_id,
-                'plot_number' => $plotNumbers->count() > 1
-                    ? $plotLabel.' (Multiple - '.$plotNumbers->count().' Plots)'
-                    : ($plotLabel ?: 'Plot #'.$representativeSale->plot_detail_id),
+                'id' => $representativeSale->id,
+                'plot_number' => ($plotLabel ?: 'Plot #'.$representativeSale->plot_detail_id)
+                    .' ('.$plotNumbers->count().' '.($plotNumbers->count() === 1 ? 'Plot' : 'Plots').')',
                 'booking_code' => $representativeSale->booking_code,
                 'customer_name' => $booking?->primaryDetail?->name,
                 'is_multiple' => $plotNumbers->count() > 1,
@@ -93,30 +92,27 @@ class EmiPaymentController extends Controller
         return response()->json(['status' => true, 'data' => $plots]);
     }
 
-    public function getBookingDetails(int $plotId): JsonResponse
+    public function getBookingDetails(int $plotSaleDetailId): JsonResponse
     {
-        $booking = CustomerBooking::with(['primaryDetail', 'plotSaleDetails.project', 'plotSaleDetails.block', 'plotSaleDetails.plotDetail', 'plotSaleDetails.payments'])
-            ->whereHas('plotSaleDetails', function ($query) use ($plotId) {
-                $query->where('plot_detail_id', $plotId);
-            })
+        $saleDetail = PlotSaleDetail::with([
+            'payments',
+            'customerBooking.primaryDetail',
+            'customerBooking.plotSaleDetails.project',
+            'customerBooking.plotSaleDetails.block',
+            'customerBooking.plotSaleDetails.plotDetail',
+            'customerBooking.plotSaleDetails.payments',
+        ])
+            ->where('id', $plotSaleDetailId)
             ->whereHas('payments', function ($query) {
                 $query->where('plan_type', 'emi_plan');
             })
             ->first();
 
-        if (! $booking) {
+        if (! $saleDetail || ! $saleDetail->customerBooking) {
             return response()->json(['status' => false, 'message' => 'EMI booking not found.']);
         }
 
-        $saleDetail = $booking->plotSaleDetails()
-            ->where('plot_detail_id', $plotId)
-            ->first();
-
-        if (! $saleDetail) {
-            return response()->json(['status' => false, 'message' => 'Plot sale details not found.']);
-        }
-
-        $saleDetail->load('payments');
+        $booking = $saleDetail->customerBooking;
 
         if (! $saleDetail->payments->contains('plan_type', 'emi_plan')) {
             return response()->json(['status' => false, 'message' => 'EMI booking not found for this plot.']);

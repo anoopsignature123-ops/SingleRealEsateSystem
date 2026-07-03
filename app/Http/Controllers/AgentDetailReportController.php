@@ -17,63 +17,26 @@ class AgentDetailReportController extends Controller
 
     public function index(Request $request)
     {
-        $query = Associate::query();
+        $agents = $this->buildQuery($request)->latest()->get();
 
-        if ($request->associate_id) {
-            $query->where('id', $request->associate_id);
-        }
+        $associateList = Associate::select('id', 'associate_id', 'associate_name')->get();
 
-        if ($request->name) {
-            $query->where('associate_name', 'like', "%{$request->name}%");
-        }
-
-        if ($request->mobile) {
-            $query->where('mobile_number', 'like', "%{$request->mobile}%");
-        }
-
-        if ($request->from_date) {
-            $query->whereDate('created_at', '>=', $request->from_date);
-        }
-
-        if ($request->to_date) {
-            $query->whereDate('created_at', '<=', $request->to_date);
-        }
-
-        $agents = $query->latest()->get();
-
-        $associateList = Associate::get();
+        $summary = [
+            'total_records' => $agents->count(),
+            'with_sponsor' => $agents->whereNotNull('sponsor_id')->count(),
+            'self_agents' => $agents->whereNull('sponsor_id')->count(),
+            'active_agents' => $agents->where('status', 'active')->count(),
+        ];
 
         return view(
             'reports.agent_detail_report.index',
-            compact('agents', 'associateList')
+            compact('agents', 'associateList', 'summary')
         );
     }
 
     public function export(Request $request)
     {
-        $query = Associate::query();
-
-        if ($request->associate_id) {
-            $query->where('id', $request->associate_id);
-        }
-
-        if ($request->name) {
-            $query->where('associate_name', 'like', '%'.$request->name.'%');
-        }
-
-        if ($request->mobile) {
-            $query->where('mobile_number', 'like', '%'.$request->mobile.'%');
-        }
-
-        if ($request->from_date) {
-            $query->whereDate('created_at', '>=', $request->from_date);
-        }
-
-        if ($request->to_date) {
-            $query->whereDate('created_at', '<=', $request->to_date);
-        }
-
-        $agents = $query->get();
+        $agents = $this->buildQuery($request)->get();
 
         return $this->excelExportService->export(
             $agents,
@@ -83,17 +46,48 @@ class AgentDetailReportController extends Controller
                 'Agent ID',
                 'Name',
                 'Mobile',
-                'Date',
+                'Rank',
+                'Status',
+                'Joining Date',
             ],
             function ($agent) {
                 return [
-                    $agent->sponsor_id,
-                    $agent->associate_id,
-                    $agent->associate_name,
-                    $agent->mobile_number,
-                    $agent->created_at->format('d-m-Y'),
+                    $agent->sponsor_id ?? 'Self',
+                    $agent->associate_id ?? 'N/A',
+                    $agent->associate_name ?? 'N/A',
+                    $agent->mobile_number ?? 'N/A',
+                    $agent->rank?->designation ?? 'N/A',
+                    ucfirst($agent->status ?? 'N/A'),
+                    $agent->created_at ? $agent->created_at->format('d-m-Y') : 'N/A',
                 ];
             }
         );
+    }
+
+    private function buildQuery(Request $request)
+    {
+        $query = Associate::with('rank');
+
+        if ($request->filled('associate_id')) {
+            $query->where('id', $request->associate_id);
+        }
+
+        if ($request->filled('name')) {
+            $query->where('associate_name', 'like', '%' . $request->name . '%');
+        }
+
+        if ($request->filled('mobile')) {
+            $query->where('mobile_number', 'like', '%' . $request->mobile . '%');
+        }
+
+        if ($request->filled('from_date')) {
+            $query->whereDate('created_at', '>=', $request->from_date);
+        }
+
+        if ($request->filled('to_date')) {
+            $query->whereDate('created_at', '<=', $request->to_date);
+        }
+
+        return $query;
     }
 }
