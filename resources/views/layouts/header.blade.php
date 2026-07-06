@@ -352,13 +352,10 @@
                                 {{ $pendingSupportCount }} New Support Request
                             </div>
                         </div>
-
                         <span class="notify-count">
                             {{ $pendingSupportCount }}
                         </span>
-
                     </a>
-
                 </li>
             @endif
 

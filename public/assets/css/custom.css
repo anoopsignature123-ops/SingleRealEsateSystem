@@ -227,12 +227,21 @@
     overflow: hidden;
     margin-top: 14px !important;
 }
-
 .header-dropdown-top {
+    padding: 24px 18px;
+        background: linear-gradient(rgba(20, 95, 59, .70), rgba(25, 135, 84, .70)),
+            url("../images/sidebarbg.jpg");
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+    }
+    
+    /* .header-dropdown-top {
     padding: 24px 18px;
     background: linear-gradient(135deg, #145f3b, #198754);
 }
 
+*/
 .header-dropdown-item {
     display: flex;
     align-items: center;
