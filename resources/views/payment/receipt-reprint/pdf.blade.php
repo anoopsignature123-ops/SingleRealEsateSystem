@@ -320,7 +320,7 @@
 
                                     <td class="label-col">Plot Rate :</td>
                                     <td class="value-col">
-                                        {{ $receiptTotals['plot_count'] > 1 ? 'Multiple' : 'Rs. '.number_format((float) ($plotSale?->plot_rate ?? 0), 2).'/Sq.Ft.' }}
+                                        {{ $receiptTotals['plot_count'] > 1 ? '-' : 'Rs. '.number_format((float) ($plotSale?->plot_rate ?? 0), 2).'/Sq.Ft.' }}
                                     </td>
                                 </tr>
 

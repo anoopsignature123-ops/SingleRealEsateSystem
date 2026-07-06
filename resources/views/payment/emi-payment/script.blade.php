@@ -84,7 +84,7 @@
                 $('#payment_history_count').text('0 Records');
                 renderEmiOverview(null);
                 $('#form_selected_plots_box').addClass('d-none');
-                $('#form_selected_plot_count').text('0 Plots');
+                $('#form_selected_plot_count').text('0 Plot');
                 $('#form_selected_plot_mode').text('Verify EMI plot details before entering amount.');
                 $('#form_selected_plots').html(`
                     <tr>
@@ -215,7 +215,7 @@
                 });
 
                 $('#form_selected_plots').html(html);
-                $('#form_selected_plot_count').text(plots.length + (plots.length > 1 ? ' Plots' : ' Plot'));
+                $('#form_selected_plot_count').text(plots.length + ' Plot' + (plots.length === 1 ? '' : 's'));
                 $('#form_selected_plot_mode').text(
                     plots.length > 1
                         ? 'Grouped EMI booking selected. One receipt will cover all listed plots.'

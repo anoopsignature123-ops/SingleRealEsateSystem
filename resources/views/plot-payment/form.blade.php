@@ -52,7 +52,7 @@
                         <div>
                             <h6 class="fw-bold mb-1">Plot Payment Details</h6>
                             <small class="text-muted">
-                                {{ $plotCount > 1 ? 'Grouped receipt: update will apply to all listed plots.' : 'Single plot receipt.' }}
+                                {{ $plotCount > 1 ? 'Receipt update will apply to all listed plots.' : 'Receipt update will apply to the listed plot.' }}
                             </small>
                         </div>
                         <span class="badge bg-success-subtle text-success border">

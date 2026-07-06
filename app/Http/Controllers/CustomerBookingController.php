@@ -83,9 +83,7 @@ class CustomerBookingController extends Controller
         $activePlotSales = collect();
 
         if ($plotSale) {
-            $activePlotSales = $plotSale->booking_code
-                ? $plotSales->where('booking_code', $plotSale->booking_code)->values()
-                : collect([$plotSale]);
+            $activePlotSales = collect([$plotSale]);
         }
 
         if ($step == 4 && ! $request->filled('plot_sale_detail_id')) {

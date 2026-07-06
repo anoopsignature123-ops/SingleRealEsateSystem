@@ -142,7 +142,7 @@
                                         Payment Entries
                                     </h6>
                                     <small class="text-muted">
-                                        Select one or multiple payments to transfer.
+                                        Select payments to transfer.
                                     </small>
                                 </div>
                                 <span class="badge bg-primary-subtle text-primary border border-primary-subtle">

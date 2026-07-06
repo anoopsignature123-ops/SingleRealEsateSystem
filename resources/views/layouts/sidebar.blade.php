@@ -320,7 +320,7 @@
                                 </li>
                             @endif
                         @else
-                            {{-- Single Menu --}}
+                            {{-- Menu item --}}
                             @if ($user->can($menu->slug . '-list'))
                                 <li class="nav-item">
                                     <a href="{{ $menu->route_name && Route::has($menu->route_name) ? route($menu->route_name) : '#' }}"

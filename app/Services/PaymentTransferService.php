@@ -111,7 +111,7 @@ class PaymentTransferService
                 return [
                     'id' => $representativeSale->plot_detail_id,
                     'plot_number' => $plotNumbers->count() > 1
-                        ? $plotNumbers->implode(', ').' (Multiple - '.$plotNumbers->count().' Plots)'
+                        ? $plotNumbers->implode(', ').' ('.$plotNumbers->count().' Plots)'
                         : ($plotNumbers->first() ?: 'Plot #'.$representativeSale->plot_detail_id),
                     'booking_code' => $representativeSale->booking_code,
                     'customer_name' => $booking?->primaryDetail?->name ?? $booking?->customer_name,

@@ -72,7 +72,7 @@
                         <span class="transaction-section-title-icon"><i class="bi bi-receipt-cutoff"></i></span>
                         <div>
                             <h5 class="fw-bold mb-1">EMI Due Records</h5>
-                            <small class="text-muted">Multiple plots remain grouped under the same booking.</small>
+                            <small class="text-muted">Plots remain grouped under the same booking.</small>
                         </div>
                     </div>
                     <span class="badge bg-success-subtle text-success border border-success-subtle">{{ $totalRecords }} Records</span>

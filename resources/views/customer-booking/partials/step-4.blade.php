@@ -1,6 +1,7 @@
 @if ($step == 4)
     @php
         $existingPlotSalesForJs = ($activePlotSales ?? collect())
+            ->take(1)
             ->mapWithKeys(function ($sale) {
                 return [
                     $sale->plot_detail_id => [
@@ -111,7 +112,11 @@
                     currentEditPlotDetailId = null;
 
                     if (bookingCode && batchPlotSales[bookingCode]) {
-                        selectedPlots = Object.assign({}, batchPlotSales[bookingCode]);
+                        let firstPlot = Object.values(batchPlotSales[bookingCode])[0];
+
+                        if (firstPlot) {
+                            selectedPlots[String(firstPlot.id)] = firstPlot;
+                        }
                     }
 
                     $('#editBookingCode').val(bookingCode || '');

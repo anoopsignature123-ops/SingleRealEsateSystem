@@ -49,7 +49,7 @@
             <div class="col-lg-4 col-md-6">
                 <div class="transaction-card h-100 border-start border-4 border-info">
                     <div class="transaction-card-body py-3">
-                        <small class="text-muted fw-semibold">Multiple Plot Bookings</small>
+                        <small class="text-muted fw-semibold">Plot Bookings</small>
                         <h4 class="fw-bold text-info mb-0">{{ $multiPlotBookings }}</h4>
                     </div>
                 </div>
@@ -63,7 +63,7 @@
                         <span class="transaction-section-title-icon"><i class="bi bi-list-check"></i></span>
                         <div>
                             <h5 class="fw-bold mb-1">Business Records</h5>
-                            <small class="text-muted">Each row represents one booking. Multiple plots stay grouped in the same booking.</small>
+                            <small class="text-muted">Each row represents one booking. Plots stay grouped in the same booking.</small>
                         </div>
                     </div>
                     <span class="badge bg-success-subtle text-success border border-success-subtle">{{ $totalBookings }} Records</span>

@@ -151,7 +151,7 @@
                             Collection Summary
                         </h5>
                         <small class="text-muted">
-                            Multiple plot bookings are grouped by booking code.
+                            Plot bookings are grouped by booking code.
                         </small>
                     </div>
 

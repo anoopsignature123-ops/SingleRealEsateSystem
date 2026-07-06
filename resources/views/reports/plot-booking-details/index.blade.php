@@ -27,7 +27,7 @@
                             Plot Booking Details Report
                         </h3>
                         <p class="text-muted small mb-0">
-                            Search and export booking reports with multiple plot details.
+                            Search and export booking reports with plot details.
                         </p>
                     </div>
                 </div>

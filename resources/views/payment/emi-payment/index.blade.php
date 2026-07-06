@@ -74,7 +74,7 @@
                                                 </small>
                                             </div>
                                             <span class="badge bg-success-subtle text-success border"
-                                                id="form_selected_plot_count">0 Plots</span>
+                                                id="form_selected_plot_count">0 Plot</span>
                                         </div>
                                         <div class="table-responsive">
                                             <table class="table table-sm table-bordered table-hover align-middle mb-0 emi-detail-table">

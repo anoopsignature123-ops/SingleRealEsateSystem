@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @push('title')
-    Multiple Cheque Clearance
+    Cheque Clearance
 @endpush
 @section('content')
     <div class="container-fluid mt-4 cheque-clearance-page">
@@ -12,7 +12,7 @@
                 </span>
                 <div>
                     <span class="text-success fw-bold text-uppercase small">Payment Verification</span>
-                    <h3 class="fw-bold mb-1 text-dark">Multiple Cheque Clearance</h3>
+                    <h3 class="fw-bold mb-1 text-dark">Cheque Clearance</h3>
                     <p class="text-muted mb-0 small">Select cheque or DD payments and update their clearance status.</p>
                 </div>
             </div>

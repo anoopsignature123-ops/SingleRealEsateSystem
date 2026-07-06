@@ -7,7 +7,7 @@
     @php
         $totalMonthlyEmi = $payments->sum(fn ($payment) => (float) ($payment->group_monthly_emi ?? 0));
         $totalDue = $payments->sum(fn ($payment) => (float) ($payment->group_due_amount ?? 0));
-        $multiplePlotCount = $payments->filter(fn ($payment) => (int) ($payment->group_plot_count ?? 0) > 1)->count();
+        $groupedPlotCount = $payments->filter(fn ($payment) => (int) ($payment->group_plot_count ?? 0) > 1)->count();
     @endphp
 
     <div class="container-fluid mt-4 transaction-page update-emi-date-page">
@@ -68,8 +68,8 @@
                 <div class="role-stat-card">
                     <span class="role-stat-icon"><i class="bi bi-grid-3x3-gap"></i></span>
                     <div>
-                        <small>Multiple Plot Groups</small>
-                        <strong>{{ $multiplePlotCount }}</strong>
+                        <small>Plot Groups</small>
+                        <strong>{{ $groupedPlotCount }}</strong>
                     </div>
                 </div>
             </div>
@@ -101,7 +101,7 @@
                     </span>
                     <div>
                         <h5 class="fw-bold mb-1">EMI Date Records</h5>
-                        <small class="text-muted">Grouped multiple plot bookings are shown as one record.</small>
+                        <small class="text-muted">Grouped plot bookings are shown as one record.</small>
                     </div>
                 </div>
 

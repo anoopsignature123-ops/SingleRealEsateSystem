@@ -557,7 +557,7 @@
                 $('#modal_booking_code').text(overview.booking || '-');
                 $('#modal_customer_detail').text((overview.customer_code || '-') + ' | ' + (overview.customer ||
                     '-'));
-                $('#modal_plot_count').text(plotCount + (plotCount === 1 ? ' Plot' : ' Plots'));
+                $('#modal_plot_count').text(plotCount + ' Plot' + (plotCount === 1 ? '' : 's'));
                 $('#modal_plot_numbers').text(overview.plots || '-');
                 $('#modal_selected_months').text(selectedMonths + (selectedMonths === 1 ? ' Month' : ' Months'));
                 $('#modal_selected_emi').html('&#8377;' + numberFormat(selectedEmi) + ' Monthly EMI');

@@ -310,7 +310,7 @@
 
                             <div class="notify-content">
                                 <div class="notify-title">
-                                    ⚠ Multiple Cheque Clearance
+                                    Cheque Clearance
                                 </div>
 
                                 <div class="notify-subtitle">

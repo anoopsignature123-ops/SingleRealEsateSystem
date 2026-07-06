@@ -76,7 +76,7 @@
                                 <div class="role-module-head">
                                     <div>
                                         <h6 class="mb-1">{{ $module->name }}</h6>
-                                        <small>{{ $module->children->count() > 0 ? $module->children->count() . ' modules' : 'Single module' }}</small>
+                                        <small>{{ $module->children->count() > 0 ? $module->children->count() . ' modules' : 'Module' }}</small>
                                     </div>
 
                                     <div class="form-check form-switch m-0 d-flex align-items-center gap-2">

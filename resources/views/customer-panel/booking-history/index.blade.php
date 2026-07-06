@@ -68,7 +68,7 @@
             <div class="customer-section-header">
                 <div>
                     <h5 class="mb-1">Booking Records</h5>
-                    <p class="mb-0">Multiple plots booked under the same booking code are shown as one record.</p>
+                    <p class="mb-0">Plots booked under the same booking code are shown as one record.</p>
                 </div>
             </div>
 

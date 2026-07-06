@@ -179,7 +179,7 @@
                             <span class="transaction-section-title-icon"><i class="bi bi-map"></i></span>
                             <div>
                                 <h5 class="fw-bold mb-1">Plot Details</h5>
-                                <small class="text-muted">Multiple plot booking stays grouped under the same ledger.</small>
+                                <small class="text-muted">Plot booking stays grouped under the same ledger.</small>
                             </div>
                         </div>
                         <span class="badge bg-success-subtle text-success border border-success-subtle">
@@ -266,7 +266,7 @@
                             <span class="transaction-section-title-icon"><i class="bi bi-receipt"></i></span>
                             <div>
                                 <h5 class="fw-bold mb-1">Payment History</h5>
-                                <small class="text-muted">Grouped by receipt number, so multiple plot receipts show once.</small>
+                                <small class="text-muted">Grouped by receipt number, so plot receipts show once.</small>
                             </div>
                         </div>
                         <span class="badge bg-success-subtle text-success border border-success-subtle">

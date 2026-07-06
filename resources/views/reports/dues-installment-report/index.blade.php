@@ -128,7 +128,7 @@
                             <i class="bi bi-table text-success me-2"></i>
                             Due Installment Summary
                         </h5>
-                        <small class="text-muted">Grouped by booking code for multiple plot bookings.</small>
+                        <small class="text-muted">Grouped by booking code for plot bookings.</small>
                     </div>
 
                     <span class="badge bg-success-subtle text-success border rounded-pill px-3 py-2">

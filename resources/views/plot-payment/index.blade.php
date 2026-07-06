@@ -67,7 +67,7 @@
                                     {{ $payment->receipt_number ?? 'N/A' }}
                                     | {{ $booking?->customer_code ?? 'N/A' }}
                                     | {{ $booking?->primaryDetail?->name ?? $booking?->customer_name ?? 'N/A' }}
-                                    | Plot {{ $plotNumbers }}{{ $plotCount > 1 ? ' (Multiple - '.$plotCount.' Plots)' : '' }}
+                                    | Plot {{ $plotNumbers }}{{ $plotCount > 1 ? ' ('.$plotCount.' Plots)' : '' }}
                                 </option>
                             @endforeach
                         </select>

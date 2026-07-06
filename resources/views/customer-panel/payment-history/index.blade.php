@@ -21,7 +21,7 @@
                 <span class="badge bg-white text-success border rounded-pill px-3 py-2">
                     {{ $paymentRecords->count() }} Receipt{{ $paymentRecords->count() === 1 ? '' : 's' }}
                 </span>
-                <small>Multiple plot receipts are shown as one record</small>
+                <small>Plot receipts are shown as one record</small>
             </div>
         </div>
 

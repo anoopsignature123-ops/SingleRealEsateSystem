@@ -110,7 +110,7 @@
                     <span class="transaction-section-title-icon"><i class="bi bi-table"></i></span>
                     <div>
                         <h5 class="fw-bold mb-1">Booking Details List</h5>
-                        <small class="text-muted">Grouped by receipt so multiple plot payments appear in one row.</small>
+                        <small class="text-muted">Grouped by receipt so plot payments appear in one row.</small>
                     </div>
                 </div>
                 <span class="transaction-count">{{ $bookings->count() }} Records</span>

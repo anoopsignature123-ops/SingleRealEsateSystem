@@ -114,7 +114,7 @@ class PlotTransferService
                 return [
                     'id' => $representativeSale->plot_detail_id,
                     'plot_number' => $plotNumbers->count() > 1
-                        ? $plotLabel.' (Multiple - '.$plotNumbers->count().' Plots)'
+                        ? $plotLabel.' ('.$plotNumbers->count().' Plots)'
                         : ($plotLabel ?: 'Plot #'.$representativeSale->plot_detail_id),
                     'booking_code' => $representativeSale->booking_code,
                     'customer_name' => $booking?->primaryDetail?->name ?? $booking?->customer_name,
@@ -232,7 +232,7 @@ class PlotTransferService
             'block_name' => $groupPlotSales->map(fn ($sale) => $sale->block?->block)->filter()->unique()->implode(', '),
             'plot_number' => $groupPlotSales->map(fn ($sale) => $sale->plotDetail?->plot_number)->filter()->unique()->implode(', '),
             'plot_area' => number_format((float) $groupPlotSales->sum(fn ($sale) => (float) ($sale->plot_area ?? 0)), 2),
-            'plot_rate' => $groupPlotSales->count() > 1 ? 'Multiple' : ($plotSale->plot_rate ?? 0),
+            'plot_rate' => $groupPlotSales->count() > 1 ? '-' : ($plotSale->plot_rate ?? 0),
             'total_plot_cost' => number_format($totalPlotCost, 2),
             'plot_count' => $groupPlotSales->count(),
             'plots' => $groupPlotSales->map(fn ($sale) => [

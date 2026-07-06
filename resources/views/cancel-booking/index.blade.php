@@ -490,7 +490,7 @@
 
             groups.forEach(group => {
                 const plotText = group.plots.map(plot => plot.plot_number).join(', ');
-                const typeText = group.plots.length > 1 ? `Multiple - ${group.plots.length} Plots` : 'Single';
+                const typeText = group.plots.length > 1 ? `${group.plots.length} Plots` : 'Plot';
                 plotHtml += `<option value="${group.key}">${plotText} (${typeText}) | ${group.booking_code} | ${group.customer_name}</option>`;
             });
 

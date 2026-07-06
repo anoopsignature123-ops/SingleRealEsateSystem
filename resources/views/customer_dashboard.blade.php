@@ -151,7 +151,7 @@
                     <div class="customer-section-header">
                         <div>
                             <h5 class="mb-1">Recent Bookings</h5>
-                            <p class="mb-0">Grouped booking summary with multiple plot support.</p>
+                            <p class="mb-0">Booking summary with plot details.</p>
                         </div>
                         <a href="{{ route('customer-panel.booking-history') }}"
                             class="btn btn-success btn-sm rounded-pill px-3">

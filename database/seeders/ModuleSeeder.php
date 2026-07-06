@@ -348,7 +348,7 @@ class ModuleSeeder extends Seeder
             ],
 
             [
-                'name' => 'Multiple Cheque Clearance',
+                'name' => 'Cheque Clearance',
                 'slug' => 'multiple-cheque-clearance',
                 'parent_slug' => 'payment',
                 'route_name' => 'multiple-cheque-clearance.index',

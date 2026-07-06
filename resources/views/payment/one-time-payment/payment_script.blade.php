@@ -44,7 +44,7 @@
                 $('#payment_history_count').text('0 Records');
                 $('#fill_due_amount').addClass('d-none');
                 $('#form_selected_plots_box').addClass('d-none');
-                $('#form_selected_plot_count').text('0 Plots');
+                $('#form_selected_plot_count').text('0 Plot');
                 $('#form_selected_plot_mode').text('Verify plot details before entering payment amount.');
                 $('#form_selected_plots').html(`
                     <tr>
@@ -148,7 +148,7 @@
                 });
 
                 $('#form_selected_plots').html(formHtml);
-                $('#form_selected_plot_count').text(plots.length + (plots.length > 1 ? ' Plots' : ' Plot'));
+                $('#form_selected_plot_count').text(plots.length + ' Plot' + (plots.length === 1 ? '' : 's'));
                 $('#form_selected_plot_mode').text(
                     plots.length > 1
                         ? 'Grouped booking selected. One payment receipt will cover all listed plots.'

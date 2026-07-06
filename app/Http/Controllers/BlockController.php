@@ -19,7 +19,7 @@ class BlockController extends Controller
         $blocks = $this->blockService->getAll();
         return view('blocks.index',compact('blocks'));
     }
-
+      
     public function create()
     {
         $projects = Project::all();
