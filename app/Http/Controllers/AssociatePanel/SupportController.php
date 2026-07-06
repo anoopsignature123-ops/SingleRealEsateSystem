@@ -40,7 +40,7 @@ class SupportController extends Controller
     {
         $supports = Support::with(['associate', 'customerBooking.primaryDetail'])
             ->latest()
-            ->paginate(15);
+            ->get();
 
         return view('support.index', compact('supports'));
     }

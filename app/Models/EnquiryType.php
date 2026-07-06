@@ -11,7 +11,6 @@ class EnquiryType extends Model
 
     protected $fillable = ['name'];
 
-    // Enquiries के साथ Relationship (अगर बाद में ज़रूरत पड़े)
     public function enquiries()
     {
         return $this->hasMany(Enquiry::class, 'enquiry_types_id');

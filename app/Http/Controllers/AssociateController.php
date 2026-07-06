@@ -62,16 +62,17 @@ class AssociateController extends Controller
 
     public function edit($id)
     {
+        
         $data = $this->associateService->editData($id);
         $data['states'] = $this->locationService->getStates();
-
         return view('associate.edit', $data);
     }
 
     public function update(AssociateRequest $request, $id)
     {
+        
         $this->associateService->update($request->validated(), $id);
-
+       
         return redirect()->route('associate.index')->with('success', 'Associate updated successfully.');
     }
 

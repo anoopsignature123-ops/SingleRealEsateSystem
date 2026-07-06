@@ -8,7 +8,11 @@
         @include('customer-booking.partials.payment-form')
 
         <div class="d-flex justify-content-end mt-4">
-            <a href="{{ route('customer-booking.edit', [$customer->id, 'step' => 4]) }}"
+            <a href="{{ route('customer-booking.edit', [
+                $customer->id,
+                'step' => 4,
+                'plot_sale_detail_id' => $selectedPlotSales->first()?->id,
+            ]) }}"
                 class="btn btn-outline-secondary px-4">
                 Previous
             </a>

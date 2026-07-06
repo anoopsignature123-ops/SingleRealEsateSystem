@@ -8,7 +8,7 @@ class EnquiryTypeService
 {
     public function getAllEnquiryTypes()
     {
-        return EnquiryType::all();
+        return EnquiryType::latest()->get();
     }
 
     public function createEnquiryType(array $data)

@@ -12,4 +12,9 @@ class Source extends Model
     protected $fillable = [
         'name',
     ];
+
+    public function enquiries()
+    {
+        return $this->hasMany(Enquiry::class, 'source_id');
+    }
 }

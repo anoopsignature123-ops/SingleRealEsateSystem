@@ -1,5 +1,7 @@
 @extends('layouts.app')
-
+@push('title')
+    Allotment & Agreement Letter
+@endpush
 @section('content')
     <div class="container-fluid mt-4 transaction-page">
         <div class="transaction-hero mb-4">
@@ -120,7 +122,7 @@
                                 <td>{{ $loop->iteration }}</td>
                                 <td>
                                     <div class="fw-bold text-success">{{ $plotSale->booking_code ?? ($booking?->booking_code ?? '-') }}</div>
-                                    <small class="text-muted">Customer Booking: {{ $booking?->booking_code ?? '-' }}</small>
+                                    {{-- <small class="text-muted">Customer Booking: {{ $booking?->booking_code ?? '-' }}</small> --}}
                                 </td>
                                 <td>
                                     <div class="fw-semibold text-dark">{{ $booking?->primaryDetail?->name ?? '-' }}</div>

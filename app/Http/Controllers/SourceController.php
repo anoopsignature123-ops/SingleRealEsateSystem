@@ -48,6 +48,14 @@ class SourceController extends Controller
 
     public function destroy($id)
     {
+        $source = $this->service->findById($id);
+
+        if ($source->enquiries()->exists()) {
+            return redirect()
+                ->route('source.index')
+                ->with('error', 'This source is linked with enquiries and cannot be deleted.');
+        }
+
         $this->service->delete($id);
 
         return redirect()

@@ -3,151 +3,179 @@
 @push('title')
     Support Management
 @endpush
-@section('content')
-    <div class="container-fluid mt-4">
 
-        {{-- Top Stats --}}
+@section('content')
+    @php
+        $totalTickets = $supports->count();
+        $pendingTickets = $supports->where('status', 'Pending')->count();
+        $progressTickets = $supports->where('status', 'In-Progress')->count();
+        $resolvedTickets = $supports->where('status', 'Resolved')->count();
+    @endphp
+
+    <div class="container-fluid mt-4 transaction-page support-management-page">
+        <div class="transaction-hero mb-4">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                <div class="d-flex align-items-center gap-3">
+                    <span class="transaction-icon">
+                        <i class="bi bi-headset"></i>
+                    </span>
+                    <div>
+                        <span class="text-success fw-bold text-uppercase small">Help Desk</span>
+                        <h3 class="fw-bold mb-1 text-dark">Support Management</h3>
+                        <p class="text-muted mb-0 small">Review customer and associate tickets, reply, and track status.</p>
+                    </div>
+                </div>
+
+                <span class="transaction-count">{{ $pendingTickets }} Pending</span>
+            </div>
+        </div>
+
         <div class="row g-3 mb-4">
-            <div class="col-md-4">
-                <div class="card border-0 shadow-sm rounded-4">
-                    <div class="card-body py-3 px-4 d-flex align-items-center justify-content-between">
-                        <div>
-                            <small class="text-muted d-block">Total Tickets</small>
-                            <h4 class="fw-bold mb-0">{{ $supports->count() }}</h4>
-                        </div>
-                        <div class="bg-dark bg-opacity-10 text-dark rounded-circle d-flex align-items-center justify-content-center"
-                            style="width: 45px; height: 45px;">
-                            <i class="bi bi-ticket-detailed"></i>
-                        </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="role-stat-card">
+                    <span class="role-stat-icon"><i class="bi bi-ticket-detailed"></i></span>
+                    <div>
+                        <small>Total Tickets</small>
+                        <strong>{{ $totalTickets }}</strong>
                     </div>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="card border-0 shadow-sm rounded-4">
-                    <div class="card-body py-3 px-4 d-flex align-items-center justify-content-between">
-                        <div>
-                            <small class="text-muted d-block">Open Tickets</small>
-                            <h4 class="fw-bold text-warning mb-0">
-                                {{ $supports->where('status', '!=', 'Resolved')->count() }}</h4>
-                        </div>
-                        <div class="bg-warning bg-opacity-10 text-warning rounded-circle d-flex align-items-center justify-content-center"
-                            style="width: 45px; height: 45px;">
-                            <i class="bi bi-hourglass-split"></i>
-                        </div>
+
+            <div class="col-xl-3 col-md-6">
+                <div class="role-stat-card">
+                    <span class="role-stat-icon"><i class="bi bi-hourglass-split"></i></span>
+                    <div>
+                        <small>Pending</small>
+                        <strong>{{ $pendingTickets }}</strong>
                     </div>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="card border-0 shadow-sm rounded-4">
-                    <div class="card-body py-3 px-4 d-flex align-items-center justify-content-between">
-                        <div>
-                            <small class="text-muted d-block">Closed Tickets</small>
-                            <h4 class="fw-bold text-success mb-0">{{ $supports->where('status', 'Resolved')->count() }}</h4>
-                        </div>
-                        <div class="bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center"
-                            style="width: 45px; height: 45px;">
-                            <i class="bi bi-check-circle"></i>
-                        </div>
+
+            <div class="col-xl-3 col-md-6">
+                <div class="role-stat-card">
+                    <span class="role-stat-icon"><i class="bi bi-arrow-repeat"></i></span>
+                    <div>
+                        <small>In Progress</small>
+                        <strong>{{ $progressTickets }}</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6">
+                <div class="role-stat-card">
+                    <span class="role-stat-icon"><i class="bi bi-check-circle"></i></span>
+                    <div>
+                        <small>Resolved</small>
+                        <strong>{{ $resolvedTickets }}</strong>
                     </div>
                 </div>
             </div>
         </div>
 
-        {{-- Support Table --}}
-        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-            <div class="card-header bg-white border-0 py-3 px-4">
-                <h5 class="fw-bold mb-1">Support Tickets</h5>
-                <small class="text-muted">Manage all associate and customer support requests</small>
+        <div class="transaction-card transaction-history-card support-table-card mb-4">
+            <div class="transaction-history-head">
+                <div class="d-flex align-items-center gap-3">
+                    <span class="transaction-section-title-icon">
+                        <i class="bi bi-inbox"></i>
+                    </span>
+                    <div>
+                        <h5 class="fw-bold mb-1">Support Tickets</h5>
+                        <small class="text-muted">Open each ticket to reply or update its status.</small>
+                    </div>
+                </div>
+
+                <span class="transaction-count">{{ $totalTickets }} Records</span>
             </div>
 
-            <div class="card-body p-3">
-                <div class="table-responsive">
-                    <table id="supportTable" class="table table-hover align-middle">
-                        <thead class="table-light">
+            <div class="transaction-table-wrap">
+                <table id="supportTable" class="table transaction-table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Raised By</th>
+                            <th>Ticket</th>
+                            <th>Status</th>
+                            <th>Created</th>
+                            <th class="text-center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($supports as $support)
+                            @php
+                                $raisedByName = $support->associate?->associate_name
+                                    ?? $support->customerBooking?->primaryDetail?->name
+                                    ?? $support->customerBooking?->customer_name
+                                    ?? '-';
+                                $raisedByCode = $support->associate?->associate_id
+                                    ?? $support->customerBooking?->customer_code
+                                    ?? '';
+                                $raisedByType = $support->associate_id ? 'Associate' : 'Customer';
+                                $initials = strtoupper(substr($raisedByName, 0, 2));
+                            @endphp
+
                             <tr>
-                                <th>#</th>
-                                <th>Raised By</th>
-                                <th>Query</th>
-                                <th>Status</th>
-                                <th>Date</th>
-                                <th class="text-center">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($supports as $support)
-                                @php
-                                    $raisedByName = $support->associate?->associate_name
-                                        ?? $support->customerBooking?->primaryDetail?->name
-                                        ?? $support->customerBooking?->customer_name
-                                        ?? '-';
-                                    $raisedByCode = $support->associate?->associate_id
-                                        ?? $support->customerBooking?->customer_code
-                                        ?? '';
-                                    $raisedByType = $support->associate_id ? 'Associate' : 'Customer';
-                                @endphp
-                                <tr>
-                                    <td class="fw-semibold">#{{ $loop->iteration }}</td>
-                                    <td>
-                                        <div class="d-flex align-items-center gap-2">
-                                            @if (!empty($support->associate->photo))
-                                                {{-- Image agar exist karti hai --}}
-                                                <img src="{{ asset('storage/' . $support->associate->photo) }}"
-                                                    alt="Profile" class="rounded-circle border"
-                                                    style="width: 34px; height: 34px; object-fit: cover;">
-                                            @else
-                                                {{-- Fallback: Agar image nahi hai to Initials dikhaye --}}
-                                                <div class="bg-dark text-white rounded-circle d-flex align-items-center justify-content-center fw-semibold"
-                                                    style="width: 34px; height: 34px; font-size: 12px;">
-                                                    {{ strtoupper(substr($raisedByName, 0, 2)) }}
-                                                </div>
-                                            @endif
-
-                                            <div>
-                                                <div class="fw-semibold small">
-                                                    {{ $raisedByName }}
-                                                </div>
-                                                <small
-                                                    class="text-muted">{{ $raisedByType }} {{ $raisedByCode ? '- ' . $raisedByCode : '' }}</small>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="fw-semibold small">{{ $support->query }}</div>
-                                        <small class="text-muted">{{ Str::limit($support->description, 45) }}</small>
-                                    </td>
-                                    <td>
-                                        @if ($support->status == 'Pending')
-                                            <span
-                                                class="badge bg-warning-subtle text-warning border border-warning-subtle px-3 py-2 rounded-pill">Pending</span>
-                                        @elseif($support->status == 'Resolved')
-                                            <span
-                                                class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill">Resolved</span>
+                                <td class="fw-semibold">{{ $loop->iteration }}</td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-3">
+                                        @if (!empty($support->associate->photo))
+                                            <img src="{{ asset('storage/' . $support->associate->photo) }}"
+                                                alt="{{ $raisedByName }}" class="staff-avatar"
+                                                onerror="this.src='{{ asset('assets/images/avatar.png') }}'">
                                         @else
-                                            <span
-                                                class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 rounded-pill">In-Progress</span>
+                                            <span class="role-avatar">{{ $initials }}</span>
                                         @endif
-                                    </td>
-                                    <td>
-                                        <div class="small fw-semibold">{{ $support->created_at->format('d M Y') }}</div>
-                                        <small class="text-muted">{{ $support->created_at->format('h:i A') }}</small>
-                                    </td>
-                                    <td class="text-center">
 
-                                        <a href="{{ route('support.detail', $support->id) }}"
-                                            class="btn btn-success btn-sm rounded-pill px-3" title="Show Detail">
-                                            <i class="bi bi-eye"></i>
-                                        </a>
-
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="6" class="text-center py-5 text-muted">No support tickets found</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
+                                        <div>
+                                            <div class="fw-bold text-dark">{{ $raisedByName }}</div>
+                                            <small class="text-muted">
+                                                {{ $raisedByType }}{{ $raisedByCode ? ' - ' . $raisedByCode : '' }}
+                                            </small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="fw-bold text-dark">{{ $support->query }}</div>
+                                    <small class="text-muted">
+                                        {{ \Illuminate\Support\Str::limit($support->description, 70) }}
+                                    </small>
+                                </td>
+                                <td>
+                                    @if ($support->status == 'Pending')
+                                        <span class="badge bg-warning-subtle text-warning border border-warning-subtle">
+                                            Pending
+                                        </span>
+                                    @elseif($support->status == 'Resolved')
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle">
+                                            Resolved
+                                        </span>
+                                    @else
+                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
+                                            In Progress
+                                        </span>
+                                    @endif
+                                </td>
+                                <td>
+                                    <div class="fw-semibold text-dark">{{ $support->created_at->format('d M, Y') }}</div>
+                                    <small class="text-muted">{{ $support->created_at->format('h:i A') }}</small>
+                                </td>
+                                <td class="text-center">
+                                    <a href="{{ route('support.detail', $support->id) }}"
+                                        class="btn btn-sm btn-outline-success">
+                                        <i class="bi bi-eye me-1"></i>
+                                        View
+                                    </a>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-5">
+                                    <i class="bi bi-inbox fs-1 d-block mb-2 text-muted"></i>
+                                    No support tickets found.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -156,15 +184,24 @@
 @push('scripts')
     <script>
         $(document).ready(function() {
-            $('#supportTable').DataTable({
-                pageLength: 10,
-                responsive: true,
-                ordering: true,
-                language: {
-                    search: "_INPUT_",
-                    searchPlaceholder: "Search tickets..."
-                }
-            });
+            const hasRecords = {{ $totalTickets > 0 ? 'true' : 'false' }};
+
+            if (hasRecords) {
+                $('#supportTable').DataTable({
+                    pageLength: 10,
+                    ordering: true,
+                    responsive: true,
+                    lengthMenu: [5, 10, 25, 50],
+                    columnDefs: [{
+                        orderable: false,
+                        targets: [5]
+                    }],
+                    language: {
+                        search: "",
+                        searchPlaceholder: "Search tickets..."
+                    }
+                });
+            }
         });
     </script>
 @endpush

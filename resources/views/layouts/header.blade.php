@@ -203,6 +203,9 @@
     } else {
         $currentUser = auth()->user();
     }
+
+    $isSuperAdmin = !$isAssociate && !$isCustomer && $currentUser?->hasRole('super-admin');
+
     if ($isAssociate) {
         $profilePhoto = $currentUser->photo
             ? getFileUrl($currentUser->photo)
@@ -328,35 +331,37 @@
                 @endif
             @endif
 
-            @php
-                $pendingSupportCount = \App\Models\Support::where('status', 'Pending')->count();
+            @if ($isSuperAdmin)
+                @php
+                    $pendingSupportCount = \App\Models\Support::where('status', 'Pending')->count();
 
-                $supportRoute = Route::has('support.index') ? route('support.index') : '#';
-            @endphp
+                    $supportRoute = Route::has('support.index') ? route('support.index') : '#';
+                @endphp
 
-            @if ($pendingSupportCount > 0)
-                <li class="nav-item me-2">
+                @if ($pendingSupportCount > 0)
+                    <li class="nav-item me-2">
 
-                    <a href="{{ $supportRoute }}" class="notification-alert support-alert">
+                        <a href="{{ $supportRoute }}" class="notification-alert support-alert">
 
-                        <div class="notify-icon" style="background:#0d6efd;">
-                            <i class="bi bi-headset"></i>
-                        </div>
-
-                        <div class="notify-content">
-                            <div class="notify-title" style="color:#0d47a1;">
-                                🎧 Customer Support
+                            <div class="notify-icon" style="background:#0d6efd;">
+                                <i class="bi bi-headset"></i>
                             </div>
 
-                            <div class="notify-subtitle">
-                                {{ $pendingSupportCount }} New Support Request
+                            <div class="notify-content">
+                                <div class="notify-title" style="color:#0d47a1;">
+                                    Customer Support
+                                </div>
+
+                                <div class="notify-subtitle">
+                                    {{ $pendingSupportCount }} New Support Request
+                                </div>
                             </div>
-                        </div>
-                        <span class="notify-count">
-                            {{ $pendingSupportCount }}
-                        </span>
-                    </a>
-                </li>
+                            <span class="notify-count">
+                                {{ $pendingSupportCount }}
+                            </span>
+                        </a>
+                    </li>
+                @endif
             @endif
 
 

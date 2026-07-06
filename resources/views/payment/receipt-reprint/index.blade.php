@@ -179,7 +179,7 @@
                                             {{ ucfirst($receipt->booking_status ?? 'N/A') }}
                                         </span>
                                         <br>
-                                        <small class="text-muted">{{ ucfirst($receipt->payment_status ?? 'N/A') }}</small>
+                                        {{-- <small class="text-muted">{{ ucfirst($receipt->payment_status ?? 'N/A') }}</small> --}}
                                     </td>
                                     <td class="text-center">
                                         <a target="_blank" href="{{ route('receipt-reprint.download', $receipt->id) }}"

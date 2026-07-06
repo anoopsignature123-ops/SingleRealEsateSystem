@@ -45,21 +45,31 @@ class CheckModulePermission
             'get.project.data' => 'plot-details-list',
             'plot-details.export' => 'plot-details-list',
             'get.project.blocks' => 'plot-rates-list',
+
             'get.sponsor.ranks' => 'associate-create-list',
+            'associate.index' => 'associate-details-list',
+            'associate.create' => 'associate-create-list',
+            'associate.store' => 'associate-create-list',
+            'associate.show' => 'associate-details-list',
+            'associate.edit' => 'associate-details-list',
+            'associate.update' => 'associate-details-list',
+            'associate.destroy' => 'associate-details-list',
             'associate.export' => 'associate-details-list',
+
             'direct-associate.export' => 'direct-associate-list',
             'associate-downline.export' => 'associate-downline-list',
+
             'get-customer-details' => 'emi-payment-details-report-list',
             'get.cities' => 'farmers-list',
+
             'customer-booking.get-blocks' => 'customer-booking-list',
             'customer-booking.get-plots' => 'customer-booking-list',
-            // Customer Ledger Report
+
             'ledger.project.blocks' => 'customer-ledger-report-list',
             'ledger.block.customers' => 'customer-ledger-report-list',
             'ledger.customer.plots' => 'customer-ledger-report-list',
             'ledger.plot.booking' => 'customer-ledger-report-list',
             'customer-ledger-report.export' => 'customer-ledger-report-list',
-
         ];
 
         if (isset($extraRouteMap[$routeName])) {

@@ -410,9 +410,7 @@
                     </div>
                 </div>
             </div>
-
         </div>
-
     </div>
 
     <div class="d-flex justify-content-end mt-2 mb-4 m-2">
@@ -429,34 +427,37 @@
 @if ($bookingGroups->isNotEmpty())
     <div class="card border-0 shadow-sm rounded-4 mb-4">
         <div class="card-body p-4">
+
             <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
                 <div class="d-flex align-items-center gap-3">
                     <div class="bg-success bg-opacity-10 text-success rounded-3 d-flex align-items-center justify-content-center"
                         style="width:44px;height:44px;">
-                        <i class="bi bi-collection fs-5"></i>
+                        <i class="bi bi-journal-check fs-5"></i>
                     </div>
+
                     <div>
                         <h6 class="fw-bold mb-1">Plot Bookings History</h6>
-                        <small class="text-muted">Booking group wise plot summary.</small>
+                        <small class="text-muted">Booking wise plot summary.</small>
                     </div>
                 </div>
+
+                <span class="badge bg-success-subtle text-success border rounded-pill px-3 py-2">
+                    {{ $bookingGroups->count() }} Booking(s)
+                </span>
             </div>
 
             <div class="row g-3">
                 @foreach ($bookingGroups as $bookingCode => $group)
                     @php
-                        $firstSale = $group->first();
+                        $sale = $group->first();
 
-                        $hasPayment = $group->flatMap->payments
-                            ->where('transaction_category', 'booking_fee')
-                            ->isNotEmpty();
+                        $hasPayment = $sale?->payments
+                            ? $sale->payments->where('transaction_category', 'booking_fee')->isNotEmpty()
+                            : false;
 
-                        $plotNumbers = $group->map(fn($sale) => $sale->plotDetail?->plot_number)->filter();
+                        $status = $sale?->status ?? 'active';
 
-                        $statuses = $group->pluck('status')->unique()->values();
-                        $groupStatus = $statuses->count() === 1 ? $statuses->first() : 'mixed';
-
-                        $groupStatusClass = match ($groupStatus) {
+                        $statusClass = match ($status) {
                             'active' => 'success',
                             'cancelled' => 'danger',
                             'transferred' => 'warning',
@@ -464,169 +465,112 @@
                             default => 'secondary',
                         };
 
-                        $groupTotal = $group->sum('total_plot_cost');
+                        $projectName = $sale?->project?->name ?? '-';
+                        $blockName = $sale?->block?->block ?? '-';
+                        $plotNumber = $sale?->plotDetail?->plot_number ?? '-';
+                        $bookingDate = $sale?->booking_date
+                            ? \Carbon\Carbon::parse($sale->booking_date)->format('d M Y')
+                            : 'Date pending';
                     @endphp
 
-                    <div class="col-xl-6 col-lg-12">
-                        <div class="border-0 shadow-sm rounded-4 bg-white h-100 overflow-hidden"
-                            style="border-top: 4px solid #198754 !important;">
+                    <div class="col-xl-4 col-lg-6 col-md-12">
+                        <div class="border rounded-4 bg-white shadow-sm h-100 p-3"
+                            style="border-top:4px solid #198754 !important;">
 
-                            <div class="p-3 bg-success bg-opacity-10 border-bottom">
-                                <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
-                                    <div>
-                                        <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
-                                            <span class="badge bg-success rounded-pill px-3 py-2">
-                                                <i class="bi bi-receipt me-1"></i>
-                                                {{ $bookingCode }}
-                                            </span>
-
-                                            <span
-                                                class="badge bg-{{ $groupStatusClass }}{{ in_array($groupStatusClass, ['warning', 'info']) ? '-subtle text-' . $groupStatusClass . ' border' : '' }} rounded-pill px-3 py-2">
-                                                {{ ucfirst($groupStatus ?: 'Mixed') }}
-                                            </span>
-
-                                            @if ($hasPayment)
-                                                <span
-                                                    class="badge bg-primary-subtle text-primary border rounded-pill px-3 py-2">
-                                                    <i class="bi bi-check-circle me-1"></i>
-                                                    Payment Done
-                                                </span>
-                                            @else
-                                                <span
-                                                    class="badge bg-warning-subtle text-warning border rounded-pill px-3 py-2">
-                                                    <i class="bi bi-clock me-1"></i>
-                                                    Payment Pending
-                                                </span>
-                                            @endif
-                                        </div>
-
-                                        <div class="fw-bold text-dark">
-                                            {{ $firstSale?->project?->name ?? '-' }}
-                                            <span class="text-muted fw-normal">/ Block
-                                                {{ $firstSale?->block?->block ?? '-' }}</span>
-                                        </div>
-
-                                        <small class="text-muted">
-                                            <i class="bi bi-calendar2-check me-1"></i>
-                                            {{ $firstSale?->booking_date ? \Carbon\Carbon::parse($firstSale->booking_date)->format('d M Y') : 'Date pending' }}
-                                            <span class="mx-1">•</span>
-                                            {{ $group->count() }} plot(s)
-                                        </small>
-                                    </div>
-
-                                    <div class="text-end">
-                                        <small class="text-muted d-block">Group Total</small>
-                                        <div class="fw-bold fs-5 text-success">
-                                            &#8377; {{ number_format($groupTotal, 2) }}
-                                        </div>
-
-                                        <button type="button"
-                                            class="btn btn-sm btn-light border rounded-pill px-3 plot-view-group-btn"
-                                            data-booking-code="{{ $bookingCode }}">
-                                            <i class="bi bi-eye me-1"></i>
-                                            View
-                                        </button>
-                                    </div>
-                                </div>
-
-
-                                <div class="d-flex flex-wrap gap-1 mt-3">
-                                    @foreach ($plotNumbers as $plotNumber)
-                                        <span class="badge bg-white text-success border rounded-pill px-2 py-1">
-                                            <i class="bi bi-geo-alt me-1"></i>
-                                            {{ $plotNumber }}
+                            <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+                                <div>
+                                    <div class="d-flex flex-wrap gap-2 mb-2">
+                                        <span class="badge bg-success rounded-pill px-3 py-2">
+                                            <i class="bi bi-receipt me-1"></i>
+                                            {{ $bookingCode }}
                                         </span>
-                                    @endforeach
+
+                                        <span class="badge bg-{{ $statusClass }} rounded-pill px-3 py-2">
+                                            {{ ucfirst($status) }}
+                                        </span>
+                                    </div>
+
+                                    <div class="fw-bold">
+                                        {{ $projectName }}
+                                        <span class="text-muted fw-normal">/ Block {{ $blockName }}</span>
+                                    </div>
+
+                                    <small class="text-muted">
+                                        <i class="bi bi-calendar2-check me-1"></i>
+                                        {{ $bookingDate }}
+                                    </small>
+                                </div>
+
+                                <div class="text-end">
+                                    <small class="text-muted d-block">Total</small>
+                                    <div class="fw-bold text-success">
+                                        ₹{{ number_format($sale?->total_plot_cost ?? 0, 2) }}
+                                    </div>
                                 </div>
                             </div>
 
-                            <div class="p-3">
-                                <div class="row g-2">
-                                    @foreach ($group as $sale)
-                                        <div class="col-md-6">
-                                            <div class="border rounded-4 p-3 h-100 bg-light bg-opacity-75">
-                                                <div
-                                                    class="d-flex justify-content-between align-items-start gap-2 mb-2">
-                                                    <div>
-                                                        <span
-                                                            class="badge bg-success-subtle text-success border rounded-pill mb-2">
-                                                            Plot {{ $sale->plotDetail?->plot_number ?? '-' }}
-                                                        </span>
-                                                        <div class="small text-muted">
-                                                            {{ $sale->project?->name ?? '-' }} /
-                                                            Block {{ $sale->block?->block ?? '-' }}
-                                                        </div>
-                                                    </div>
+                            <div class="d-flex flex-wrap gap-2 mb-3">
+                                <span class="badge bg-success-subtle text-success border rounded-pill px-3 py-2">
+                                    <i class="bi bi-geo-alt me-1"></i>
+                                    Plot {{ $plotNumber }}
+                                </span>
 
-                                                    {{-- <button type="button"
-                                                        class="btn btn-sm btn-outline-primary rounded-circle plot-edit-btn"
-                                                        title="{{ $hasPayment ? 'Edit Details' : 'Edit Plot' }}"
-                                                        data-sale-id="{{ $sale->id }}"
-                                                        data-booking-code="{{ $sale->booking_code ?? '' }}"
-                                                        data-project-id="{{ $sale->project_id }}"
-                                                        data-block-id="{{ $sale->block_id }}"
-                                                        data-plot-id="{{ $sale->plot_detail_id }}"
-                                                        data-plot-number="{{ $sale->plotDetail?->plot_number ?? '' }}"
-                                                        data-plot-rate="{{ $sale->plot_rate ?? 0 }}"
-                                                        data-plot-area="{{ $sale->plot_area ?? 0 }}"
-                                                        data-plot-cost="{{ $sale->plot_cost ?? 0 }}"
-                                                        data-plc="{{ $sale->plc_amount ?? 0 }}"
-                                                        data-total-development-charge="{{ $sale->total_development_charge ?? 0 }}"
-                                                        data-development-rate="{{ $sale->development_rate ?? 0 }}"
-                                                        data-other-charges="{{ $sale->other_charges ?? 0 }}"
-                                                        data-coupon-discount="{{ $sale->coupon_discount ?? 0 }}"
-                                                        data-final-payable="{{ $sale->final_payable ?? 0 }}"
-                                                        data-total-plot-cost="{{ $sale->total_plot_cost ?? 0 }}"
-                                                        data-booking-date="{{ $sale->booking_date ? \Carbon\Carbon::parse($sale->booking_date)->format('Y-m-d') : '' }}"
-                                                        data-remark="{{ $sale->remark ?? '' }}">
-                                                        <i class="bi bi-pencil-square"></i>
-                                                    </button> --}}
-                                                </div>
+                                @if ($hasPayment)
+                                    <span class="badge bg-primary-subtle text-primary border rounded-pill px-3 py-2">
+                                        <i class="bi bi-check-circle me-1"></i>
+                                        Payment Done
+                                    </span>
+                                @else
+                                    <span class="badge bg-warning-subtle text-warning border rounded-pill px-3 py-2">
+                                        <i class="bi bi-clock me-1"></i>
+                                        Payment Pending
+                                    </span>
+                                @endif
+                            </div>
 
-                                                <div class="row g-2 small">
-                                                    <div class="col-6">
-                                                        <span class="text-muted d-block">Area</span>
-                                                        <strong>{{ number_format((float) $sale->plot_area, 2) }}
-                                                            Sq.Ft.</strong>
-                                                    </div>
-
-                                                    <div class="col-6 text-end">
-                                                        <span class="text-muted d-block">Rate</span>
-                                                        <strong>&#8377;
-                                                            {{ number_format((float) $sale->plot_rate, 2) }}</strong>
-                                                    </div>
-
-                                                    <div class="col-6">
-                                                        <span class="text-muted d-block">PLC</span>
-                                                        <strong>&#8377;
-                                                            {{ number_format((float) $sale->plc_amount, 2) }}</strong>
-                                                    </div>
-
-                                                    <div class="col-6 text-end">
-                                                        <span class="text-muted d-block">Other</span>
-                                                        <strong>&#8377;
-                                                            {{ number_format((float) $sale->other_charges, 2) }}</strong>
-                                                    </div>
-                                                </div>
-
-                                                <div
-                                                    class="border-top mt-3 pt-2 d-flex justify-content-between align-items-center">
-                                                    <small class="text-muted">Total</small>
-                                                    <strong class="text-success">
-                                                        &#8377; {{ number_format($sale->total_plot_cost ?? 0, 2) }}
-                                                    </strong>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    @endforeach
+                            <div class="row g-2 small mb-3">
+                                <div class="col-6">
+                                    <span class="text-muted d-block">Area</span>
+                                    <strong>{{ number_format((float) ($sale?->plot_area ?? 0), 2) }} Sq.Ft.</strong>
                                 </div>
 
+                                <div class="col-6 text-end">
+                                    <span class="text-muted d-block">Rate</span>
+                                    <strong>₹{{ number_format((float) ($sale?->plot_rate ?? 0), 2) }}</strong>
+                                </div>
 
+                                <div class="col-6">
+                                    <span class="text-muted d-block">PLC</span>
+                                    <strong>₹{{ number_format((float) ($sale?->plc_amount ?? 0), 2) }}</strong>
+                                </div>
+
+                                <div class="col-6 text-end">
+                                    <span class="text-muted d-block">Other Charges</span>
+                                    <strong>₹{{ number_format((float) ($sale?->other_charges ?? 0), 2) }}</strong>
+                                </div>
                             </div>
+
+                            <div class="border-top pt-3 d-flex justify-content-between align-items-center">
+                                <div>
+                                    <small class="text-muted d-block">Final Plot Cost</small>
+                                    <strong class="text-success">
+                                        ₹{{ number_format($sale?->total_plot_cost ?? 0, 2) }}
+                                    </strong>
+                                </div>
+
+                                <button type="button"
+                                    class="btn btn-sm btn-outline-success rounded-pill px-3 plot-view-group-btn"
+                                    data-booking-code="{{ $bookingCode }}">
+                                    <i class="bi bi-eye me-1"></i>
+                                    View
+                                </button>
+                            </div>
+
                         </div>
                     </div>
                 @endforeach
             </div>
+
         </div>
     </div>
 @endif

@@ -23,11 +23,11 @@ class EnquiryTypeController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string|max:255|unique:enquiry_types,name',
         ]);
 
-        $this->enquiryTypeService->createEnquiryType($request->all());
+        $this->enquiryTypeService->createEnquiryType($validated);
 
         return redirect()->route('enquiry-type.index')->with('success', 'Enquiry Type created successfully.');
     }
@@ -41,17 +41,25 @@ class EnquiryTypeController extends Controller
 
     public function update(Request $request, $id)
     {
-        $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string|max:255|unique:enquiry_types,name,'.$id,
         ]);
 
-        $this->enquiryTypeService->updateEnquiryType($id, $request->all());
+        $this->enquiryTypeService->updateEnquiryType($id, $validated);
 
         return redirect()->route('enquiry-type.index')->with('success', 'Enquiry Type updated successfully.');
     }
 
     public function destroy($id)
     {
+        $enquiryType = $this->enquiryTypeService->getEnquiryTypeById($id);
+
+        if ($enquiryType->enquiries()->exists()) {
+            return redirect()
+                ->route('enquiry-type.index')
+                ->with('error', 'This lead type is linked with enquiries and cannot be deleted.');
+        }
+
         $this->enquiryTypeService->deleteEnquiryType($id);
 
         return redirect()->route('enquiry-type.index')->with('success', 'Enquiry Type deleted successfully.');

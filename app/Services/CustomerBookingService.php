@@ -211,9 +211,10 @@ class CustomerBookingService
 
     public function getPlotsByBlock($blockId, $customerId = null)
     {
-        $bookedPlotIds = PlotSaleDetail::when($customerId, function ($query, $customerId) {
-            return $query->where('customer_booking_id', '!=', $customerId);
-        })->pluck('plot_detail_id')->toArray();
+        $bookedPlotIds = PlotSaleDetail::whereHas('payments')
+            ->pluck('plot_detail_id')
+            ->filter()
+            ->toArray();
 
         return PlotDetail::with('plotType')
             ->where('status', 'available')
@@ -241,8 +242,15 @@ class CustomerBookingService
 
         if ($plotIds->isNotEmpty()) {
             $plotDetails = collect($data['plot_details'] ?? []);
+            $draftPlotSale = null;
+
             if (! $bookingCode) {
-                $bookingCode = $this->makePlotBookingCode($customerId);
+                $draftPlotSale = PlotSaleDetail::where('customer_booking_id', $customerId)
+                    ->whereDoesntHave('payments')
+                    ->latest()
+                    ->first();
+
+                $bookingCode = $draftPlotSale?->booking_code ?: $this->makePlotBookingCode($customerId);
             }
 
             $groupHasPayment = PlotSaleDetail::where('customer_booking_id', $customerId)
@@ -264,12 +272,30 @@ class CustomerBookingService
                 }
             }
 
+            $paidPlotUsedElsewhere = PlotSaleDetail::whereIn('plot_detail_id', $plotIds->all())
+                ->whereHas('payments')
+                ->where(function ($query) use ($customerId, $bookingCode) {
+                    $query->where('customer_booking_id', '!=', $customerId)
+                        ->orWhere(function ($nested) use ($bookingCode) {
+                            if ($bookingCode) {
+                                $nested->where('booking_code', '!=', $bookingCode)
+                                    ->orWhereNull('booking_code');
+                            }
+                        });
+                })
+                ->exists();
+
+            if ($paidPlotUsedElsewhere) {
+                throw new \Exception('Selected plot is already booked.');
+            }
+
             $alreadyUsedPlots = PlotSaleDetail::where('customer_booking_id', $customerId)
                 ->whereIn('plot_detail_id', $plotIds->all())
                 ->where(function ($query) use ($bookingCode) {
                     $query->whereNull('booking_code')
                         ->orWhere('booking_code', '!=', $bookingCode);
                 })
+                ->whereHas('payments')
                 ->exists();
 
             if ($alreadyUsedPlots) {
@@ -321,6 +347,8 @@ class CustomerBookingService
                 $searchAttributes = ['customer_booking_id' => $customerId, 'plot_detail_id' => $plotId];
                 if (!empty($detail['sale_id'])) {
                     $searchAttributes = ['id' => $detail['sale_id']];
+                } elseif ($draftPlotSale) {
+                    $searchAttributes = ['id' => $draftPlotSale->id];
                 }
 
                 $savedPlotSales->push(PlotSaleDetail::updateOrCreate(
@@ -346,6 +374,16 @@ class CustomerBookingService
                     ]
                 ));
             }
+
+            PlotSaleDetail::where('customer_booking_id', $customerId)
+                ->whereDoesntHave('payments')
+                ->whereNotIn('id', $savedPlotSales->pluck('id')->filter()->all())
+                ->delete();
+
+            PlotSaleDetail::whereIn('customer_booking_id', $this->relatedCustomerBookingIds($customerId))
+                ->where('customer_booking_id', '!=', $customerId)
+                ->whereDoesntHave('payments')
+                ->delete();
 
             CustomerBooking::where('id', $customerId)->update(['current_step' => 5]);
 
@@ -510,6 +548,20 @@ class CustomerBookingService
         } while ($existingCodes->contains($code));
 
         return $code;
+    }
+
+    private function relatedCustomerBookingIds(int $customerId): array
+    {
+        $booking = CustomerBooking::findOrFail($customerId);
+        $rootCustomerId = $booking->customer_id ?: $booking->id;
+
+        return CustomerBooking::where('id', $rootCustomerId)
+            ->orWhere('customer_id', $rootCustomerId)
+            ->pluck('id')
+            ->push($customerId)
+            ->unique()
+            ->values()
+            ->all();
     }
 
     public function deleteBooking($id)
