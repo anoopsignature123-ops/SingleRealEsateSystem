@@ -23,6 +23,7 @@ Route::prefix('associate-panel')->name('associate-panel.')->group(function () {
     Route::middleware('auth:associate')->group(function () {
         Route::get('dashboard', [AssociateDashboardController::class, 'dashboard'])->name('dashboard');
         Route::post('/logout', [AssociateAuthController::class, 'logout'])->name('logout');
+        Route::get('get-cities/{stateId}', [AssociateRegistrationController::class, 'getCities'])->name('get-cities');
 
         Route::controller(AssociateProfileController::class)->group(function () {
             Route::get('view-profile', 'viewProfile')->name('view-profile');

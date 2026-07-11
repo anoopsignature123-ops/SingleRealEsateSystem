@@ -1,6 +1,6 @@
 @php
     $isEdit = isset($associate);
-    $sponsorAssociate = $loggedInAssociate ?? auth('associate')->user() ?? auth()->user();
+    $sponsorAssociate = $loggedInAssociate ?? (auth('associate')->user() ?? auth()->user());
     $currentBank = $associate->bankDetail ?? null;
 @endphp
 
@@ -28,7 +28,8 @@
 
             <div class="col-lg-4 col-md-6">
                 <label class="form-label fw-semibold">Rank</label>
-                <input type="text" class="form-control" value="{{ $sponsorAssociate?->rank?->designation ?? 'N/A' }}" readonly>
+                <input type="text" class="form-control" value="{{ $sponsorAssociate?->rank?->designation ?? 'N/A' }}"
+                    readonly>
                 <input type="hidden" name="rank_id" value="{{ $sponsorAssociate?->rank_id }}">
             </div>
 
@@ -46,18 +47,21 @@
                 <label class="form-label fw-semibold">Associate Name <span class="text-danger">*</span></label>
                 <input type="text" name="associate_name"
                     value="{{ old('associate_name', $associate->associate_name ?? '') }}"
-                    placeholder="Enter associate name" class="form-control @error('associate_name') is-invalid @enderror">
+                    placeholder="Enter associate name"
+                    class="form-control @error('associate_name') is-invalid @enderror">
                 @error('associate_name')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
             </div>
 
             <div class="col-lg-3 col-md-6">
-                <label class="form-label fw-semibold">Gender</label>
+                <label class="form-label fw-semibold">Gender <span class="text-danger">*</span> </label>
                 <select name="gender" class="form-select @error('gender') is-invalid @enderror">
                     <option value="">Select Gender</option>
-                    <option value="male" {{ old('gender', $associate->gender ?? '') == 'male' ? 'selected' : '' }}>Male</option>
-                    <option value="female" {{ old('gender', $associate->gender ?? '') == 'female' ? 'selected' : '' }}>Female</option>
+                    <option value="male" {{ old('gender', $associate->gender ?? '') == 'male' ? 'selected' : '' }}>
+                        Male</option>
+                    <option value="female" {{ old('gender', $associate->gender ?? '') == 'female' ? 'selected' : '' }}>
+                        Female</option>
                 </select>
                 @error('gender')
                     <div class="invalid-feedback">{{ $message }}</div>
@@ -65,11 +69,13 @@
             </div>
 
             <div class="col-lg-3 col-md-6">
-                <label class="form-label fw-semibold">Title</label>
+                <label class="form-label fw-semibold">Title <span class="text-danger">*</span> </label>
                 <select name="title" class="form-select @error('title') is-invalid @enderror">
                     <option value="">Select Title</option>
                     @foreach (['s/o' => 'S/O', 'w/o' => 'W/O', 'b/o' => 'B/O', 'd/o' => 'D/O', 'f/o' => 'F/O'] as $value => $label)
-                        <option value="{{ $value }}" {{ old('title', $associate->title ?? '') == $value ? 'selected' : '' }}>{{ $label }}</option>
+                        <option value="{{ $value }}"
+                            {{ old('title', $associate->title ?? '') == $value ? 'selected' : '' }}>
+                            {{ $label }}</option>
                     @endforeach
                 </select>
                 @error('title')
@@ -78,17 +84,18 @@
             </div>
 
             <div class="col-lg-6">
-                <label class="form-label fw-semibold">Father / Husband Name</label>
+                <label class="form-label fw-semibold">Father / Husband Name <span class="text-danger">*</span> </label>
                 <input type="text" name="father_name"
                     value="{{ old('father_name', $associate->father_name ?? '') }}"
-                    placeholder="Enter father or husband name" class="form-control @error('father_name') is-invalid @enderror">
+                    placeholder="Enter father or husband name"
+                    class="form-control @error('father_name') is-invalid @enderror">
                 @error('father_name')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
             </div>
 
-            <div class="col-lg-3 col-md-6">
-                <label class="form-label fw-semibold">Date Of Birth</label>
+            <div class="col-lg-6 col-md-6">
+                <label class="form-label fw-semibold">Date Of Birth <span class="text-danger">*</span> </label>
                 <input type="date" name="dob" value="{{ old('dob', $associate->dob ?? '') }}"
                     class="form-control @error('dob') is-invalid @enderror">
                 @error('dob')
@@ -96,17 +103,17 @@
                 @enderror
             </div>
 
-            <div class="col-lg-3 col-md-6">
-                <label class="form-label fw-semibold">Mobile Number</label>
+            <div class="col-lg-6 col-md-6">
+                <label class="form-label fw-semibold">Mobile Number <span class="text-danger">*</span> </label>
                 <input type="text" name="mobile_number"
-                    value="{{ old('mobile_number', $associate->mobile_number ?? '') }}"
+                    value="{{ old('mobile_number', $associate->mobile_number ?? '') }}" maxlength="10"
                     placeholder="Enter mobile number" class="form-control @error('mobile_number') is-invalid @enderror">
                 @error('mobile_number')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
             </div>
 
-            <div class="col-lg-3 col-md-6">
+            <div class="col-lg-6 col-md-6">
                 <label class="form-label fw-semibold">Email</label>
                 <input type="email" name="email" value="{{ old('email', $associate->email ?? '') }}"
                     placeholder="Enter email" class="form-control @error('email') is-invalid @enderror">
@@ -115,46 +122,38 @@
                 @enderror
             </div>
 
-            <div class="col-lg-3 col-md-6">
+            @include('state-city', [
+                'states' => $states,
+                'selectedState' => old('state', $associate->state ?? ''),
+                'selectedCity' => old('city', $associate->city ?? ''),
+                'stateCityColumnClass' => 'col-lg-6 col-md-6',
+                'citiesUrl' => route('associate-panel.get-cities', ['stateId' => '__STATE_ID__']),
+            ])
+
+            <div class="col-lg-6 col-md-6">
                 <label class="form-label fw-semibold">PAN Card Number</label>
                 <input type="text" name="pancard_number"
                     value="{{ old('pancard_number', $associate->pancard_number ?? '') }}"
-                    placeholder="Enter PAN card number" class="form-control @error('pancard_number') is-invalid @enderror">
+                    placeholder="Enter PAN card number"
+                    class="form-control @error('pancard_number') is-invalid @enderror">
                 @error('pancard_number')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
             </div>
 
-            <div class="col-lg-3 col-md-6">
+            <div class="col-lg-6 col-md-6">
                 <label class="form-label fw-semibold">Aadhaar Number</label>
                 <input type="text" name="aadhar_number"
                     value="{{ old('aadhar_number', $associate->aadhar_number ?? '') }}"
-                    placeholder="Enter Aadhaar number" class="form-control @error('aadhar_number') is-invalid @enderror">
+                    placeholder="Enter Aadhaar number"
+                    class="form-control @error('aadhar_number') is-invalid @enderror">
                 @error('aadhar_number')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
             </div>
 
-            <div class="col-lg-3 col-md-6">
-                <label class="form-label fw-semibold">City</label>
-                <input type="text" name="city" value="{{ old('city', $associate->city ?? '') }}"
-                    class="form-control @error('city') is-invalid @enderror" placeholder="Enter city">
-                @error('city')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
-            </div>
-
-            <div class="col-lg-3 col-md-6">
-                <label class="form-label fw-semibold">State</label>
-                <input type="text" name="state" value="{{ old('state', $associate->state ?? '') }}"
-                    class="form-control @error('state') is-invalid @enderror" placeholder="Enter state">
-                @error('state')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
-            </div>
-
             <div class="col-12">
-                <label class="form-label fw-semibold">Address</label>
+                <label class="form-label fw-semibold">Address <span class="text-danger">*</span> </label>
                 <textarea name="address" rows="2" class="form-control @error('address') is-invalid @enderror"
                     placeholder="Enter full address">{{ old('address', $associate->address ?? '') }}</textarea>
                 @error('address')
@@ -188,8 +187,10 @@
             </div>
             <div class="col-lg-3 col-md-6">
                 <label class="form-label fw-semibold">Account Number</label>
-                <input type="text" name="account_number" value="{{ old('account_number', $currentBank->account_number ?? '') }}"
-                    placeholder="Enter account number" class="form-control @error('account_number') is-invalid @enderror">
+                <input type="text" name="account_number"
+                    value="{{ old('account_number', $currentBank->account_number ?? '') }}"
+                    placeholder="Enter account number"
+                    class="form-control @error('account_number') is-invalid @enderror">
                 @error('account_number')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
@@ -206,7 +207,8 @@
                 <label class="form-label fw-semibold">Account Holder Name</label>
                 <input type="text" name="account_holder_name"
                     value="{{ old('account_holder_name', $currentBank->account_holder_name ?? '') }}"
-                    placeholder="Enter account holder name" class="form-control @error('account_holder_name') is-invalid @enderror">
+                    placeholder="Enter account holder name"
+                    class="form-control @error('account_holder_name') is-invalid @enderror">
                 @error('account_holder_name')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
@@ -230,31 +232,37 @@
         <div class="row g-3">
             <div class="col-lg-3 col-md-6">
                 <label class="form-label fw-semibold">Nominee Name</label>
-                <input type="text" name="nominee_name" value="{{ old('nominee_name', $associate->nominee_name ?? '') }}"
-                    placeholder="Enter nominee name" class="form-control @error('nominee_name') is-invalid @enderror">
+                <input type="text" name="nominee_name"
+                    value="{{ old('nominee_name', $associate->nominee_name ?? '') }}"
+                    placeholder="Enter nominee name"
+                    class="form-control @error('nominee_name') is-invalid @enderror">
                 @error('nominee_name')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
             </div>
             <div class="col-lg-3 col-md-6">
                 <label class="form-label fw-semibold">Nominee Relation</label>
-                <input type="text" name="nominee_relation" value="{{ old('nominee_relation', $associate->nominee_relation ?? '') }}"
-                    placeholder="Enter relation" class="form-control @error('nominee_relation') is-invalid @enderror">
+                <input type="text" name="nominee_relation"
+                    value="{{ old('nominee_relation', $associate->nominee_relation ?? '') }}"
+                    placeholder="Enter relation"
+                    class="form-control @error('nominee_relation') is-invalid @enderror">
                 @error('nominee_relation')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
             </div>
             <div class="col-lg-3 col-md-6">
                 <label class="form-label fw-semibold">Nominee Age</label>
-                <input type="number" name="nominee_age" value="{{ old('nominee_age', $associate->nominee_age ?? '') }}"
-                    placeholder="Enter age" class="form-control @error('nominee_age') is-invalid @enderror">
+                <input type="number" name="nominee_age"
+                    value="{{ old('nominee_age', $associate->nominee_age ?? '') }}" placeholder="Enter age"
+                    class="form-control @error('nominee_age') is-invalid @enderror">
                 @error('nominee_age')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
             </div>
             <div class="col-lg-3 col-md-6">
                 <label class="form-label fw-semibold">Joining Date</label>
-                <input type="date" name="joining_date" value="{{ old('joining_date', $associate->joining_date ?? '') }}"
+                <input type="date" name="joining_date"
+                    value="{{ old('joining_date', $associate->joining_date ?? '') }}"
                     class="form-control @error('joining_date') is-invalid @enderror">
                 @error('joining_date')
                     <div class="invalid-feedback">{{ $message }}</div>
@@ -277,12 +285,7 @@
         </div>
 
         <div class="row g-3">
-            @foreach ([
-                ['name' => 'photo', 'label' => 'Upload Photo', 'current' => $associate->photo ?? null],
-                ['name' => 'id_proof_photo', 'label' => 'Upload ID Proof', 'current' => $associate->id_proof_photo ?? null],
-                ['name' => 'pancard_photo', 'label' => 'Upload PAN Card', 'current' => $associate->pancard_photo ?? null],
-                ['name' => 'bank_passbook', 'label' => 'Upload Bank Passbook', 'current' => $currentBank->bank_passbook ?? null],
-            ] as $document)
+            @foreach ([['name' => 'photo', 'label' => 'Upload Photo', 'current' => $associate->photo ?? null], ['name' => 'id_proof_photo', 'label' => 'Upload ID Proof', 'current' => $associate->id_proof_photo ?? null], ['name' => 'pancard_photo', 'label' => 'Upload PAN Card', 'current' => $associate->pancard_photo ?? null], ['name' => 'bank_passbook', 'label' => 'Upload Bank Passbook', 'current' => $currentBank->bank_passbook ?? null]] as $document)
                 <div class="col-lg-3 col-md-6 document-upload">
                     <label class="form-label fw-semibold">{{ $document['label'] }}</label>
                     <input type="file" name="{{ $document['name'] }}"
@@ -291,7 +294,8 @@
                         style="width:100px;height:100px;object-fit:cover;display:none;" alt="Preview">
                     @if (!empty($document['current']))
                         <div class="mt-2">
-                            <a href="{{ getFileUrl($document['current']) }}" target="_blank" class="text-success fw-semibold">
+                            <a href="{{ getFileUrl($document['current']) }}" target="_blank"
+                                class="text-success fw-semibold">
                                 View Current File
                             </a>
                         </div>

@@ -1,4 +1,6 @@
-<div class="col-md-6">
+@php($stateCityColumnClass = $stateCityColumnClass ?? 'col-md-6')
+
+<div class="{{ $stateCityColumnClass }}">
     <label class="form-label fw-semibold">
         State <span class="text-danger">*</span>
     </label>
@@ -13,7 +15,7 @@
     <div class="invalid-feedback state-error"></div>
 </div>
 
-<div class="col-md-6">
+<div class="{{ $stateCityColumnClass }}">
     <label class="form-label fw-semibold">
         City <span class="text-danger">*</span>
     </label>
@@ -39,7 +41,9 @@ $(function() {
             return;
         }
 
-        $.get(`/get-cities/${stateId}`, function(response) {
+        const citiesUrl = "{{ $citiesUrl ?? '/get-cities/__STATE_ID__' }}".replace('__STATE_ID__', stateId);
+
+        $.get(citiesUrl, function(response) {
             let options = '<option value="">Select City</option>';
             
             response.forEach(city => {

@@ -5,12 +5,17 @@ namespace App\Services\Associate;
 use App\Models\Associate;
 use App\Models\BankDetail;
 use App\Models\DesignationRank;
+use App\Services\LocationService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 class AssociateRegistrationService
 {
+    public function __construct(private LocationService $locationService)
+    {
+    }
+
     public function getAssociateData($request)
     {
         $currentAssociateId = auth()->user()->associate_id;
@@ -38,7 +43,11 @@ class AssociateRegistrationService
         $associates = Associate::with('rank')->get();
         $defaultRank = DesignationRank::orderByDesc('rank_number')->first();
 
-        return ['associates' => $associates, 'defaultRank' => $defaultRank];
+        return [
+            'associates' => $associates,
+            'defaultRank' => $defaultRank,
+            'states' => $this->locationService->getStates(),
+        ];
     }
 
     public function store(array $data)
@@ -97,6 +106,7 @@ class AssociateRegistrationService
             'associate' => Associate::with('bankDetail')->findOrFail($id),
             'associates' => Associate::get(),
             'ranks' => DesignationRank::get(),
+            'states' => $this->locationService->getStates(),
         ];
     }
 

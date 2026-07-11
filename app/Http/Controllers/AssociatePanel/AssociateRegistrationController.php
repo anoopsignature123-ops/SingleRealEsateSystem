@@ -8,14 +8,19 @@ use App\Models\Associate;
 use App\Models\DesignationRank;
 use App\Services\Associate\AssociateRegistrationService;
 use App\Services\ExcelExportService;
+use App\Services\LocationService;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class AssociateRegistrationController extends Controller
 {
     protected $associateService;
 
-    public function __construct(AssociateRegistrationService $associateService)
+    public function __construct(
+        AssociateRegistrationService $associateService,
+        private LocationService $locationService
+    )
     {
         $this->associateService = $associateService;
     }
@@ -44,6 +49,11 @@ class AssociateRegistrationController extends Controller
         $ranks = DesignationRank::where('rank_number', '<=', $associate->rank->rank_number)->orderByDesc('rank_number')->get();
 
         return response()->json($ranks);
+    }
+
+    public function getCities(int $stateId): JsonResponse
+    {
+        return response()->json($this->locationService->getCities($stateId));
     }
 
     public function store(AssociateRequest $request)
